@@ -73,16 +73,10 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $user_result = createUser($user_data);
                 if ($user_result === true) {
                     // Send message
-                    $messageText = "Hello, " . $user_data['first_name'] . "!" . " Send here your RSS link to get updates from it.";
+                    $messageText = "Hello, " . $user_data['first_name'] . "! You are successfully registered. Use /help command to get help.";
                     $messageResponse = $bot->sendMessage($chatId, $messageText);
                 } else {
                     // Send message
-                    // $total_links = count($user_result);
-                    // $user_rss_links = [];
-                    // foreach ($user_result as $key => $value) {
-                    //     $user_rss_links[] = $key + 1 . '. ' . $value['rss_link'];
-                    // }
-                    // $existing_links = implode("\n", $user_rss_links);
                     $messageText = "Hello, " . $user_data['first_name'] . "! You are already registered.";
                     $messageResponse = $bot->sendMessage($chatId, $messageText);
                     file_put_contents($log_dir . '/start.log', ' | Existing user', FILE_APPEND);
