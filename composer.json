@@ -1,0 +1,26 @@
+{
+    "name": "lalafo-tgm-bot/api",
+    "description": "Telegram Bot for Lalafo.kg",
+    "keywords": [
+        "php",
+        "lalafo",
+        "telegram",
+        "bot",
+        "bot api"
+    ],
+    "homepage": "https://github.com/Wadamir/lalafoTgmBot",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "XDomus",
+            "email": "domus159@gmail.com",
+            "homepage": "https://xdomus.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "phpquery/phpquery": "^0.0.4",
+        "guzzlehttp/guzzle": "^7.8",
+        "telegram-bot/api": "^2.5"
+    }
+}
