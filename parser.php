@@ -301,7 +301,10 @@ if (mysqli_num_rows($users_result)) {
                         $bot = new \TelegramBot\Api\BotApi($token);
                         $bot->sendMessage($chat_id, $message, 'HTML');
                         // Update sent_to_user
-                        $chat_ids_sent = json_decode($row['chat_ids_sent']);
+                        $chat_ids_sent = [];
+                        if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== null) {
+                            $chat_ids_sent = json_decode($row['chat_ids_sent']);
+                        }
                         $chat_ids_sent[] = $user_id;
                         $chat_ids_sent = array_unique($chat_ids_sent);
                         $chat_ids_sent = json_encode($chat_ids_sent);
