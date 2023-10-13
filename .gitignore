@@ -2,3 +2,4 @@ vendor
 logs/*.log
 config.php
 composer.lock
+apartment.html
