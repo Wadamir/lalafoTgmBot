@@ -201,9 +201,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         );
         $bot->deleteMessage($chatId, $messageId);
         $user_data = getUserData($user_data['user_id']);
+        file_put_contents($log_dir . '/start.log', ' | user_data - ' . print_r($user_data, true), FILE_APPEND);
         if (!empty($user_data)) {
-            $messageText = "<b></b>Настройка / Settings</b>\n\n✅ Минимум комнат (minimum rooms):" . $user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
-            $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+            $messageText = "<b>Настройка / Settings</b>\n\n✅ Минимум комнат (minimum rooms):" . $user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+            file_put_contents($log_dir . '/start.log', ' | messageText - ' . $messageText, FILE_APPEND);
+            $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+            file_put_contents($log_dir . '/start.log', ' | send_result - ' . print_r($send_result, true), FILE_APPEND);
         } else {
             $messageText = "Something went wrong. Try again later, please...";
             $bot->sendMessage($chatId, $messageText);
