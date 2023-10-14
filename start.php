@@ -118,11 +118,13 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
-                            ['text' => 'Remove RSS link', 'callback_data' => 'removerss_1'],
+                            ['text' => 'Мин. комнат (min rooms) - 1', 'callback_data' => 'room_1'],
+                            ['text' => 'Мин. комнат (min rooms) - 2', 'callback_data' => 'room_2'],
+                            ['text' => 'Мин. комнат (min rooms) - 3+', 'callback_data' => 'room_3'],
                         ],
                     ]
                 );
-                $messageText = "Settings";
+                $messageText = "Настройка / Settings";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, null, false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
@@ -159,24 +161,22 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
-} elseif ($chat_type === 'callback_query' && strpos($command_data, "removerss") === 0) {
+} elseif ($chat_type === 'callback_query' && strpos($command_data, "room") === 0) {
     file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
-    try {
-        $bot = new \TelegramBot\Api\BotApi($token);
-        $rss_link_id = str_replace('removerss_', '', $command_data);
-        // $remove_rss_link_response = removeRssLink($user_data['user_id'], $rss_link_id);
-        if ($remove_rss_link_response) {
-            // Send message
-            $messageText = "Ok, " . $user_data['first_name'] . "! This RSS chanel removed. Use /getrss command to get list of your RSS links.";
-            $messageResponse = $bot->sendMessage($chatId, $messageText);
-        } else {
-            // Send message
-            $messageText = "Sorry, " . $user_data['first_name'] . "! This RSS chanel was deleted earlier or is missing. Use /getrss command to get list of your RSS links.";
-            $messageResponse = $bot->sendMessage($chatId, $messageText);
-        }
-    } catch (Exception $e) {
-        file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+    switch ($command_data) {
+        case 'room_1':
+            $user_data['min_rooms'] = 1;
+            break;
+        case 'room_2':
+            $user_data['min_rooms'] = 2;
+            break;
+        case 'room_3':
+            $user_data['min_rooms'] = 3;
+            break;
+        default:
+            $user_data['min_rooms'] = 1;
     }
+    updateUser($user_data, $user_data['user_id']);
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/start.log', ' | Bot command - undefined', FILE_APPEND);
@@ -306,7 +306,7 @@ function deactivateUser($user_id)
 }
 
 
-function updateUser($user_data)
+function updateUser($user_data, $user_id)
 {
     global $log_dir;
 
@@ -314,6 +314,7 @@ function updateUser($user_data)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
+    $table_users = MYSQL_TABLE_USERS;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -321,10 +322,22 @@ function updateUser($user_data)
         file_put_contents($log_dir . '/start.log', ' | Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    // $updateRssLinksResult  = addRssLink($user_data['user_id'], $user_data['text']);
 
-    // Close connection
-    mysqli_close($conn);
+    $sql = "UPDATE $table_users SET";
+    foreach ($user_data as $key => $value) {
+        $sql .= " $key = '" . $value . "',";
+    }
+    $sql = rtrim($sql, ',');
+    $sql .= " WHERE user_id = " . $user_id;
+
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        file_put_contents($log_dir . '/start.log', " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+        // Close connection
+        mysqli_close($conn);
+        return false;
+    }
 
     return true; // $updateRssLinksResult;
 }
