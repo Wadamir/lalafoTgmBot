@@ -179,6 +179,19 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     }
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
+        // updateDeleteMessage
+        $bot = new \TelegramBot\Api\BotApi($token);
+        $bot->callbackQuery(function ($callbackQuery) use ($bot) {
+            $keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup([
+                [
+                    ['text' => 'тест', 'callback_data' => 'tesssst'],
+                ],
+            ]
+        );
+        $bot->editMessageReplyMarkup($callbackQuery->getMessage()->getChat()->getId(), $callbackQuery->getMessage()->getMessageId(), $keyboard);
+
+
+
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
