@@ -202,6 +202,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 ],
             ]
         );
+        $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+        $bot->editMessageReplyMarkup($chatId, $messageId, $messageText);
         $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);
         // $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
         // $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
