@@ -125,7 +125,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         ],
                     ]
                 );
-                $messageText = "<b>Настройка / Settings</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \nHow many minimum rooms in an apartment do you need? \n\n";
+                $messageText = "<b>Настройка / Settings</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \n❓How many minimum rooms in an apartment do you need? \n\n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
@@ -180,9 +180,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     }
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
-        // updateDeleteMessage
-        // $bot = new \TelegramBot\Api\BotApi($token);
-
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
@@ -204,11 +201,17 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         );
         $bot->deleteMessage($chatId, $messageId);
         $user_data = getUserData($user_data['user_id']);
-        $messageText = "<b></b>Настройка / Settings</b>\n\nМинимум комнат (minimum rooms):" . $new_data['rooms_min'] . "\n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
-        $bot->editMessageText($chatId, $messageId, $messageText);
-        $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);
-        // $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
-        // $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+        if (!empty($user_data)) {
+            $messageText = "<b></b>Настройка / Settings</b>\n\n✅ Минимум комнат (minimum rooms):" . $user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+            $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+        } else {
+            $messageText = "Something went wrong. Try again later, please...";
+            $bot->sendMessage($chatId, $messageText);
+        }
+    } else {
+        $bot->deleteMessage($chatId, $messageId);
+        $messageText = "Something went wrong. Try again later, please...";
+        $bot->sendMessage($chatId, $messageText);
     }
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "usd") === 0) {
@@ -254,14 +257,21 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $new_data['price_currency'] = 'USD';
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
+        $bot->deleteMessage($chatId, $messageId);
+        $user_data = getUserData($user_data['user_id']);
+        if (!empty($user_data)) {
+            $messageText = "<b>Настройки успешно сохранены!</b>\<b>Settings succefully saved!</b>\n\n✅ Минимум комнат (minimum rooms):" . $user_data['rooms_min'] . "\n\✅ Максимальная стоимость аренды в месяц (maximum rental cost per month): " . $user_data['price_min'] . " \n\n";
+            $bot->sendMessage($chatId, $messageText, 'HTML');
+        } else {
+            $messageText = "Something went wrong. Try again later, please...";
+            $bot->sendMessage($chatId, $messageText);
+        }
+    } else {
         try {
             // Send message
             $bot = new \TelegramBot\Api\BotApi($token);
-            $messageText = "Настройки сохранены. \nSettings saved.";
+            $messageText = "Something went wrong. Try again later, please...";
             $messageResponse = $bot->sendMessage($chatId, $messageText);
-            $messageText = "Настройка / Settings \n\nМинимум комнат (minimum rooms):" . $new_data['rooms_min'] . "\n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
-            $bot->editMessageText($chatId, $messageId, $messageText);
-            $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);            
         } catch (Exception $e) {
             file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
         }
@@ -432,7 +442,8 @@ function updateUser($user_data, $user_id)
     return true; // $updateRssLinksResult;
 }
 
-function getUserData($user_id) {
+function getUserData($user_id)
+{
     global $log_dir;
 
     $dbhost = MYSQL_HOST;
@@ -455,23 +466,28 @@ function getUserData($user_id) {
             $user_data = [
                 'user_id' => $row['user_id'],
                 'is_bot' => $row['is_bot'],
+                'is_deleted' => $row['is_deleted'],
+                'is_premium' => $row['is_premium'],
                 'first_name' => $row['first_name'],
                 'last_name' => $row['last_name'],
                 'username' => $row['username'],
                 'language_code' => $row['language_code'],
-                'is_premium' => $row['is_premium'],
                 'chat_id' => $row['chat_id'],
-                'text'  => $row['text'],
-                'rooms_min' => $row['rooms_min'],
+                'refresh_time' => $row['refresh_time'],
+                'price_min' => $row['price_min'],
                 'price_max' => $row['price_max'],
                 'price_currency' => $row['price_currency'],
-                'is_deleted' => $row['is_deleted'],
+                'rooms_min' => $row['rooms_min'],
+                'rooms_max' => $row['rooms_max'],
+                'preference_city' => $row['preference_city'],
+                'preference_district' => $row['preference_district'],
+                'date_updated' => $row['date_updated'],
+                'date_added' => $row['date_added'],
             ];
         }
     }
     // Close connection
     mysqli_close($conn);
-
     return $user_data;
 }
 /*
