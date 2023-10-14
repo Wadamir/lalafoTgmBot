@@ -263,7 +263,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         $get_user_data = getUserData($user_data['user_id']);
         if (!empty($get_user_data)) {
             file_put_contents($log_dir . '/start.log', ' | User data - ' . print_r($get_user_data, true), FILE_APPEND);
-            $messageText = "<b>Настройки успешно сохранены!</b>\n<b>Settings succefully saved!</b>\n\n✅ Минимум комнат (minimum rooms): <b>" . $get_user_data['rooms_min'] . "</b>\n\✅ Максимальная стоимость аренды в месяц (maximum rental cost per month): <b>" . $get_user_data['price_max'] . "</b>";
+            $messageText = "<b>Настройки успешно сохранены!</b>\n<b>Settings succefully saved!</b>\n\n✅ Минимум комнат (minimum rooms): <b>" . $get_user_data['rooms_min'] . "</b>\n\n✅ Максимальная стоимость аренды в месяц (maximum rental cost per month): <b>" . $get_user_data['price_max'] . " " . $get_user_data['price_currency'] . "</b>";
             $bot->sendMessage($chatId, $messageText, 'HTML');
         } else {
             $messageText = "Something went wrong. Try again later, please...";
