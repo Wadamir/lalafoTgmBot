@@ -115,7 +115,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
-                $inline_keyboard = new \TelegramBot\Api\Types\ReplyKeyboardMarkup(
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
                             ['text' => '1', 'callback_data' => 'room_1'],
@@ -181,7 +181,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     if ($update_result) {
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
-        $inline_keyboard = new \TelegramBot\Api\Types\ReplyKeyboardMarkup(
+        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
             [
                 [
                     ['text' => '100$', 'callback_data' => 'usd_100'],
