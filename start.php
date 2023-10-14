@@ -118,13 +118,13 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
-                            ['text' => 'Мин. комнат (min rooms) - 1', 'callback_data' => 'room_1'],
+                            ['text' => '1', 'callback_data' => 'room_1'],
                             ['text' => 'Мин. комнат (min rooms) - 2', 'callback_data' => 'room_2'],
                             ['text' => 'Мин. комнат (min rooms) - 3+', 'callback_data' => 'room_3'],
                         ],
                     ]
                 );
-                $messageText = "Настройка / Settings";
+                $messageText = "Настройка / Settings \nМин. комнат (min rooms)? \n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, null, false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
@@ -165,16 +165,16 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
     switch ($command_data) {
         case 'room_1':
-            $user_data['min_rooms'] = 1;
+            $user_data['rooms_min'] = 1;
             break;
         case 'room_2':
-            $user_data['min_rooms'] = 2;
+            $user_data['rooms_min'] = 2;
             break;
         case 'room_3':
-            $user_data['min_rooms'] = 3;
+            $user_data['rooms_min'] = 3;
             break;
         default:
-            $user_data['min_rooms'] = 1;
+            $user_data['rooms_min'] = 1;
     }
     updateUser($user_data, $user_data['user_id']);
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
