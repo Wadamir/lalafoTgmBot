@@ -124,8 +124,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         ],
                     ]
                 );
-                $messageText = "<b>Настройка / Settings</b> \n\nСколько минимум комнат в квартире вам нужно? \n How many minimum rooms in an apartment do you need? \n\n";
-                $messageResponse = $bot->sendMessage($chatId, $messageText, null, false, null, $inline_keyboard);
+                $messageText = "<b>Настройка / Settings</b> \n\nСколько минимум комнат в квартире вам нужно? \nHow many minimum rooms in an apartment do you need? \n\n";
+                $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
@@ -177,7 +177,83 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         default:
             $new_data['rooms_min'] = 1;
     }
-    updateUser($new_data, $user_data['user_id']);
+    $update_result = updateUser($new_data, $user_data['user_id']);
+    if ($update_result) {
+        // Send message
+        $bot = new \TelegramBot\Api\BotApi($token);
+        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+            [
+                [
+                    ['text' => '100$', 'callback_data' => 'usd_100'],
+                    ['text' => '200$', 'callback_data' => 'usd_200'],
+                    ['text' => '300$', 'callback_data' => 'usd_300'],
+                    ['text' => '400$', 'callback_data' => 'usd_400'],
+                    ['text' => '500$', 'callback_data' => 'usd_500'],
+                    ['text' => '600$', 'callback_data' => 'usd_600'],
+                    ['text' => '700$', 'callback_data' => 'usd_700'],
+                    ['text' => '800$', 'callback_data' => 'usd_800'],
+                    ['text' => '900$', 'callback_data' => 'usd_900'],
+                    ['text' => '1000$', 'callback_data' => 'usd_1000'],
+                    ['text' => '> 1000$', 'callback_data' => 'usd_none'],
+                ],
+            ]
+        );
+        $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+        $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+    }
+    file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+} elseif ($chat_type === 'callback_query' && strpos($command_data, "usd") === 0) {
+    file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
+    $new_data = [];
+    switch ($command_data) {
+        case 'usd_100':
+            $new_data['price_max'] = 100;
+            break;
+        case 'usd_200':
+            $new_data['price_max'] = 200;
+            break;
+        case 'usd_300':
+            $new_data['price_max'] = 300;
+            break;
+        case 'usd_400':
+            $new_data['price_max'] = 400;
+            break;
+        case 'usd_500':
+            $new_data['price_max'] = 500;
+            break;
+        case 'usd_600':
+            $new_data['price_max'] = 600;
+            break;
+        case 'usd_700':
+            $new_data['price_max'] = 700;
+            break;
+        case 'usd_800':
+            $new_data['price_max'] = 800;
+            break;
+        case 'usd_900':
+            $new_data['price_max'] = 900;
+            break;
+        case 'usd_1000':
+            $new_data['price_max'] = 1000;
+            break;
+        case 'usd_none':
+            $new_data['price_max'] = 1000000;
+            break;
+        default:
+            $new_data['price_max'] = 1000000;
+    }
+    $new_data['price_currency'] = 'USD';
+    $update_result = updateUser($new_data, $user_data['user_id']);
+    if ($update_result) {
+        try {
+            // Send message
+            $bot = new \TelegramBot\Api\BotApi($token);
+            $messageText = "Настройки сохранены. \nSettings saved.";
+            $messageResponse = $bot->sendMessage($chatId, $messageText);
+        } catch (Exception $e) {
+            file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+        }
+    }
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/start.log', ' | Bot command - undefined', FILE_APPEND);
