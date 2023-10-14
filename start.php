@@ -163,6 +163,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "room") === 0) {
     file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
+    $user_data = [];
     switch ($command_data) {
         case 'room_1':
             $user_data['rooms_min'] = 1;
