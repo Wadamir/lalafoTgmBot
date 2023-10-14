@@ -59,6 +59,7 @@ if (isset($update['message'])) {
 
     $chat_type = 'callback_query';
     $chatId = $update['callback_query']["message"]["chat"]["id"];
+    $messageId = $update['callback_query']["message"]["message_id"];
     $message = $update['callback_query']["message"]["text"];
     $message_type = $update['callback_query']["message"]["entities"][0]["type"];
     $command_data = $update['callback_query']['data'];
@@ -180,17 +181,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
         // updateDeleteMessage
-        $bot = new \TelegramBot\Api\BotApi($token);
-        $bot->callbackQuery(function ($callbackQuery) use ($bot) {
-            $keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup([
-                [
-                    ['text' => 'тест', 'callback_data' => 'tesssst'],
-                ],
-            ]
-        );
-        $bot->editMessageReplyMarkup($callbackQuery->getMessage()->getChat()->getId(), $callbackQuery->getMessage()->getMessageId(), $keyboard);
-
-
+        // $bot = new \TelegramBot\Api\BotApi($token);
 
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
@@ -211,8 +202,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 ],
             ]
         );
-        $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
-        $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+        $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);
+        // $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+        // $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
     }
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "usd") === 0) {
