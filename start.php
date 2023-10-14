@@ -258,7 +258,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $new_data['price_currency'] = 'USD';
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
-        file_put_contents($log_dir . '/start.log', ' | Update result - ' . print_r($update_result, true), FILE_APPEND);
+        $bot = new \TelegramBot\Api\BotApi($token);
         $bot->deleteMessage($chatId, $messageId);
         $get_user_data = getUserData($user_data['user_id']);
         if (!empty($get_user_data)) {
