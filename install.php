@@ -174,7 +174,7 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_rates (
         `cny` DECIMAL (10,4) NOT NULL,
         `rub` DECIMAL (10,4) NOT NULL,
         `kzt` DECIMAL (10,4) NOT NULL,
-        `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        `date_updated` varchar(255) NOT NULL,
         `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
