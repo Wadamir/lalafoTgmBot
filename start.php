@@ -202,7 +202,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 ],
             ]
         );
-        $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+        $messageText = "Настройка / Settings \n\nМинимум комнат (minimum rooms):" . $new_data['rooms_min'] . "\n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
         $bot->editMessageText($chatId, $messageId, $messageText);
         $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);
         // $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
