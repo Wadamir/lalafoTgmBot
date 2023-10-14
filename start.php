@@ -22,7 +22,7 @@ if (!$get_content) {
     exit;
 }
 $update = json_decode($get_content, TRUE);
-// file_put_contents($log_dir . '/start.log', '[' . date('Y-m-d H:i:s') . '] Received: ' . $get_content . PHP_EOL, FILE_APPEND);
+file_put_contents($log_dir . '/start.log', '[' . date('Y-m-d H:i:s') . '] Received: ' . $get_content . PHP_EOL, FILE_APPEND);
 
 $command_data = '';
 if (isset($update['message'])) {
@@ -179,12 +179,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     }
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
-        // remove last message
-        $bot = new \TelegramBot\Api\BotApi($token);
-        $bot->deleteMessage($chatId, $messageResponse->getMessageId());
-        
-        
-
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
