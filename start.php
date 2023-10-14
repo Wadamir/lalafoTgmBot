@@ -119,12 +119,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     [
                         [
                             ['text' => '1', 'callback_data' => 'room_1'],
-                            ['text' => 'Мин. комнат (min rooms) - 2', 'callback_data' => 'room_2'],
-                            ['text' => 'Мин. комнат (min rooms) - 3+', 'callback_data' => 'room_3'],
+                            ['text' => '2', 'callback_data' => 'room_2'],
+                            ['text' => '3+', 'callback_data' => 'room_3'],
                         ],
                     ]
                 );
-                $messageText = "Настройка / Settings \nМин. комнат (min rooms)? \n";
+                $messageText = "<b>Настройка / Settings</b> \n\nСколько минимум комнат в квартире вам нужно? \n How many minimum rooms in an apartment do you need? \n\n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, null, false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
@@ -329,6 +329,7 @@ function updateUser($user_data, $user_id)
     }
     $sql = rtrim($sql, ',');
     $sql .= " WHERE user_id = " . $user_id;
+    file_put_contents($log_dir . '/start.log', ' | Update User - ' . $sql, FILE_APPEND);
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
