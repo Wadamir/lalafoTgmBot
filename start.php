@@ -110,6 +110,25 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             }
             file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
             break;
+        case '/settings':
+            file_put_contents($log_dir . '/start.log', ' | Bot command - /settings', FILE_APPEND);
+            try {
+                // Send message
+                $bot = new \TelegramBot\Api\BotApi($token);
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                    [
+                        [
+                            ['text' => 'Remove RSS link', 'callback_data' => 'removerss_1'],
+                        ],
+                    ]
+                );
+                $messageText = "Settings";
+                $messageResponse = $bot->sendMessage($chatId, $messageText, null, false, null, $inline_keyboard);
+            } catch (Exception $e) {
+                file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+            }
+            file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+            break;
         default:
             file_put_contents($log_dir . '/start.log', ' | Bot command - undefined', FILE_APPEND);
             try {

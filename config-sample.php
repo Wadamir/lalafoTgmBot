@@ -1,5 +1,6 @@
 <?php
 define('TOKEN', "");
+define('FX_TOKEN', "");
 define('MYSQL_HOST', "localhost");
 define('MYSQL_USER', "");
 define('MYSQL_PASSWORD', "");
@@ -8,3 +9,4 @@ define('MYSQL_TABLE_USERS', "users");
 define('MYSQL_TABLE_CITY', "city");
 define('MYSQL_TABLE_DISTRICT', "district");
 define('MYSQL_TABLE_DATA', "data");
+define('MYSQL_TABLE_RATES', "rates");
