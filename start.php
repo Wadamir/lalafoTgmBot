@@ -459,6 +459,7 @@ function getUserData($user_id)
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_id;
+    file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . $sql, FILE_APPEND);
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
@@ -486,6 +487,7 @@ function getUserData($user_id)
             ];
         }
     }
+    file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . print_r($user_data, true), FILE_APPEND);
     // Close connection
     mysqli_close($conn);
     return $user_data;
