@@ -125,7 +125,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         ],
                     ]
                 );
-                $messageText = "<b>Настройка / Settings</b> \n\nСколько минимум комнат в квартире вам нужно? \nHow many minimum rooms in an apartment do you need? \n\n";
+                $messageText = "<b>Настройка / Settings</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \nHow many minimum rooms in an apartment do you need? \n\n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
@@ -202,7 +202,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 ],
             ]
         );
-        $messageText = "Настройка / Settings \n\nМинимум комнат (minimum rooms):" . $new_data['rooms_min'] . "\n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+        $bot->deleteMessage($chatId, $messageId);
+        $user_data = getUserData($user_data['user_id']);
+        $messageText = "<b></b>Настройка / Settings</b>\n\nМинимум комнат (minimum rooms):" . $new_data['rooms_min'] . "\n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
         $bot->editMessageText($chatId, $messageId, $messageText);
         $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);
         // $messageText = "<b>Настройка / Settings</b> \n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
@@ -257,6 +259,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $bot = new \TelegramBot\Api\BotApi($token);
             $messageText = "Настройки сохранены. \nSettings saved.";
             $messageResponse = $bot->sendMessage($chatId, $messageText);
+            $messageText = "Настройка / Settings \n\nМинимум комнат (minimum rooms):" . $new_data['rooms_min'] . "\n\nМаксимальная стоимость аренды в месяц? \nMaximum rental cost per month? \n\n";
+            $bot->editMessageText($chatId, $messageId, $messageText);
+            $bot->editMessageReplyMarkup($chatId, $messageId, $inline_keyboard);            
         } catch (Exception $e) {
             file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
         }
@@ -425,6 +430,49 @@ function updateUser($user_data, $user_id)
     }
 
     return true; // $updateRssLinksResult;
+}
+
+function getUserData($user_id) {
+    global $log_dir;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_users = MYSQL_TABLE_USERS;
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($log_dir . '/start.log', ' | Get User Data - connection failed', FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+    $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_id;
+    $result = mysqli_query($conn, $sql);
+    $user_data = [];
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $user_data = [
+                'user_id' => $row['user_id'],
+                'is_bot' => $row['is_bot'],
+                'first_name' => $row['first_name'],
+                'last_name' => $row['last_name'],
+                'username' => $row['username'],
+                'language_code' => $row['language_code'],
+                'is_premium' => $row['is_premium'],
+                'chat_id' => $row['chat_id'],
+                'text'  => $row['text'],
+                'rooms_min' => $row['rooms_min'],
+                'price_max' => $row['price_max'],
+                'price_currency' => $row['price_currency'],
+                'is_deleted' => $row['is_deleted'],
+            ];
+        }
+    }
+    // Close connection
+    mysqli_close($conn);
+
+    return $user_data;
 }
 /*
 function getRssLinksByUser($user_id)
