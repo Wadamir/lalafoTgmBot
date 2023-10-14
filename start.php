@@ -179,9 +179,11 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     }
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
-        // remove keyboard
+        // remove last message
         $bot = new \TelegramBot\Api\BotApi($token);
-        $bot->sendMessage($chatId, ' ', 'HTML', false, null, new \TelegramBot\Api\Types\ReplyKeyboardRemove(true));
+        $bot->deleteMessage($chatId, $messageResponse->getMessageId());
+        
+        
 
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
