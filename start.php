@@ -185,21 +185,13 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
             [
                 [
-                    ['text' => '100$', 'callback_data' => 'usd_100'],
                     ['text' => '200$', 'callback_data' => 'usd_200'],
                     ['text' => '300$', 'callback_data' => 'usd_300'],
                     ['text' => '400$', 'callback_data' => 'usd_400'],
                     ['text' => '500$', 'callback_data' => 'usd_500'],
-                    ['text' => '600$', 'callback_data' => 'usd_600'],
-                ],
-            ],
-            [
-                [
                     ['text' => '700$', 'callback_data' => 'usd_700'],
-                    ['text' => '800$', 'callback_data' => 'usd_800'],
                     ['text' => '900$', 'callback_data' => 'usd_900'],
-                    ['text' => '1000$', 'callback_data' => 'usd_1000'],
-                    ['text' => '> 1000$', 'callback_data' => 'usd_none'],
+                    ['text' => '> 900$', 'callback_data' => 'usd_none'],
                 ],
             ]
         );
