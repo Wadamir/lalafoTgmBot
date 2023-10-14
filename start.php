@@ -163,21 +163,21 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "room") === 0) {
     file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
-    $user_data = [];
+    $new_data = [];
     switch ($command_data) {
         case 'room_1':
-            $user_data['rooms_min'] = 1;
+            $new_data['rooms_min'] = 1;
             break;
         case 'room_2':
-            $user_data['rooms_min'] = 2;
+            $new_data['rooms_min'] = 2;
             break;
         case 'room_3':
-            $user_data['rooms_min'] = 3;
+            $new_data['rooms_min'] = 3;
             break;
         default:
-            $user_data['rooms_min'] = 1;
+            $new_data['rooms_min'] = 1;
     }
-    updateUser($user_data, $user_data['user_id']);
+    updateUser($new_data, $user_data['user_id']);
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/start.log', ' | Bot command - undefined', FILE_APPEND);
