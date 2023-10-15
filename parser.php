@@ -282,6 +282,8 @@ if (count($chat_ids) > 0) {
                     }
                 }
 
+                $chat_ids_to_send = array_values($chat_ids_to_send);
+
                 $data = [
                     'title' => mysqli_real_escape_string($conn, $link->textContent),
                     'link' => $apartment_link,
