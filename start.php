@@ -119,9 +119,14 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else {
                     $get_user_data = getUserData($user_data['user_id']);
                     if (!empty($get_user_data)) {
+                        if ($get_user_data['price_max'] === 1000000) {
+                            $user_max_price = $user_language === 'ru' ? 'без ограничений' : 'no limit';
+                        } else {
+                            $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
+                        }
                         // Send message
-                        $messageText = $user_language === 'ru' ?  "С возвращением, " . $user_data['first_name'] . "!\n\n" : "Welcome back, " . $user_data['first_name'] . "!";
-                        $messageText .= $user_language === 'ru' ? "\n\n<b>Ваши настройки</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц?\n\nЕсли Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n❓Maximum rental cost per month? \n\nIf you want to change the settings, use the command /settings\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                        $messageText = $user_language === 'ru' ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
+                        $messageText .= $user_language === 'ru' ? "\n\n<b>Ваши настройки</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\nЕсли Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n✅ Maximum rental cost per month: " . $user_max_price . "\n\nIf you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                         $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
                     } else {
                         // Send message
