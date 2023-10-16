@@ -171,8 +171,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     }
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
+        $bot->deleteMessage($chatId, $messageId);
         // Send message
-        $bot = new \TelegramBot\Api\BotApi($token);
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
             [
                 [
@@ -201,6 +201,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
         }
     } else {
+        $bot->deleteMessage($chatId, $messageId);
         // Send message
         $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
