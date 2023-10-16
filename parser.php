@@ -383,7 +383,6 @@ if (mysqli_num_rows($users_result)) {
                 $renovation = $row['renovation'];
                 $animals = $row['animals'];
 
-
                 $message = "<b>$title</b>";
                 if ($renovation !== 'n/d') {
                     $message .= ", $renovation\n";
@@ -425,8 +424,11 @@ if (mysqli_num_rows($users_result)) {
                         if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== null) {
                             $chat_ids_sent = json_decode($row['chat_ids_sent']);
                         }
-                        $chat_ids_sent[] = $user_id;
+                        $chat_ids_sent = array_map('strval', $chat_ids_sent);
+                        $chat_ids_sent[] = strval($user_id);
                         $chat_ids_sent = array_unique($chat_ids_sent);
+                        $chat_ids_sent = array_values($chat_ids_sent);
+                        $chat_ids_sent = sort($chat_ids_sent);
                         $chat_ids_sent = json_encode($chat_ids_sent);
                         $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
                         if (mysqli_query($conn, $sql)) {
@@ -437,6 +439,12 @@ if (mysqli_num_rows($users_result)) {
                             $msg_error++;
                         }
                         $chat_ids_to_send = $row['chat_ids_to_send'];
+                        $chat_ids_to_send = json_decode($chat_ids_to_send);
+                        $chat_ids_to_send = array_map('strval', $chat_ids_to_send);
+                        $chat_ids_to_send = array_unique($chat_ids_to_send);
+                        $chat_ids_to_send = array_values($chat_ids_to_send);
+                        $chat_ids_to_send = sort($chat_ids_to_send);
+                        $chat_ids_to_send = json_encode($chat_ids_to_send);
                         if ($chat_ids_sent === $chat_ids_to_send) {
                             $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
                             if (mysqli_query($conn, $sql)) {
@@ -479,6 +487,17 @@ if (mysqli_num_rows($users_result)) {
 } else {
     file_put_contents($parser_log_file, ' | No users found', FILE_APPEND);
 }
+
+
+// 6. Check all records
+file_put_contents($parser_log_file, ' | Check all records', FILE_APPEND);
+$check_result = checkAllRecords();
+if ($check_result !== false) {
+    file_put_contents($parser_log_file, ' | All records checked', FILE_APPEND);
+} else {
+    file_put_contents($parser_error_log_file, ' | Error checking all records', FILE_APPEND);
+}
+
 file_put_contents($parser_log_file, ' | End: ' . date('Y-m-d H:i:s') . PHP_EOL, FILE_APPEND);
 mysqli_close($conn);
 
@@ -493,8 +512,6 @@ function deactivateUser($user_id)
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
     $table_users = MYSQL_TABLE_USERS;
-    $table_city = MYSQL_TABLE_CITY;
-    $table_district = MYSQL_TABLE_DISTRICT;
     $table_data = MYSQL_TABLE_DATA;
 
     // Create connection
@@ -522,4 +539,35 @@ function deactivateUser($user_id)
     mysqli_close($conn);
 
     return true;
+}
+
+function checkAllRecords()
+{
+    global $parser_log_file;
+    global $parser_error_log_file;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_data = MYSQL_TABLE_DATA;
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($parser_error_log_file, ' | Update User - connection failed', FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+
+    $sql = "UPDATE $table_data SET done = 1 WHERE done IS NULL AND chat_ids_to_send = '[]'";
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        file_put_contents($parser_error_log_file, " | Error updating all empty records: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+    }
+
+    // Close connection
+    mysqli_close($conn);
+
+    return $result;
 }
