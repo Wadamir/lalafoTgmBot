@@ -7,26 +7,29 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 require_once __DIR__ . '/config.php';
 $log_dir = __DIR__ . '/logs';
-
-file_put_contents($log_dir . '/start.log', PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Start ', FILE_APPEND);
+$start_log_file = $log_dir . '/start.log';
+$start_error_log_file = $log_dir . '/start_error.log';
 
 $token = TOKEN;
 if (!$token) {
-    file_put_contents($log_dir . '/start.log', ' | Token not found' . PHP_EOL, FILE_APPEND);
+    file_put_contents($start_error_log_file, ' | Token not found' . PHP_EOL, FILE_APPEND);
     die('Token not found');
 }
+
+$adminChatId = ADMIN_CHAT_ID;
 
 // Todo move to api
 $get_content = file_get_contents("php://input");
 if (!$get_content) {
-    exit;
+    file_put_contents($start_error_log_file, ' | Get content failed' . PHP_EOL, FILE_APPEND);
+    die('Get content failed');
 }
 $update = json_decode($get_content, TRUE);
-file_put_contents($log_dir . '/start.log', '[' . date('Y-m-d H:i:s') . '] Received: ' . $get_content . PHP_EOL, FILE_APPEND);
+file_put_contents($start_log_file, '[' . date('Y-m-d H:i:s') . '] Received: ', FILE_APPEND);
 
 $command_data = '';
 if (isset($update['message'])) {
-    file_put_contents($log_dir . '/start.log', ' | Message: ' . $update['message']['text'], FILE_APPEND);
+    file_put_contents($start_log_file, ' | Message: ' . $update['message']['text'], FILE_APPEND);
     $user_data = [
         'user_id' => $update['message']['from']['id'],
         'is_bot' => (isset($update['message']['from']['is_bot']) && $update['message']['from']['is_bot'] !== 'false' && $update['message']['from']['is_bot'] !== false) ? 1 : 0,
@@ -44,7 +47,7 @@ if (isset($update['message'])) {
     $message = $update["message"]["text"];
     $message_type = $update["message"]["entities"][0]["type"];
 } elseif (isset($update['callback_query'])) {
-    file_put_contents($log_dir . '/start.log', ' | Callback: ' . $update['callback_query']['data'], FILE_APPEND);
+    file_put_contents($start_log_file, ' | Callback: ' . $update['callback_query']['data'], FILE_APPEND);
     $user_data = [
         'user_id' => $update['callback_query']['from']['id'],
         'is_bot' => (isset($update['callback_query']['from']['is_bot']) && $update['messacallback_querye']['from']['is_bot'] !== 'false' && $update['callback_query']['from']['is_bot'] !== false) ? 1 : 0,
@@ -70,7 +73,7 @@ $user_language = $user_data['language_code'] === 'ru' ? 'ru' : $user_data['langu
 if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 'bot_command') {
     switch ($message) {
         case '/stop':
-            file_put_contents($log_dir . '/start.log', ' | Bot command - /stop', FILE_APPEND);
+            file_put_contents($start_log_file, ' | Bot command - /stop' . PHP_EOL, FILE_APPEND);
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
@@ -78,23 +81,22 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $messageResponse = $bot->sendMessage($chatId, $messageText);
                 deactivateUser($user_data['user_id']);
             } catch (Exception $e) {
-                file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
             break;
         case '/help':
-            file_put_contents($log_dir . '/start.log', ' | Bot command - /help', FILE_APPEND);
+            file_put_contents($start_log_file, ' | Bot command - /help' . PHP_EOL, FILE_APPEND);
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
                 $messageText = $user_language === 'ru' ? "Для обратной связи напишите боту сообщение с хештегом #feedback" : "For feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText);
             } catch (Exception $e) {
-                file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
-            file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
             break;
         case '/start':
-            file_put_contents($log_dir . '/start.log', ' | Bot command - /start', FILE_APPEND);
+            file_put_contents($start_log_file, ' | Bot command - /start', FILE_APPEND);
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
@@ -106,9 +108,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else {
                     // Send message
                     $messageText = $user_language === 'ru' ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
-                    file_put_contents($log_dir . '/start.log', ' | Existing user', FILE_APPEND);
                 }
-
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
@@ -121,39 +121,39 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $messageText .= $user_language === 'ru' ? "\n\n <b>Настройка</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "\n\n <b>Settings</b> \n\n❓How many minimum rooms in an apartment do you need? \n\n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
-                file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
-            file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+            file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
             break;
         default:
-            file_put_contents($log_dir . '/start.log', ' | Bot command - undefined', FILE_APPEND);
+            file_put_contents($start_log_file, ' | Bot command - undefined', FILE_APPEND);
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
                 $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
             } catch (Exception $e) {
-                file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
-            file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+            file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
     }
 } elseif ($chat_type === 'message' && strpos($message, "#feedback") !== false) {
-    file_put_contents($log_dir . '/start.log', ' | Feedback - ' . $message, FILE_APPEND);
+    file_put_contents($start_log_file, ' | Feedback - ' . $message, FILE_APPEND);
     $bot = new \TelegramBot\Api\BotApi($token);
     try {
-        $myChatId = '180165701';
+        // Send message to admin
         $messageText = "Feedback: " . $user_data['first_name'] . "\n\n" . $message;
-        $messageResponse = $bot->sendMessage($myChatId, $messageText);
+        $messageResponse = $bot->sendMessage($adminChatId, $messageText);
 
         // Send message to user
         $messageText = $user_language === 'ru' ? "Спасибо! Ваше сообщение отправлено." : "Thank you! Your message has been sent.";
         $bot->sendMessage($chatId, $messageText);
     } catch (Exception $e) {
-        file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
-    file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+    file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "room") === 0) {
-    file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
+    file_put_contents($start_log_file, ' | command_data - ' . $command_data, FILE_APPEND);
     $bot = new \TelegramBot\Api\BotApi($token);
     $new_data = [];
     switch ($command_data) {
@@ -205,9 +205,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     }
-    file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+    file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "usd") === 0) {
-    file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
+    file_put_contents($start_log_file, ' | command_data - ' . $command_data, FILE_APPEND);
     $bot = new \TelegramBot\Api\BotApi($token);
     $new_data = [];
     switch ($command_data) {
@@ -272,26 +272,29 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
             $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
         } catch (Exception $e) {
-            file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+            file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
         }
     }
-    file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+    file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 } else {
-    file_put_contents($log_dir . '/start.log', ' | Bot command - undefined', FILE_APPEND);
+    file_put_contents($start_log_file, ' | Bot command - undefined', FILE_APPEND);
     try {
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
         $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     } catch (Exception $e) {
-        file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
-    file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
+    file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 }
 
 function createUser($user_data)
 {
     global $log_dir;
+    global $start_log_file;
+    global $start_error_log_file;
+
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
@@ -301,7 +304,7 @@ function createUser($user_data)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | Connection failed', FILE_APPEND);
         throw new ErrorException("Connection failed: " . mysqli_connect_error());
     }
     // Check if user exists
@@ -309,8 +312,8 @@ function createUser($user_data)
     $result = mysqli_query($conn, $sql);
     // $rss_links = '';
     if (mysqli_num_rows($result) > 0) {
-        file_put_contents($log_dir . '/start.log', ' | User already exists', FILE_APPEND);
         activateUser($user_data['user_id']);
+        file_put_contents($start_log_file, ' | User already exists ' . $user_data['user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
         // Close connection
         mysqli_close($conn);
         return false; // $rss_links;
@@ -323,9 +326,10 @@ function createUser($user_data)
         $sql = "INSERT INTO $table_users ($columns) VALUES ('$values')";
         $result = mysqli_query($conn, $sql);
         if (!$result) {
-            file_put_contents($log_dir . '/start.log', " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+            file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
             throw new ErrorException("Error: " . $sql . ' | ' . mysqli_error($conn));
         }
+        file_put_contents($start_log_file, ' | New user created ' . $user_data['user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
         // Close connection
         mysqli_close($conn);
         return true;
@@ -336,6 +340,7 @@ function createUser($user_data)
 function activateUser($user_id)
 {
     global $log_dir;
+    global $start_error_log_file;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -346,13 +351,13 @@ function activateUser($user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_users SET is_deleted = NULL WHERE user_id = " . $user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($log_dir . '/start.log', " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
     // Close connection
@@ -365,6 +370,7 @@ function activateUser($user_id)
 function deactivateUser($user_id)
 {
     global $log_dir;
+    global $start_error_log_file;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -378,13 +384,13 @@ function deactivateUser($user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_users SET is_deleted = 1 WHERE user_id = " . $user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($log_dir . '/start.log', " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
 
@@ -392,7 +398,7 @@ function deactivateUser($user_id)
     $sql = "DELETE FROM $table_data WHERE chat_id = " . $user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($log_dir . '/start.log', " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
 
@@ -406,6 +412,8 @@ function deactivateUser($user_id)
 function updateUser($user_data, $user_id)
 {
     global $log_dir;
+    global $start_log_file;
+    global $start_error_log_file;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -416,7 +424,7 @@ function updateUser($user_data, $user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -426,23 +434,24 @@ function updateUser($user_data, $user_id)
     }
     $sql = rtrim($sql, ',');
     $sql .= " WHERE user_id = " . $user_id;
-    file_put_contents($log_dir . '/start.log', ' | Update User - ' . $sql, FILE_APPEND);
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($log_dir . '/start.log', " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
         // Close connection
         mysqli_close($conn);
         return false;
     }
+    file_put_contents($start_log_file, ' | User successfully updated ' . $user_id . ' - ' . $user_data['username'], FILE_APPEND);
 
-    return true; // $updateRssLinksResult;
+    return true;
 }
 
 function getUserData($user_id)
 {
     global $log_dir;
+    global $start_error_log_file;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -453,11 +462,10 @@ function getUserData($user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Get User Data - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | Get User Data - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_id;
-    file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . $sql, FILE_APPEND);
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
@@ -485,7 +493,6 @@ function getUserData($user_id)
             ];
         }
     }
-    // file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . print_r($user_data, true), FILE_APPEND);
     // Close connection
     mysqli_close($conn);
     return $user_data;
@@ -494,9 +501,9 @@ function getUserData($user_id)
 function sendLastAds($user_id, $chat_id)
 {
     global $log_dir;
+    global $start_log_file;
+    global $start_error_log_file;
     global $token;
-
-    $start_log_file = $log_dir . '/start.log';
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -508,11 +515,11 @@ function sendLastAds($user_id, $chat_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Get User Data - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | Send last ads - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_id;
-    file_put_contents($log_dir . '/start.log', ' | sendLastAds!', FILE_APPEND);
+    file_put_contents($start_log_file, ' | sendLastAds!', FILE_APPEND);
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
@@ -540,13 +547,13 @@ function sendLastAds($user_id, $chat_id)
             ];
         }
     } else {
-        file_put_contents($log_dir . '/start.log', ' | sendLastAds -> User not found', FILE_APPEND);
+        file_put_contents($start_log_file, ' | sendLastAds -> User not found', FILE_APPEND);
     }
 
     if (!empty($user_data)) {
         $username = $user_data['username'];
 
-        $sql = "SELECT * FROM $table_data WHERE owner !== 'Риэлтор' AND price_usd <= " . $user_data['price_max'] . " AND rooms >= " . $user_data['rooms_min'] . " ORDER BY date DESC LIMIT 3";
+        $sql = "SELECT * FROM $table_data WHERE owner !== 'Риэлтор' AND price_usd <= " . $user_data['price_max'] . " AND rooms >= " . $user_data['rooms_min'] . " ORDER BY date_added DESC LIMIT 3";
         $result = mysqli_query($conn, $sql);
         $result = mysqli_query($conn, $sql);
         $counter = 0;
@@ -664,6 +671,8 @@ function sendLastAds($user_id, $chat_id)
                 }
                 $counter++;
             }
+        } else {
+            file_put_contents($start_log_file, ' | User: ' . $username . ' | No last ads!' . PHP_EOL, FILE_APPEND);
         }
     }
 }
