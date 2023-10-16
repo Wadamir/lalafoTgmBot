@@ -65,34 +65,16 @@ if (isset($update['message'])) {
     $command_data = $update['callback_query']['data'];
 }
 
+$user_language = $user_data['language_code'] === 'ru' ? 'ru' : $user_data['language_code'];
+
 if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 'bot_command') {
     switch ($message) {
-        case '/start':
-            file_put_contents($log_dir . '/start.log', ' | Bot command - /start', FILE_APPEND);
-            try {
-                $bot = new \TelegramBot\Api\BotApi($token);
-                $user_result = createUser($user_data);
-                if ($user_result === true) {
-                    // Send message
-                    $messageText = "Hello, " . $user_data['first_name'] . "! You are successfully registered. Use /help command to get help.";
-                    $messageResponse = $bot->sendMessage($chatId, $messageText);
-                } else {
-                    // Send message
-                    $messageText = "Hello, " . $user_data['first_name'] . "! You are already registered.";
-                    $messageResponse = $bot->sendMessage($chatId, $messageText);
-                    file_put_contents($log_dir . '/start.log', ' | Existing user', FILE_APPEND);
-                }
-            } catch (Exception $e) {
-                file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
-            }
-            file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
-            break;
         case '/stop':
             file_put_contents($log_dir . '/start.log', ' | Bot command - /stop', FILE_APPEND);
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
-                $messageText = "You are unsubscribed from bot updates. If you decide to restore notifications, use the /start command. You can find help setting up the bot here - https://wadamir.ru/lalafo-tgm-bot/";
+                $messageText = $user_language === 'ru' ? "Вы отписаны от обновлений бота. Если решите восстановить уведомления, воспользуйтесь командой /start. Для обратной связи напишите боту сообщение с хештегом #feedback" : "You are unsubscribed from bot updates. If you decide to restart notifications, use the /start command. For feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText);
                 deactivateUser($user_data['user_id']);
             } catch (Exception $e) {
@@ -104,18 +86,31 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
-                $messageText = "You can get help here - https://wadamir.ru/lalafo-tgm-bot/";
+                $messageText = $user_language === 'ru' ? "Для обратной связи напишите боту сообщение с хештегом #feedback" : "For feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
             file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
             break;
-        case '/settings':
-            file_put_contents($log_dir . '/start.log', ' | Bot command - /settings', FILE_APPEND);
+        case '/start':
+            file_put_contents($log_dir . '/start.log', ' | Bot command - /start', FILE_APPEND);
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
+                $user_result = createUser($user_data);
+
+                if ($user_result === true) {
+                    // Send message
+                    $messageText = $user_language === 'ru' ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
+                    $messageResponse = $bot->sendMessage($chatId, $messageText);
+                } else {
+                    // Send message
+                    $messageText = $user_language === 'ru' ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
+                    $messageResponse = $bot->sendMessage($chatId, $messageText);
+                    file_put_contents($log_dir . '/start.log', ' | Existing user', FILE_APPEND);
+                }
+
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
@@ -125,7 +120,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         ],
                     ]
                 );
-                $messageText = "<b>Настройка / Settings</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \n❓How many minimum rooms in an apartment do you need? \n\n";
+                $messageText .= $user_language === 'ru' ? "\n\n <b>Настройка</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "\n\n <b>Settings</b> \n\n❓How many minimum rooms in an apartment do you need? \n\n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
@@ -137,33 +132,31 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             try {
                 // Send message
                 $bot = new \TelegramBot\Api\BotApi($token);
-                $messageResponse = $bot->sendMessage($chatId, "Something went wrong. Try again later, please...");
+                $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
             } catch (Exception $e) {
                 file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
             file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
     }
-} elseif ($chat_type === 'message' && strpos($message, "https://www.upwork.com/") === 0 && $message_type === 'url') {
-    file_put_contents($log_dir . '/start.log', ' | Add RSS link - ' . $message, FILE_APPEND);
+} elseif ($chat_type === 'message' && strpos($message, "#feedback") !== false) {
+    file_put_contents($log_dir . '/start.log', ' | Feedback - ' . $message, FILE_APPEND);
+    $bot = new \TelegramBot\Api\BotApi($token);
     try {
-        $bot = new \TelegramBot\Api\BotApi($token);
-        // $add_rss_link_response = addRssLink($user_data['user_id'], $user_data['text']);
-        if ($add_rss_link_response) {
-            // Send message
-            $existing_links = implode("\n", $user_result);
-            $messageText = "Ok, " . $user_data['first_name'] . "! I will send you updates from this channel. Use /getrss command to get list of your RSS links.";
-            $messageResponse = $bot->sendMessage($chatId, $messageText);
-        } else {
-            // Send message
-            $messageText = "Sorry, " . $user_data['first_name'] . "! This RSS link is already added. Use /getrss command to get list of your RSS links.";
-            $messageResponse = $bot->sendMessage($chatId, $messageText);
-        }
+        $myChatId = '180165701';
+        $messageText = "Feedback: " . $user_data['first_name'] . "\n\n" . $message;
+        $messageResponse = $bot->sendMessage($myChatId, $messageText);
+
+        // Send message to user
+        $messageText = $user_language === 'ru' ? "Спасибо! Ваше сообщение отправлено." : "Thank you! Your message has been sent.";
+        $bot->sendMessage($chatId, $messageText);
     } catch (Exception $e) {
         file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "room") === 0) {
     file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
+    $bot = new \TelegramBot\Api\BotApi($token);
     $new_data = [];
     switch ($command_data) {
         case 'room_1':
@@ -200,23 +193,24 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 ]
             ]
         );
-        $bot->deleteMessage($chatId, $messageId);
         $get_user_data = getUserData($user_data['user_id']);
         if (!empty($get_user_data)) {
-            $messageText = "<b>Настройка / Settings</b>\n\n✅ Минимум комнат (minimum rooms): " . $get_user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц? \n❓Maximum rental cost per month? \n\n";
+            $messageText = $user_language === 'ru' ? "<b>Настройка</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n❓Maximum rental cost per month? \n\n";
             $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
         } else {
-            $messageText = "Something went wrong. Try again later, please...";
-            $bot->sendMessage($chatId, $messageText);
+            // Send message
+            $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+            $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
         }
     } else {
-        $bot->deleteMessage($chatId, $messageId);
-        $messageText = "Something went wrong. Try again later, please...";
-        $bot->sendMessage($chatId, $messageText);
+        // Send message
+        $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+        $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     }
     file_put_contents($log_dir . '/start.log', PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "usd") === 0) {
     file_put_contents($log_dir . '/start.log', ' | command_data - ' . $command_data, FILE_APPEND);
+    $bot = new \TelegramBot\Api\BotApi($token);
     $new_data = [];
     switch ($command_data) {
         case 'usd_100':
@@ -258,23 +252,28 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $new_data['price_currency'] = 'USD';
     $update_result = updateUser($new_data, $user_data['user_id']);
     if ($update_result) {
-        $bot = new \TelegramBot\Api\BotApi($token);
         $bot->deleteMessage($chatId, $messageId);
         $get_user_data = getUserData($user_data['user_id']);
         if (!empty($get_user_data)) {
+            if ($get_user_data['price_max'] === 1000000) {
+                $user_max_price = $user_language === 'ru' ? 'без ограничений' : 'no limit';
+            } else {
+                $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
+            }
             file_put_contents($log_dir . '/start.log', ' | User data - ' . print_r($get_user_data, true), FILE_APPEND);
-            $messageText = "<b>Настройки успешно сохранены!</b>\n<b>Settings succefully saved!</b>\n\n✅ Минимум комнат (minimum rooms): <b>" . $get_user_data['rooms_min'] . "</b>\n\n✅ Максимальная стоимость аренды в месяц (maximum rental cost per month): <b>" . $get_user_data['price_max'] . " " . $get_user_data['price_currency'] . "</b>";
+            $messageText = $user_language === 'ru' ? "<b>Настройки успешно сохранены!</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡" : "<b>Settings successfully saved!</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡";
             $bot->sendMessage($chatId, $messageText, 'HTML');
+            sendLastAds($user_data['user_id'], $chatId);
         } else {
-            $messageText = "Something went wrong. Try again later, please...";
-            $bot->sendMessage($chatId, $messageText);
+            // Send message
+            $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+            $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
         }
     } else {
         try {
             // Send message
-            $bot = new \TelegramBot\Api\BotApi($token);
-            $messageText = "Something went wrong. Try again later, please...";
-            $messageResponse = $bot->sendMessage($chatId, $messageText);
+            $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+            $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
         } catch (Exception $e) {
             file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
         }
@@ -285,7 +284,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     try {
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
-        $messageResponse = $bot->sendMessage($chatId, "Try again, please");
+        $messageText = $user_language === 'ru' ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+        $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     } catch (Exception $e) {
         file_put_contents($log_dir . '/start.log', ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
@@ -314,8 +314,6 @@ function createUser($user_data)
     if (mysqli_num_rows($result) > 0) {
         file_put_contents($log_dir . '/start.log', ' | User already exists', FILE_APPEND);
         activateUser($user_data['user_id']);
-
-        // $rss_links = getRssLinksByUser($user_data['user_id']);
         // Close connection
         mysqli_close($conn);
         return false; // $rss_links;
@@ -495,39 +493,178 @@ function getUserData($user_id)
     mysqli_close($conn);
     return $user_data;
 }
-/*
-function getRssLinksByUser($user_id)
+
+function sendLastAds($user_id, $chat_id)
 {
     global $log_dir;
+    global $token;
 
-    file_put_contents($log_dir . '/start.log', ' | Get RSS Links By User', FILE_APPEND);
+    $start_log_file = $log_dir . '/start.log';
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
+    $table_users = MYSQL_TABLE_USERS;
+    $table_data = MYSQL_TABLE_DATA;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($log_dir . '/start.log', ' | Get RSS Links By User - connection failed', FILE_APPEND);
+        file_put_contents($log_dir . '/start.log', ' | Get User Data - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "SELECT * FROM $table_rss_links WHERE user_id = " . $user_id;
+    $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_id;
+    file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . $sql, FILE_APPEND);
     $result = mysqli_query($conn, $sql);
-    $rss_links = [];
+    $user_data = [];
     if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
-            $rss_links[] = [
-                'id'        => $row['id'],
-                'rss_link'  => $row['rss_link'],
-                'rss_name'  => $row['rss_name'],
+            $user_data = [
+                'user_id' => $row['user_id'],
+                'is_bot' => $row['is_bot'],
+                'is_deleted' => $row['is_deleted'],
+                'is_premium' => $row['is_premium'],
+                'first_name' => $row['first_name'],
+                'last_name' => $row['last_name'],
+                'username' => $row['username'],
+                'language_code' => $row['language_code'],
+                'chat_id' => $row['chat_id'],
+                'refresh_time' => $row['refresh_time'],
+                'price_min' => $row['price_min'],
+                'price_max' => $row['price_max'],
+                'price_currency' => $row['price_currency'],
+                'rooms_min' => $row['rooms_min'],
+                'rooms_max' => $row['rooms_max'],
+                'preference_city' => $row['preference_city'],
+                'preference_district' => $row['preference_district'],
+                'date_updated' => $row['date_updated'],
+                'date_added' => $row['date_added'],
             ];
         }
     }
-    // Close connection
-    mysqli_close($conn);
 
-    return $rss_links;
+    if (!empty($user_data)) {
+        $username = $user_data['username'];
+
+        $sql = "SELECT * FROM $table_data WHERE owner !== 'Риэлтор' AND price_usd <= " . $user_data['price_max'] . " AND rooms >= " . $user_data['rooms_min'] . " ORDER BY date DESC LIMIT 3";
+        $result = mysqli_query($conn, $sql);
+        $result = mysqli_query($conn, $sql);
+        $counter = 0;
+        $msg_sent = 0;
+        $msg_error = 0;
+        if (mysqli_num_rows($result) > 0) {
+            $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            foreach ($rows as $row) {
+                $title = $row['title'];
+                $district = $row['district'];
+                $link = $row['link'];
+                $created_at = $row['created_at'];
+                $updated_at = $row['updated_at'];
+                $price_kgs = $row['price_kgs'];
+                $price_usd = $row['price_usd'];
+                $deposit = $row['deposit'];
+                $owner = $row['owner'];
+                $owner_name = $row['owner_name'];
+                $phone = $row['phone'];
+                $rooms = $row['rooms'];
+                $floor = $row['floor'];
+                $house_type = $row['house_type'];
+                $sharing = $row['sharing'];
+                $furniture = $row['furniture'];
+                $condition = $row['condition'];
+                $renovation = $row['renovation'];
+                $animals = $row['animals'];
+
+
+                $message = "<b>$title</b>";
+                if ($renovation !== 'n/d') {
+                    $message .= ", $renovation\n";
+                } else {
+                    $message .= "\n";
+                }
+                $message .= "<b>Район:</b> $district\n";
+                if ($price_kgs !== 'n/d')   $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
+                if ($deposit !== 'n/d')     $message .= "<b>Депозит:</b> $deposit\n";
+                if ($house_type !== 'n/d')  $message .= "<b>Серия:</b> $house_type\n";
+                if ($sharing !== 'n/d')     $message .= "<b>Подселение:</b> $sharing\n";
+                // if ($rooms !== 'n/d')    $message .= "<b>Комнат:</b> $rooms\n";
+                if ($floor !== 'n/d')       $message .= "<b>Этаж:</b> $floor\n";
+                // if ($furniture !== 'n/d') $message .= "<b>Мебель:</b> $furniture\n";
+                if ($condition !== 'n/d')   $message .= "<b>Состояние:</b> $condition\n";
+                // if ($renovation !== 'n/d') $message .= "<b>Ремонт:</b> $renovation\n";
+                if ($animals !== 'n/d')     $message .= "<b>Животные:</b> $animals\n";
+                if ($owner !== 'n/d' && $owner_name !== 'n/d') {
+                    $message .= "<b>Кто сдает:</b> $owner, $owner_name\n";
+                } else {
+                    if ($owner !== 'n/d')   $message .= "<b>Кто сдает:</b> $owner\n";
+                    if ($owner_name !== 'n/d') $message .= "<b>Имя:</b> $owner_name\n";
+                }
+                if ($phone !== 'n/d')       $message .= "<b>Телефон:</b> $phone\n";
+                if ($created_at !== $updated_at) {
+                    if ($created_at !== 'n/d') $message .= "<b>Создано:</b> $created_at\n";
+                    if ($updated_at !== 'n/d') $message .= "<b>Обновлено:</b> $updated_at\n";
+                } else {
+                    if ($created_at !== 'n/d') $message .= "<b>Создано:</b> $created_at\n";
+                }
+                $message .= "$link\n";
+
+                try {
+                    if (trim($owner) !== 'Агентство' && trim($owner) !== 'Агентство недвижимости' && trim($owner) !== 'Риэлтор') {
+                        $bot = new \TelegramBot\Api\BotApi($token);
+                        $bot->sendMessage($chat_id, $message, 'HTML');
+                        // Update sent_to_user
+                        $chat_ids_sent = [];
+                        if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== null) {
+                            $chat_ids_sent = json_decode($row['chat_ids_sent']);
+                        }
+                        $chat_ids_sent[] = $user_id;
+                        $chat_ids_sent = array_unique($chat_ids_sent);
+                        $chat_ids_sent = json_encode($chat_ids_sent);
+                        $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
+                        if (mysqli_query($conn, $sql)) {
+                            // file_put_contents($start_log_file, ' | User: ' . $username . ' | Msg sent: ' . $message . PHP_EOL, FILE_APPEND);
+                            $msg_sent++;
+                        } else {
+                            file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                            $msg_error++;
+                        }
+                        $chat_ids_to_send = $row['chat_ids_to_send'];
+                        if ($chat_ids_sent === $chat_ids_to_send) {
+                            $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
+                            if (mysqli_query($conn, $sql)) {
+                                // file_put_contents( $start_log_file, ' | User: ' . $username . ' | Msg sent: ' . $message . PHP_EOL, FILE_APPEND);
+                                $msg_sent++;
+                            } else {
+                                file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                                $msg_error++;
+                            }
+                        }
+                    } else {
+                        $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
+                        if (mysqli_query($conn, $sql)) {
+                            // file_put_contents( $start_log_file, ' | User: ' . $username . ' | Msg sent: ' . $message . PHP_EOL, FILE_APPEND);
+                            $msg_sent++;
+                        } else {
+                            file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                            $msg_error++;
+                        }
+                    }
+                } catch (\TelegramBot\Api\Exception $e) {
+                    $error = $e->getMessage();
+                    file_put_contents($start_log_file, ' | User: ' . $username . ' Error: ' . $e->getMessage(), FILE_APPEND);
+                    if ($error === 'Forbidden: bot was blocked by the user') {
+                        try {
+                            // file_put_contents( $start_log_file, ' | User: ' . $username . ' try to deactivate', FILE_APPEND);
+                            deactivateUser($user_id);
+                        } catch (Exception $e) {
+                            file_put_contents($start_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+                        }
+                    }
+                    break;
+                }
+                $counter++;
+            }
+        }
+    }
 }
-*/
