@@ -103,11 +103,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 if ($user_result === true) {
                     // Send message
                     $messageText = $user_language === 'ru' ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
-                    $messageResponse = $bot->sendMessage($chatId, $messageText);
                 } else {
                     // Send message
                     $messageText = $user_language === 'ru' ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
-                    $messageResponse = $bot->sendMessage($chatId, $messageText);
                     file_put_contents($log_dir . '/start.log', ' | Existing user', FILE_APPEND);
                 }
 
@@ -260,7 +258,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             } else {
                 $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
             }
-            file_put_contents($log_dir . '/start.log', ' | User data - ' . print_r($get_user_data, true), FILE_APPEND);
             $messageText = $user_language === 'ru' ? "<b>Настройки успешно сохранены!</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡" : "<b>Settings successfully saved!</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡";
             $bot->sendMessage($chatId, $messageText, 'HTML');
             sendLastAds($user_data['user_id'], $chatId);
@@ -488,7 +485,7 @@ function getUserData($user_id)
             ];
         }
     }
-    file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . print_r($user_data, true), FILE_APPEND);
+    // file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . print_r($user_data, true), FILE_APPEND);
     // Close connection
     mysqli_close($conn);
     return $user_data;
@@ -515,7 +512,7 @@ function sendLastAds($user_id, $chat_id)
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_id;
-    file_put_contents($log_dir . '/start.log', ' | Get User Data - ' . $sql, FILE_APPEND);
+    file_put_contents($log_dir . '/start.log', ' | sendLastAds!', FILE_APPEND);
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
@@ -542,6 +539,8 @@ function sendLastAds($user_id, $chat_id)
                 'date_added' => $row['date_added'],
             ];
         }
+    } else {
+        file_put_contents($log_dir . '/start.log', ' | sendLastAds -> User not found', FILE_APPEND);
     }
 
     if (!empty($user_data)) {
