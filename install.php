@@ -54,6 +54,7 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_users (
         `is_bot` tinyint(1) DEFAULT NULL,
         `is_deleted` tinyint(1) DEFAULT NULL,
         `is_premium` tinyint(1) DEFAULT NULL,
+        `is_returned` tinyint(1) DEFAULT NULL,
         `first_name` varchar(255) DEFAULT NULL,
         `last_name` varchar(255) DEFAULT NULL,
         `username` varchar(255) DEFAULT NULL,

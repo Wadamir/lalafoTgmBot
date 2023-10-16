@@ -481,3 +481,45 @@ if (mysqli_num_rows($users_result)) {
 }
 file_put_contents($parser_log_file, ' | End: ' . date('Y-m-d H:i:s') . PHP_EOL, FILE_APPEND);
 mysqli_close($conn);
+
+
+
+function deactivateUser($user_id)
+{
+    global $parser_log_file;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_users = MYSQL_TABLE_USERS;
+    $table_city = MYSQL_TABLE_CITY;
+    $table_district = MYSQL_TABLE_DISTRICT;
+    $table_data = MYSQL_TABLE_DATA;
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($parser_log_file, ' | Update User - connection failed', FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+    $sql = "UPDATE $table_users SET is_deleted = 1 WHERE user_id = " . $user_id;
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        file_put_contents($parser_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+    }
+
+    // remove all from data table
+    $sql = "DELETE FROM $table_data WHERE chat_id = " . $user_id;
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        file_put_contents($parser_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+    }
+
+    // Close connection
+    mysqli_close($conn);
+
+    return true;
+}
