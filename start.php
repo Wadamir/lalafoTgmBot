@@ -553,7 +553,7 @@ function sendLastAds($user_id, $chat_id)
     if (!empty($user_data)) {
         $username = $user_data['username'];
 
-        $sql = "SELECT * FROM $table_data WHERE owner !== 'Риэлтор' AND price_usd <= " . $user_data['price_max'] . " AND rooms >= " . $user_data['rooms_min'] . " ORDER BY date_added DESC LIMIT 3";
+        $sql = "SELECT * FROM $table_data WHERE owner != 'Риэлтор' AND price_usd <= " . $user_data['price_max'] . " AND rooms >= " . $user_data['rooms_min'] . " ORDER BY date_added DESC LIMIT 3";
         $result = mysqli_query($conn, $sql);
         $result = mysqli_query($conn, $sql);
         $counter = 0;
