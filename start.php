@@ -128,6 +128,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
                     $messageText .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
                     $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+                    file_put_contents($start_log_file, print_r($messageResponse, true), FILE_APPEND);
                 } else {
                     $get_user_data = getUserData($user_data['user_id']);
                     if (!empty($get_user_data)) {
