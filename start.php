@@ -112,6 +112,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                             $cities[] = $row;
                         }
                     }
+                    file_put_contents($start_log_file, ' | Cities - ' . print_r($cities, true), FILE_APPEND);
                     if ($user_language === 'ru' || $user_language === 'kg') {
                         $inline_keyboard_array = [];
                         foreach ($cities as $city) {
@@ -123,10 +124,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                             $inline_keyboard_array[] = [['text' => $city['name_en'], 'callback_data' => 'city_' . $city['slug']]];
                         }
                     }
+                    file_put_contents($start_log_file, ' | Inline keyboard - ' . print_r($inline_keyboard_array, true), FILE_APPEND);
                     $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
 
                     $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
                     $messageText .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+                    file_put_contents($start_log_file, ' | Message - ' . $messageText, FILE_APPEND);
                     try {
                         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
                         file_put_contents($start_log_file, print_r($messageResponse, true), FILE_APPEND);
