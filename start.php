@@ -138,8 +138,14 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     file_put_contents($start_log_file, ' | Cities - ' . print_r($cities, true), FILE_APPEND);
                     if ($user_language === 'ru' || $user_language === 'kg') {
                         $inline_keyboard_array = [];
+                        $city_counter = 0;
                         foreach ($cities as $city) {
-                            $inline_keyboard_array[] = [['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']]];
+                            if ($city_counter % 2 === 0) {
+                                $inline_keyboard_array[] = [['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']]];
+                            } else {
+                                $inline_keyboard_array[][] = ['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']];
+                            }
+                            $city_counter++;
                         }
                     } else {
                         $inline_keyboard_array = [];
