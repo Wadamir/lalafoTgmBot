@@ -49,6 +49,9 @@ if (!mysqli_select_db($conn, $dbname)) {
     die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
 }
 
+// Get arguments
+$arguments = $_SERVER['argv'];
+
 
 
 // 2. Send messages to telegram
@@ -109,8 +112,8 @@ if (mysqli_num_rows($users_result)) {
                 }
                 if ($district) {
                     $sql_district = "SELECT name FROM $table_district WHERE id = $district";
-                    $result_district = mysqli_query($conn, $sql);
-                    $row_district = mysqli_fetch_assoc($result);
+                    $result_district = mysqli_query($conn, $sql_district);
+                    $row_district = mysqli_fetch_assoc($result_district);
                     if ($row_district) {
                         $district_name = $row_district['name'];
                         $message .= "<b>Район:</b> $district_name\n";
