@@ -111,8 +111,10 @@ if (mysqli_num_rows($users_result)) {
                     $sql_district = "SELECT name FROM $table_district WHERE id = $district";
                     $result_district = mysqli_query($conn, $sql);
                     $row_district = mysqli_fetch_assoc($result);
-                    $district_name = $row_district['name'];
-                    $message .= "<b>Район:</b> $district_name\n";
+                    if ($row_district) {
+                        $district_name = $row_district['name'];
+                        $message .= "<b>Район:</b> $district_name\n";
+                    }
                 }
                 if ($price_kgs !== 'n/d' && $price_kgs !== NULL)        $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
                 if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL)    $message .= "<b>Депозит:</b> $deposit_kgs KGS ($deposit_usd USD)\n";
