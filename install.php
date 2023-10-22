@@ -5,10 +5,10 @@ Create database for Lalafo tgm bot
 1. Create database
 2. Create table users
 3. Create table city
-3. Create table district
-4. Create table data
-5. Create table rates
-6. Close connection
+4. Create table district
+5. Create table data
+6. Create table rates
+7. Close connection
 */
 
 ini_set('display_errors', 1);
@@ -68,6 +68,9 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_users (
         `rooms_max` int DEFAULT NULL,
         `preference_city` text DEFAULT NULL,
         `preference_district` text DEFAULT NULL,
+        `preference_sharing` tinyint(1) DEFAULT '1',
+        `preference_owner` tinyint(1) DEFAULT '1',
+        `date_payment` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
@@ -87,7 +90,10 @@ if (mysqli_query($conn, $sql)) {
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 3. Create table ' . $table_city . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_city (
         `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        `name` varchar(255) DEFAULT NULL,
+        `name_en` varchar(255)  NOT NULL,
+        `name_ru` varchar(255)  NOT NULL,
+        `name_kg` varchar(255)  NOT NULL,
+        `slug` varchar(255)  NOT NULL,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
@@ -107,8 +113,9 @@ if (mysqli_query($conn, $sql)) {
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 4. Create table ' . $table_district . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_district (
         `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        `city_id` bigint DEFAULT NULL,
-        `name` varchar(255) DEFAULT NULL,
+        `city_id` bigint NOT NULL,
+        `name` varchar(255) NOT NULL,
+        `slug` varchar(255) NOT NULL,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
@@ -131,21 +138,23 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_data (
         `chat_ids_to_send` TEXT DEFAULT NULL,
         `chat_ids_sent` TEXT DEFAULT NULL,
         `done` tinyint(1) DEFAULT NULL,
+        `city` bigint NOT NULL,
+        `district` bigint DEFAULT NULL,
         `title` varchar(255) DEFAULT NULL,
         `link` text DEFAULT NULL,
-        `created_at` datetime NOT NULL,
-        `updated_at` datetime NOT NULL,
+        `created_at` varchar(255) DEFAULT NULL,
+        `updated_at` varchar(255) DEFAULT NULL,
         `price_kgs` int DEFAULT NULL,
         `price_usd` int DEFAULT NULL,
-        `deposit` varchar(255) DEFAULT NULL,
+        `deposit_kgs` int DEFAULT NULL,
+        `deposit_usd` int DEFAULT NULL,
         `owner` varchar(255) DEFAULT NULL,
         `owner_name` varchar(255) DEFAULT NULL,
         `phone` varchar(255) DEFAULT NULL,
-        `district` varchar(255) DEFAULT NULL,
         `rooms` int DEFAULT NULL,
         `floor` varchar(255) DEFAULT NULL,
         `house_type` varchar(255) DEFAULT NULL,
-        `sharing` varchar(255) DEFAULT NULL,
+        `sharing` tinyint(1) DEFAULT NULL,
         `furniture` varchar(255) DEFAULT NULL,
         `condition` varchar(255) DEFAULT NULL,
         `renovation` varchar(255) DEFAULT NULL,
