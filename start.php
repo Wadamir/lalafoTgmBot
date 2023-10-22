@@ -28,6 +28,18 @@ $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
 $table_rates = MYSQL_TABLE_RATES;
 
+// Create connection
+$conn = mysqli_connect($dbhost, $dbuser, $dbpass);
+if (!$conn) {
+    file_put_contents($start_error_log_file, '[' . date('Y-m-d H:i:s') . '] Connection failed' . PHP_EOL, FILE_APPEND);
+    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+}
+if (!mysqli_select_db($conn, $dbname)) {
+    file_put_contents($start_error_log_file, '[' . date('Y-m-d H:i:s') . '] Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
+    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+}
+
+
 // Todo move to api
 $get_content = file_get_contents("php://input");
 if (!$get_content) {
@@ -165,6 +177,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
                     }
                 }
+                // Close connection
+                mysqli_close($conn);
             } catch (Exception $e) {
                 file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
@@ -265,6 +279,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     }
+    // Close connection
+    mysqli_close($conn);
     file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "room") === 0) {
     file_put_contents($start_log_file, ' | command_data - ' . $command_data, FILE_APPEND);
