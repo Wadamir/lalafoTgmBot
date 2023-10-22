@@ -205,8 +205,7 @@ if (count($cities) > 0) {
 
 
                     $phone = ($apartment_pq->query('.call-button a')->length) ? $apartment_pq->query('.call-button a')[0]->getAttribute('href') : NULL;
-                    $phone = str_replace('tel:', '', $phone);
-                    $phone = ($phone === '') ? NULL : $phone;
+                    $phone = ($phone) ? str_replace('tel:', '', $phone) : NULL;
 
                     $owner_name = ($apartment_pq->query('.userName-text')->length) ? $apartment_pq->query('.userName-text')[0]->textContent : NULL;
 
