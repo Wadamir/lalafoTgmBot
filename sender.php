@@ -111,7 +111,7 @@ if (mysqli_num_rows($users_result)) {
                     $sql_district = "SELECT name FROM $table_district WHERE id = $district";
                     $result_district = mysqli_query($conn, $sql);
                     $row_district = mysqli_fetch_assoc($result);
-                    $district_name = $row['name'];
+                    $district_name = $row_district['name'];
                     $message .= "<b>Район:</b> $district_name\n";
                 }
                 if ($price_kgs !== 'n/d' && $price_kgs !== NULL)        $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
@@ -145,44 +145,34 @@ if (mysqli_num_rows($users_result)) {
                 $message .= "$link\n";
 
                 try {
-                    if (trim($owner) !== 'Агентство' && trim($owner) !== 'Агентство недвижимости' && trim($owner) !== 'Риэлтор') {
-                        $bot = new \TelegramBot\Api\BotApi($token);
-                        $bot->sendMessage($chat_id, $message, 'HTML');
-                        // Update sent_to_user
-                        $chat_ids_sent = [];
-                        if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== NULL) {
-                            $chat_ids_sent = json_decode($row['chat_ids_sent']);
-                        }
-                        $chat_ids_sent = array_map('strval', $chat_ids_sent);
-                        $chat_ids_sent[] = strval($user_id);
-                        $chat_ids_sent = array_unique($chat_ids_sent);
-                        $chat_ids_sent = array_values($chat_ids_sent);
-                        sort($chat_ids_sent);
-                        $chat_ids_sent = json_encode($chat_ids_sent);
-                        $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
-                        if (mysqli_query($conn, $sql)) {
-                            $msg_sent++;
-                        } else {
-                            file_put_contents($sender_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
-                            $msg_error++;
-                        }
-                        $chat_ids_to_send = $row['chat_ids_to_send'];
-                        $chat_ids_to_send = json_decode($chat_ids_to_send);
-                        $chat_ids_to_send = array_map('strval', $chat_ids_to_send);
-                        $chat_ids_to_send = array_unique($chat_ids_to_send);
-                        $chat_ids_to_send = array_values($chat_ids_to_send);
-                        sort($chat_ids_to_send);
-                        $chat_ids_to_send = json_encode($chat_ids_to_send);
-                        if ($chat_ids_sent === $chat_ids_to_send) {
-                            $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
-                            if (mysqli_query($conn, $sql)) {
-                                $msg_sent++;
-                            } else {
-                                file_put_contents($sender_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
-                                $msg_error++;
-                            }
-                        }
+                    $bot = new \TelegramBot\Api\BotApi($token);
+                    $bot->sendMessage($chat_id, $message, 'HTML');
+                    // Update sent_to_user
+                    $chat_ids_sent = [];
+                    if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== NULL) {
+                        $chat_ids_sent = json_decode($row['chat_ids_sent']);
+                    }
+                    $chat_ids_sent = array_map('strval', $chat_ids_sent);
+                    $chat_ids_sent[] = strval($user_id);
+                    $chat_ids_sent = array_unique($chat_ids_sent);
+                    $chat_ids_sent = array_values($chat_ids_sent);
+                    sort($chat_ids_sent);
+                    $chat_ids_sent = json_encode($chat_ids_sent);
+                    $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
+                    if (mysqli_query($conn, $sql)) {
+                        $msg_sent++;
                     } else {
+                        file_put_contents($sender_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                        $msg_error++;
+                    }
+                    $chat_ids_to_send = $row['chat_ids_to_send'];
+                    $chat_ids_to_send = json_decode($chat_ids_to_send);
+                    $chat_ids_to_send = array_map('strval', $chat_ids_to_send);
+                    $chat_ids_to_send = array_unique($chat_ids_to_send);
+                    $chat_ids_to_send = array_values($chat_ids_to_send);
+                    sort($chat_ids_to_send);
+                    $chat_ids_to_send = json_encode($chat_ids_to_send);
+                    if ($chat_ids_sent === $chat_ids_to_send) {
                         $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
                         if (mysqli_query($conn, $sql)) {
                             $msg_sent++;
