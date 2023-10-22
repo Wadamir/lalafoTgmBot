@@ -136,21 +136,22 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         }
                     }
                     file_put_contents($start_log_file, ' | Cities - ' . print_r($cities, true), FILE_APPEND);
+                    $city_array = [];
                     if ($user_language === 'ru' || $user_language === 'kg') {
-                        $inline_keyboard_array = [];
-                        $city_counter = 0;
                         foreach ($cities as $city) {
-                            if ($city_counter % 2 === 0) {
-                                $inline_keyboard_array[] = [['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']]];
-                            } else {
-                                $inline_keyboard_array[][] = ['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']];
-                            }
-                            $city_counter++;
+                            $city_array[] = ['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']];
                         }
                     } else {
-                        $inline_keyboard_array = [];
                         foreach ($cities as $city) {
-                            $inline_keyboard_array[] = [['text' => $city['name_en'], 'callback_data' => 'city_' . $city['slug']]];
+                            $city_array[] = ['text' => $city['name_en'], 'callback_data' => 'city_' . $city['slug']];
+                        }
+                    }
+                    $inline_keyboard_array = [];
+                    foreach ($city_array as $key => $value) {
+                        if ($key % 2 === 0) {
+                            $inline_keyboard_array[] = [$value];
+                        } else {
+                            $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
                         }
                     }
                     file_put_contents($start_log_file, ' | Inline keyboard - ' . print_r($inline_keyboard_array, true), FILE_APPEND);
