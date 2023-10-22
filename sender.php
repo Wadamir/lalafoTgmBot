@@ -107,7 +107,13 @@ if (mysqli_num_rows($users_result)) {
                 } else {
                     $message .= "\n";
                 }
-                $message .= "<b>Район:</b> $district\n";
+                if ($district) {
+                    $sql = "SELECT name FROM $table_district WHERE id = $district";
+                    $result = mysqli_query($conn, $sql);
+                    $row = mysqli_fetch_assoc($result);
+                    $district = $row['name'];
+                    $message .= "<b>Район:</b> $district\n";
+                }
                 if ($price_kgs !== 'n/d' && $price_kgs !== NULL)        $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
                 if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL)    $message .= "<b>Депозит:</b> $deposit_kgs KGS ($deposit_usd USD)\n";
                 if ($house_type !== 'n/d' && $house_type !== NULL)      $message .= "<b>Серия:</b> $house_type\n";
