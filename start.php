@@ -18,6 +18,16 @@ if (!$token) {
 
 $adminChatId = ADMIN_CHAT_ID;
 
+$dbhost = MYSQL_HOST;
+$dbuser = MYSQL_USER;
+$dbpass = MYSQL_PASSWORD;
+$dbname = MYSQL_DB;
+$table_users = MYSQL_TABLE_USERS;
+$table_city = MYSQL_TABLE_CITY;
+$table_district = MYSQL_TABLE_DISTRICT;
+$table_data = MYSQL_TABLE_DATA;
+$table_rates = MYSQL_TABLE_RATES;
+
 // Todo move to api
 $get_content = file_get_contents("php://input");
 if (!$get_content) {

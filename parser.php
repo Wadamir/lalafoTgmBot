@@ -31,7 +31,6 @@ $items_total = 0;
 $items_added = 0;
 $items_error = 0;
 
-$token = TOKEN;
 $fx_token = FX_TOKEN;
 
 $dbhost = MYSQL_HOST;
