@@ -151,20 +151,25 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else { // Returned user
                     $get_user_data = getUserData($user_data['tgm_user_id']);
                     if (!empty($get_user_data)) {
-                        if ($get_user_data['price_max'] === 1000000) {
-                            $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
-                        } else {
-                            $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
-                        }
                         if ($get_user_data['preference_city'] === NULL) {
                             $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                         } else {
                             $city = getCity($get_user_data['preference_city']);
                             $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                         }
+                        if ($get_user_data['rooms_min'] === NULL) {
+                            $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
+                        } else {
+                            $user_rooms_min = $get_user_data['rooms_min'];
+                        }
+                        if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
+                            $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
+                        } else {
+                            $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
+                        }
                         // Send message
                         $messageText = ($user_language === 'ru' || $user_language === 'kg') ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
-                        $messageText .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: " . $get_user_data['city_name_ru'] . "\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\nЕсли Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: " . $get_user_data['city_name_en'] . "\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n✅ Maximum rental cost per month: " . $user_max_price . "\n\nIf you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                        $messageText .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\nЕсли Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Maximum rental cost per month: " . $user_max_price . "\n\nIf you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                         $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
                     } else {
                         // Send message
