@@ -118,12 +118,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $city_array = [];
                         if ($user_language === 'ru' || $user_language === 'kg') {
                             foreach ($cities as $city) {
-                                $city_array[] = ['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']];
+                                $city_array[] = ['text' => $city['city_name_ru'], 'callback_data' => 'city_' . $city['city_slug']];
                             }
                             $city_array[] = ['text' => 'Неважно', 'callback_data' => 'city_none'];
                         } else {
                             foreach ($cities as $city) {
-                                $city_array[] = ['text' => $city['name_en'], 'callback_data' => 'city_' . $city['slug']];
+                                $city_array[] = ['text' => $city['city_name_en'], 'callback_data' => 'city_' . $city['city_slug']];
                             }
                             $city_array[] = ['text' => 'No matter', 'callback_data' => 'city_none'];
                         }
@@ -160,7 +160,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                             $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                         } else {
                             $city = getCity($get_user_data['preference_city']);
-                            $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['name_ru'] : $city['name_en'];
+                            $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                         }
                         // Send message
                         $messageText = ($user_language === 'ru' || $user_language === 'kg') ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
