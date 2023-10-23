@@ -25,11 +25,11 @@ $dbhost = MYSQL_HOST;
 $dbuser = MYSQL_USER;
 $dbpass = MYSQL_PASSWORD;
 $dbname = MYSQL_DB;
-$table_users = MYSQL_TABLE_USERS;
+$table_user = MYSQL_TABLE_USER;
 $table_city = MYSQL_TABLE_CITY;
 $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
-$table_rates = MYSQL_TABLE_RATES;
+$table_rate = MYSQL_TABLE_RATE;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -47,10 +47,10 @@ if (mysqli_query($conn, $sql)) {
 }
 
 // 2. Create table users
-file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 2. Create table ' . $table_users . PHP_EOL, FILE_APPEND);
-$sql = "CREATE TABLE IF NOT EXISTS $table_users (
-        `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        `user_id` varchar(255) DEFAULT NULL,
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 2. Create table ' . $table_user . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_user (
+        `user_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `tgm_user_id` varchar(255) DEFAULT NULL,
         `is_bot` tinyint(1) DEFAULT NULL,
         `is_deleted` tinyint(1) DEFAULT NULL,
         `is_premium` tinyint(1) DEFAULT NULL,
@@ -81,21 +81,19 @@ if (!mysqli_select_db($conn, $dbname)) {
 }
 
 if (mysqli_query($conn, $sql)) {
-    file_put_contents($log_dir . '/install.log', "Table $table_users created successfully" . PHP_EOL, FILE_APPEND);
+    file_put_contents($log_dir . '/install.log', "Table $table_user created successfully" . PHP_EOL, FILE_APPEND);
 } else {
-    file_put_contents($log_dir . '/install.log', "Error creating table $table_users: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_user: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 // 3. Create table city
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 3. Create table ' . $table_city . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_city (
-        `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        `name_en` varchar(255)  NOT NULL,
-        `name_ru` varchar(255)  NOT NULL,
-        `name_kg` varchar(255)  NOT NULL,
-        `slug` varchar(255)  NOT NULL,
-        `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+        `city_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `city_name_en` varchar(255)  NOT NULL,
+        `city_name_ru` varchar(255)  NOT NULL,
+        `city_name_kg` varchar(255)  NOT NULL,
+        `city_slug` varchar(255)  NOT NULL
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
 if (!mysqli_select_db($conn, $dbname)) {
@@ -109,15 +107,15 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_city: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
-// 4. Create table districts
+// 4. Create table district
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 4. Create table ' . $table_district . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_district (
-        `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `district_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
         `city_id` bigint NOT NULL,
-        `name` varchar(255) NOT NULL,
-        `slug` varchar(255) NOT NULL,
-        `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+        `district_name_en` varchar(255) NOT NULL,
+        `district_name_ru` varchar(255) NOT NULL,
+        `district_name_kg` varchar(255) NOT NULL,
+        `district_slug` varchar(255) NOT NULL
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
 if (!mysqli_select_db($conn, $dbname)) {
@@ -174,10 +172,10 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_data: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
-// 6. Create table rates
-file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 6. Create table ' . $table_rates . PHP_EOL, FILE_APPEND);
-$sql = "CREATE TABLE IF NOT EXISTS $table_rates (
-        `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+// 6. Create table rate
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 6. Create table ' . $table_rate . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_rate (
+        `rate_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
         `usd` DECIMAL (10,4) NOT NULL,
         `eur` DECIMAL (10,4) NOT NULL,
         `gbp` DECIMAL (10,4) NOT NULL,
@@ -194,9 +192,9 @@ if (!mysqli_select_db($conn, $dbname)) {
 }
 
 if (mysqli_query($conn, $sql)) {
-    file_put_contents($log_dir . '/install.log', "Table $table_rates created successfully" . PHP_EOL, FILE_APPEND);
+    file_put_contents($log_dir . '/install.log', "Table $table_rate created successfully" . PHP_EOL, FILE_APPEND);
 } else {
-    file_put_contents($log_dir . '/install.log', "Error creating table $table_rates: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_rate: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 // 7. Close connection

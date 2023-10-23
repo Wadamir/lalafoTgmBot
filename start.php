@@ -22,23 +22,10 @@ $dbhost = MYSQL_HOST;
 $dbuser = MYSQL_USER;
 $dbpass = MYSQL_PASSWORD;
 $dbname = MYSQL_DB;
-$table_users = MYSQL_TABLE_USERS;
+$table_user = MYSQL_TABLE_USER;
 $table_city = MYSQL_TABLE_CITY;
 $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
-$table_rates = MYSQL_TABLE_RATES;
-
-// Create connection
-$conn = mysqli_connect($dbhost, $dbuser, $dbpass);
-if (!$conn) {
-    file_put_contents($start_error_log_file, '[' . date('Y-m-d H:i:s') . '] Connection failed' . PHP_EOL, FILE_APPEND);
-    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
-}
-if (!mysqli_select_db($conn, $dbname)) {
-    file_put_contents($start_error_log_file, '[' . date('Y-m-d H:i:s') . '] Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
-    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
-}
-
 
 // Todo move to api
 $get_content = file_get_contents("php://input");
@@ -53,7 +40,7 @@ $command_data = '';
 if (isset($update['message'])) {
     file_put_contents($start_log_file, ' | Message: ' . $update['message']['text'], FILE_APPEND);
     $user_data = [
-        'user_id' => $update['message']['from']['id'],
+        'tgm_user_id' => $update['message']['from']['id'],
         'is_bot' => (isset($update['message']['from']['is_bot']) && $update['message']['from']['is_bot'] !== 'false' && $update['message']['from']['is_bot'] !== false) ? 1 : 0,
         'first_name' => (isset($update['message']['from']['first_name']) && $update['message']['from']['first_name'] !== '') ? $update['message']['from']['first_name'] : null,
         'last_name' => (isset($update['message']['from']['last_name']) && $update['message']['from']['last_name'] !== '') ? $update['message']['from']['last_name'] : null,
@@ -71,7 +58,7 @@ if (isset($update['message'])) {
 } elseif (isset($update['callback_query'])) {
     file_put_contents($start_log_file, ' | Callback: ' . $update['callback_query']['data'], FILE_APPEND);
     $user_data = [
-        'user_id' => $update['callback_query']['from']['id'],
+        'tgm_user_id' => $update['callback_query']['from']['id'],
         'is_bot' => (isset($update['callback_query']['from']['is_bot']) && $update['messacallback_querye']['from']['is_bot'] !== 'false' && $update['callback_query']['from']['is_bot'] !== false) ? 1 : 0,
         'first_name' => (isset($update['callback_query']['from']['first_name']) && $update['callback_query']['from']['first_name'] !== '') ? $update['callback_query']['from']['first_name'] : null,
         'last_name' => (isset($update['callback_query']['from']['last_name']) && $update['callback_query']['from']['last_name'] !== '') ? $update['callback_query']['from']['last_name'] : null,
@@ -92,87 +79,87 @@ if (isset($update['message'])) {
 
 $user_language = $user_data['language_code'] === 'ru' ? 'ru' : $user_data['language_code'];
 
+// Accumulate errors
+$error_array = [];
+
 if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 'bot_command') {
+    file_put_contents($start_log_file, ' | Bot command - ' . $message, FILE_APPEND);
+    $bot = new \TelegramBot\Api\BotApi($token);
+
     switch ($message) {
         case '/stop':
-            file_put_contents($start_log_file, ' | Bot command - /stop' . PHP_EOL, FILE_APPEND);
             try {
                 // Send message
-                $bot = new \TelegramBot\Api\BotApi($token);
                 $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Вы отписаны от обновлений бота. Если решите восстановить уведомления, воспользуйтесь командой /start. Для обратной связи напишите боту сообщение с хештегом #feedback" : "You are unsubscribed from bot updates. If you decide to restart notifications, use the /start command. For feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText);
-                deactivateUser($user_data['user_id']);
+                deactivateUser($user_data['tgm_user_id']);
             } catch (Exception $e) {
-                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                $error_array[] = $e->getMessage();
             }
             break;
         case '/help':
-            file_put_contents($start_log_file, ' | Bot command - /help' . PHP_EOL, FILE_APPEND);
             try {
                 // Send message
-                $bot = new \TelegramBot\Api\BotApi($token);
                 $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Для обратной связи напишите боту сообщение с хештегом #feedback" : "For feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText);
             } catch (Exception $e) {
-                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                $error_array[] = $e->getMessage();
             }
             break;
         case '/start':
-            file_put_contents($start_log_file, ' | Bot command - /start', FILE_APPEND);
             try {
                 // Send message
-                $bot = new \TelegramBot\Api\BotApi($token);
                 $user_result = createUser($user_data);
-                file_put_contents($start_log_file, ' | User result - ' . print_r($user_result, true), FILE_APPEND);
-
-                if ($user_result === true) {
+                if ($user_result === true) { // New user
                     // Get all cities
-                    $sql = "SELECT * FROM $table_city";
-                    $result = mysqli_query($conn, $sql);
-                    $cities = [];
-                    if ($result !== false && mysqli_num_rows($result) > 0) {
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            $cities[] = $row;
+                    $cities = getCity();
+                    if (!empty($cities)) {
+                        $city_array = [];
+                        if ($user_language === 'ru' || $user_language === 'kg') {
+                            foreach ($cities as $city) {
+                                $city_array[] = ['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']];
+                            }
+                            $city_array[] = ['text' => 'Неважно', 'callback_data' => 'city_none'];
+                        } else {
+                            foreach ($cities as $city) {
+                                $city_array[] = ['text' => $city['name_en'], 'callback_data' => 'city_' . $city['slug']];
+                            }
+                            $city_array[] = ['text' => 'No matter', 'callback_data' => 'city_none'];
                         }
-                    }
-                    file_put_contents($start_log_file, ' | Cities - ' . print_r($cities, true), FILE_APPEND);
-                    $city_array = [];
-                    if ($user_language === 'ru' || $user_language === 'kg') {
-                        foreach ($cities as $city) {
-                            $city_array[] = ['text' => $city['name_ru'], 'callback_data' => 'city_' . $city['slug']];
+                        $inline_keyboard_array = [];
+                        foreach ($city_array as $key => $value) {
+                            if ($key % 2 === 0) {
+                                $inline_keyboard_array[] = [$value];
+                            } else {
+                                $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+                            }
+                        }
+
+                        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+                        $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
+                        $messageText .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+                        file_put_contents($start_log_file, ' | Message - ' . $messageText, FILE_APPEND);
+                        try {
+                            $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
+                        } catch (Exception $e) {
+                            $error_array[] = $e->getMessage();
                         }
                     } else {
-                        foreach ($cities as $city) {
-                            $city_array[] = ['text' => $city['name_en'], 'callback_data' => 'city_' . $city['slug']];
-                        }
+                        $error_array[] = 'Cities not found';
                     }
-                    $inline_keyboard_array = [];
-                    foreach ($city_array as $key => $value) {
-                        if ($key % 2 === 0) {
-                            $inline_keyboard_array[] = [$value];
-                        } else {
-                            $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
-                        }
-                    }
-                    file_put_contents($start_log_file, ' | Inline keyboard - ' . print_r($inline_keyboard_array, true), FILE_APPEND);
-                    $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
-
-                    $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
-                    $messageText .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
-                    file_put_contents($start_log_file, ' | Message - ' . $messageText, FILE_APPEND);
-                    try {
-                        $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
-                        file_put_contents($start_log_file, print_r($messageResponse, true), FILE_APPEND);
-                    } catch (Exception $e) {
-                        file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
-                    }
-                } else {
-                    $get_user_data = getUserData($user_data['user_id']);
+                } else { // Returned user
+                    $get_user_data = getUserData($user_data['tgm_user_id']);
                     if (!empty($get_user_data)) {
                         if ($get_user_data['price_max'] === 1000000) {
                             $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                         } else {
                             $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
+                        }
+                        if ($get_user_data['preference_city'] === NULL) {
+                            $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
+                        } else {
+                            $city = getCity($get_user_data['preference_city']);
+                            $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['name_ru'] : $city['name_en'];
                         }
                         // Send message
                         $messageText = ($user_language === 'ru' || $user_language === 'kg') ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
@@ -244,48 +231,48 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "city") === 0) {
     file_put_contents($start_log_file, ' | command_data - ' . $command_data, FILE_APPEND);
     $city_slug = str_replace('city_', '', $command_data);
-    $sql = "SELECT * FROM $table_city WHERE slug = '$city_slug'";
-    $result = mysqli_query($conn, $sql);
-    if ($result !== false && mysqli_num_rows($result) > 0) {
-        $city_data = mysqli_fetch_assoc($result);
-        $bot = new \TelegramBot\Api\BotApi($token);
-        $new_data = [];
-        $new_data['preference_city'] = $city_data['id'];
-        $update_result = updateUser($new_data, $user_data['user_id']);
-        if ($update_result) {
-            $bot->deleteMessage($chatId, $messageId);
-            // Send message
-            $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+    file_put_contents($start_log_file, ' | city_slug - ' . $city_slug, FILE_APPEND);
+    $bot = new \TelegramBot\Api\BotApi($token);
+    if ($city_slug !== 'none') {
+        $sql = "SELECT * FROM $table_city WHERE slug = '$city_slug'";
+        $result = mysqli_query($conn, $sql);
+        if ($result !== false && mysqli_num_rows($result) > 0) {
+            $city_data = mysqli_fetch_assoc($result);
+            $new_data = [];
+            $new_data['preference_city'] = $city_data['id'];
+            $update_result = updateUser($new_data, $user_data['tgm_user_id']);
+        }
+    } else {
+        $update_result = true;
+    }
+    if ($update_result) {
+        $bot->deleteMessage($chatId, $messageId);
+        // Send message
+        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+            [
                 [
-                    [
-                        ['text' => '1', 'callback_data' => 'room_1'],
-                        ['text' => '2', 'callback_data' => 'room_2'],
-                        ['text' => '3+', 'callback_data' => 'room_3'],
-                    ],
-                ]
-            );
-            $get_user_data = getUserData($user_data['user_id']);
-            if (!empty($get_user_data)) {
-                $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $get_user_data['city_name_ru'] . "\n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "<b>Settings</b>\n\n✅ City: " . $get_user_data['city_name_en'] . "\n\n❓How many minimum rooms in an apartment do you need? \n\n";
-                $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
-            } else {
-                // Send message
-                $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
-                $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
-            }
+                    ['text' => '1', 'callback_data' => 'room_1'],
+                    ['text' => '2', 'callback_data' => 'room_2'],
+                    ['text' => '3+', 'callback_data' => 'room_3'],
+                ],
+            ]
+        );
+        $get_user_data = getUserData($user_data['tgm_user_id']);
+        if (!empty($get_user_data)) {
+            $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $get_user_data['city_name_ru'] . "\n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "<b>Settings</b>\n\n✅ City: " . $get_user_data['city_name_en'] . "\n\n❓How many minimum rooms in an apartment do you need? \n\n";
+            $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
         } else {
-            $bot->deleteMessage($chatId, $messageId);
             // Send message
             $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
             $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
         }
     } else {
-        $bot = new \TelegramBot\Api\BotApi($token);
         $bot->deleteMessage($chatId, $messageId);
         // Send message
         $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     }
+
     // Close connection
     mysqli_close($conn);
     file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
@@ -306,7 +293,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         default:
             $new_data['rooms_min'] = 1;
     }
-    $update_result = updateUser($new_data, $user_data['user_id']);
+    $update_result = updateUser($new_data, $user_data['tgm_user_id']);
     if ($update_result) {
         $bot->deleteMessage($chatId, $messageId);
         // Send message
@@ -328,7 +315,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 ]
             ]
         );
-        $get_user_data = getUserData($user_data['user_id']);
+        $get_user_data = getUserData($user_data['tgm_user_id']);
         if (!empty($get_user_data)) {
             $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n❓Maximum rental cost per month? \n\n";
             $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
@@ -386,10 +373,10 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $new_data['price_max'] = 1000000;
     }
     $new_data['price_currency'] = 'USD';
-    $update_result = updateUser($new_data, $user_data['user_id']);
+    $update_result = updateUser($new_data, $user_data['tgm_user_id']);
     if ($update_result) {
         $bot->deleteMessage($chatId, $messageId);
-        $get_user_data = getUserData($user_data['user_id']);
+        $get_user_data = getUserData($user_data['tgm_user_id']);
         if (!empty($get_user_data)) {
             if ($get_user_data['price_max'] === 1000000) {
                 $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
@@ -398,7 +385,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             }
             $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройки успешно сохранены!</b>\n\n✅ Минимум комнат: " . $get_user_data['rooms_min'] . "\n\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "<b>Settings successfully saved!</b>\n\n✅ Minimum rooms: " . $get_user_data['rooms_min'] . "\n\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡\n\nFor feedback, write a message to the bot with the hashtag #feedback";
             $bot->sendMessage($chatId, $messageText, 'HTML');
-            sendLastAds($user_data['user_id'], $chatId);
+            sendLastAds($user_data['tgm_user_id'], $chatId);
         } else {
             // Send message
             $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
@@ -437,7 +424,7 @@ function createUser($user_data)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USER;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -446,12 +433,12 @@ function createUser($user_data)
         throw new ErrorException("Connection failed: " . mysqli_connect_error());
     }
     // Check if user exists
-    $sql = "SELECT * FROM $table_users WHERE user_id = " . $user_data['user_id'];
+    $sql = "SELECT * FROM $table_user WHERE tgm_user_id = " . $user_data['tgm_user_id'];
     $result = mysqli_query($conn, $sql);
     // $rss_links = '';
     if (mysqli_num_rows($result) > 0) {
-        activateUser($user_data['user_id']);
-        file_put_contents($start_log_file, ' | User already exists ' . $user_data['user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
+        activateUser($user_data['tgm_user_id']);
+        file_put_contents($start_log_file, ' | User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
         // Close connection
         mysqli_close($conn);
         return false; // $rss_links;
@@ -465,13 +452,13 @@ function createUser($user_data)
         $columns = implode(", ", array_keys($user_data));
         $escaped_values = array_map(array($conn, 'real_escape_string'), array_values($user_data));
         $values  = implode("', '", $escaped_values);
-        $sql = "INSERT INTO $table_users ($columns) VALUES ('$values')";
+        $sql = "INSERT INTO $table_user ($columns) VALUES ('$values')";
         $result = mysqli_query($conn, $sql);
         if (!$result) {
             file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
             throw new ErrorException("Error: " . $sql . ' | ' . mysqli_error($conn));
         }
-        file_put_contents($start_log_file, ' | New user created ' . $user_data['user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
+        file_put_contents($start_log_file, ' | New user created ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
         // Close connection
         mysqli_close($conn);
         return true;
@@ -479,7 +466,7 @@ function createUser($user_data)
 }
 
 
-function activateUser($user_id)
+function activateUser($tgm_user_id)
 {
     global $log_dir;
     global $start_error_log_file;
@@ -488,7 +475,7 @@ function activateUser($user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USERS;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -496,7 +483,7 @@ function activateUser($user_id)
         file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "UPDATE $table_users SET is_deleted = NULL, is_returned = 1 WHERE user_id = " . $user_id;
+    $sql = "UPDATE $table_user SET is_deleted = NULL, is_returned = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
         file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
@@ -509,7 +496,7 @@ function activateUser($user_id)
 }
 
 
-function deactivateUser($user_id)
+function deactivateUser($tgm_user_id)
 {
     global $log_dir;
     global $start_error_log_file;
@@ -518,7 +505,7 @@ function deactivateUser($user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USERS;
     $table_city = MYSQL_TABLE_CITY;
     $table_district = MYSQL_TABLE_DISTRICT;
     $table_data = MYSQL_TABLE_DATA;
@@ -529,7 +516,7 @@ function deactivateUser($user_id)
         file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "UPDATE $table_users SET is_deleted = 1 WHERE user_id = " . $user_id;
+    $sql = "UPDATE $table_user SET is_deleted = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
         file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
@@ -537,7 +524,7 @@ function deactivateUser($user_id)
     }
 
     // remove all from data table
-    $sql = "DELETE FROM $table_data WHERE chat_id = " . $user_id;
+    $sql = "DELETE FROM $table_data WHERE chat_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
         file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
@@ -551,7 +538,7 @@ function deactivateUser($user_id)
 }
 
 
-function updateUser($user_data, $user_id)
+function updateUser($user_data, $tgm_user_id)
 {
     global $log_dir;
     global $start_log_file;
@@ -561,7 +548,7 @@ function updateUser($user_data, $user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USERS;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -570,12 +557,12 @@ function updateUser($user_data, $user_id)
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
-    $sql = "UPDATE $table_users SET";
+    $sql = "UPDATE $table_user SET";
     foreach ($user_data as $key => $value) {
         $sql .= " $key = '" . $value . "',";
     }
     $sql = rtrim($sql, ',');
-    $sql .= " WHERE user_id = " . $user_id;
+    $sql .= " WHERE tgm_user_id = " . $tgm_user_id;
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
@@ -585,12 +572,12 @@ function updateUser($user_data, $user_id)
         mysqli_close($conn);
         return false;
     }
-    file_put_contents($start_log_file, ' | User successfully updated ' . $user_id . ' - ' . $user_data['username'], FILE_APPEND);
+    file_put_contents($start_log_file, ' | User successfully updated ' . $tgm_user_id . ' - ' . $user_data['username'], FILE_APPEND);
 
     return true;
 }
 
-function getUserData($user_id)
+function getUserData($tgm_user_id)
 {
     global $log_dir;
     global $start_error_log_file;
@@ -599,7 +586,7 @@ function getUserData($user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USERS;
     $table_city = MYSQL_TABLE_CITY;
 
     // Create connection
@@ -608,7 +595,7 @@ function getUserData($user_id)
         file_put_contents($start_error_log_file, ' | Get User Data - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "SELECT * FROM $table_users LEFT JOIN $table_city ON $table_users.preference_city = $table_city.id WHERE user_id = " . $user_id;
+    $sql = "SELECT * FROM $table_user LEFT JOIN $table_city ON $table_user.preference_city = $table_city.id WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
@@ -631,7 +618,7 @@ function getUserData($user_id)
                 }
             }
             $user_data = [
-                'user_id' => $row['user_id'],
+                'tgm_user_id' => $row['tgm_user_id'],
                 'is_bot' => $row['is_bot'],
                 'is_deleted' => $row['is_deleted'],
                 'is_premium' => $row['is_premium'],
@@ -666,7 +653,7 @@ function getUserData($user_id)
     return $user_data;
 }
 
-function sendLastAds($user_id, $chat_id)
+function sendLastAds($tgm_user_id, $chat_id)
 {
     global $log_dir;
     global $start_log_file;
@@ -677,7 +664,7 @@ function sendLastAds($user_id, $chat_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USERS;
     $table_data = MYSQL_TABLE_DATA;
 
     // Create connection
@@ -687,7 +674,7 @@ function sendLastAds($user_id, $chat_id)
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     file_put_contents($start_log_file, ' | sendLastAds!', FILE_APPEND);
-    $user_data = getUserData($user_id);
+    $user_data = getUserData($tgm_user_id);
 
     if (!empty($user_data)) {
         if (isset($user_data['is_returned']) && $user_data['is_returned'] === '1') {
@@ -767,7 +754,7 @@ function sendLastAds($user_id, $chat_id)
                             if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== null) {
                                 $chat_ids_sent = json_decode($row['chat_ids_sent']);
                             }
-                            $chat_ids_sent[] = $user_id;
+                            $chat_ids_sent[] = $tgm_user_id;
                             $chat_ids_sent = array_unique($chat_ids_sent);
                             $chat_ids_sent = json_encode($chat_ids_sent);
                             $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
@@ -805,7 +792,7 @@ function sendLastAds($user_id, $chat_id)
                         if ($error === 'Forbidden: bot was blocked by the user') {
                             try {
                                 // file_put_contents( $start_log_file, ' | User: ' . $username . ' try to deactivate', FILE_APPEND);
-                                deactivateUser($user_id);
+                                deactivateUser($tgm_user_id);
                             } catch (Exception $e) {
                                 file_put_contents($start_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
                             }
@@ -822,6 +809,92 @@ function sendLastAds($user_id, $chat_id)
             return true;
         }
     } else {
-        file_put_contents($start_error_log_file, ' | User: ' . $user_id . ' | User data is empty!' . PHP_EOL, FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | User: ' . $tgm_user_id . ' | User data is empty!' . PHP_EOL, FILE_APPEND);
     }
+}
+
+function getCity($slug = '')
+{
+    global $start_error_log_file;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_city = MYSQL_TABLE_CITY;
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($start_error_log_file, ' | getCity - connection failed', FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+
+    $cities = [];
+
+    if ($slug === '') {
+        $sql = "SELECT * FROM city";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $cities[] = $row;
+            }
+        } else {
+            file_put_contents($start_error_log_file, ' | getCity - no cities found', FILE_APPEND);
+        }
+    } else {
+        $sql = "SELECT * FROM $table_city WHERE slug = '$slug'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $cities[] = $row;
+            }
+        } else {
+            file_put_contents($start_error_log_file, ' | getCity with slug ' . $slug . ' - no cities found', FILE_APPEND);
+        }
+    }
+
+    // Close connection
+    mysqli_close($conn);
+
+    return $cities;
+}
+
+function getCityById($id)
+{
+    global $start_error_log_file;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_city = MYSQL_TABLE_CITY;
+
+    $city = [];
+
+    if ($id === '') {
+        file_put_contents($start_error_log_file, ' | getCityById - id is empty', FILE_APPEND);
+    } else {
+        // Create connection
+        $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+        if (!$conn) {
+            file_put_contents($start_error_log_file, ' | getCityById - connection failed', FILE_APPEND);
+            throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+        }
+
+        $sql = "SELECT * FROM $table_city WHERE id = '$id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $city = $row;
+            }
+        } else {
+            file_put_contents($start_error_log_file, ' | getCityById with id ' . $id . ' - no cities found', FILE_APPEND);
+        }
+
+        // Close connection
+        mysqli_close($conn);
+    }
+
+    return $city;
 }

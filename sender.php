@@ -32,11 +32,11 @@ $dbhost = MYSQL_HOST;
 $dbuser = MYSQL_USER;
 $dbpass = MYSQL_PASSWORD;
 $dbname = MYSQL_DB;
-$table_users = MYSQL_TABLE_USERS;
+$table_user = MYSQL_TABLE_USER;
 $table_city = MYSQL_TABLE_CITY;
 $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
-$table_rates = MYSQL_TABLE_RATES;
+$table_rate = MYSQL_TABLE_RATE;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -55,26 +55,27 @@ $arguments = $_SERVER['argv'];
 
 
 // 2. Send messages to telegram
-$sql = "SELECT * FROM $table_users WHERE is_deleted = 0 OR is_deleted IS NULL";
+$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 OR is_deleted IS NULL";
 $users_result = mysqli_query($conn, $sql);
 if (mysqli_num_rows($users_result)) {
     file_put_contents($sender_log_file, ' | Active users: ' . mysqli_num_rows($users_result), FILE_APPEND);
     $users_rows = mysqli_fetch_all($users_result, MYSQLI_ASSOC);
     foreach ($users_rows as $user) {
-        $user_id = $user['user_id'];
+        $tgm_user_id = $user['tgm_user_id'];
         $chat_id = $user['chat_id'];
         $username = $user['username'];
+        $user_language = $user['language_code'];
 
 
         // select ids from data table where user_id is in chat_ids_to_send and not in chat_ids_sent
-        $sql = "SELECT id FROM $table_data WHERE JSON_CONTAINS(chat_ids_sent, '\"$user_id\"') AND done IS NULL";
+        $sql = "SELECT id FROM $table_data WHERE JSON_CONTAINS(chat_ids_sent, '\"$chat_id\"') AND done IS NULL";
         $result = mysqli_query($conn, $sql);
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         $sent_ids_array = array_column($rows, 'id');
         $sent_ids = implode(',', $sent_ids_array);
 
 
-        $sql = "SELECT * FROM $table_data WHERE JSON_CONTAINS(chat_ids_to_send, '\"$user_id\"') AND done IS NULL";
+        $sql = "SELECT * FROM $table_data WHERE JSON_CONTAINS(chat_ids_to_send, '\"$chat_id\"') AND done IS NULL";
         if (!empty($sent_ids)) {
             $sql .= " AND id NOT IN ($sent_ids)";
         }
@@ -111,12 +112,19 @@ if (mysqli_num_rows($users_result)) {
                     $message .= "\n";
                 }
                 if ($district) {
-                    $sql_district = "SELECT name FROM $table_district WHERE id = $district";
+                    if ($user_language === 'ru' || $user_language === 'kg') {
+                        $sql_district = "SELECT district_name_ru FROM $table_district WHERE district_id = $district";
+                    } else {
+                        $sql_district = "SELECT district_name_en FROM $table_district WHERE district_id = $district";
+                    }
                     $result_district = mysqli_query($conn, $sql_district);
                     $row_district = mysqli_fetch_assoc($result_district);
-                    if ($row_district) {
-                        $district_name = $row_district['name'];
+                    if ($user_language === 'ru' || $user_language === 'kg') {
+                        $district_name = $row_district['district_name_ru'];
                         $message .= "<b>Район:</b> $district_name\n";
+                    } else {
+                        $district_name = $row_district['district_name_en'];
+                        $message .= "<b>District:</b> $district_name\n";
                     }
                 }
                 if ($price_kgs !== 'n/d' && $price_kgs !== NULL)        $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
@@ -158,7 +166,7 @@ if (mysqli_num_rows($users_result)) {
                         $chat_ids_sent = json_decode($row['chat_ids_sent']);
                     }
                     $chat_ids_sent = array_map('strval', $chat_ids_sent);
-                    $chat_ids_sent[] = strval($user_id);
+                    $chat_ids_sent[] = strval($chat_id);
                     $chat_ids_sent = array_unique($chat_ids_sent);
                     $chat_ids_sent = array_values($chat_ids_sent);
                     sort($chat_ids_sent);
@@ -188,12 +196,12 @@ if (mysqli_num_rows($users_result)) {
                     }
                 } catch (\TelegramBot\Api\Exception $e) {
                     $error = $e->getMessage();
-                    file_put_contents($sender_log_file, ' | User: ' . $username . ' Error: ' . $e->getMessage(), FILE_APPEND);
+                    file_put_contents($sender_error_log_file, ' | User: ' . $username . ' Error: ' . $e->getMessage(), FILE_APPEND);
                     if ($error === 'Forbidden: bot was blocked by the user') {
                         try {
-                            deactivateUser($user_id);
+                            deactivateUser($tgm_user_id, $chat_id);
                         } catch (Exception $e) {
-                            file_put_contents($sender_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+                            file_put_contents($sender_error_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
                         }
                     }
                     break;
@@ -201,7 +209,6 @@ if (mysqli_num_rows($users_result)) {
                 $counter++;
             }
         }
-
         file_put_contents($sender_log_file, ' | Msgs for ' . $username . ' sent: ' . $counter, FILE_APPEND);
     }
 } else {
@@ -213,36 +220,64 @@ mysqli_close($conn);
 
 
 
-function deactivateUser($user_id)
+function deactivateUser($tgm_user_id, $chat_id)
 {
     global $sender_log_file;
+    global $sender_error_log_file;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USER;
     $table_data = MYSQL_TABLE_DATA;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($sender_log_file, ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($sender_error_log_file, ' | deactivateUser - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "UPDATE $table_users SET is_deleted = 1 WHERE user_id = " . $user_id;
+    $sql = "UPDATE $table_user SET is_deleted = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
-    if (!$result) {
-        file_put_contents($sender_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+    if ($result === false) {
+        file_put_contents($sender_error_log_file, " | deactivateUser - error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+        return false;
     }
 
-    // remove all from data table
-    $sql = "DELETE FROM $table_data WHERE chat_id = " . $user_id;
+    // remove  from chat_ids_to_send
+    $sql = "SELECT * FROM $table_data WHERE JSON_CONTAINS(chat_ids_to_send, '\"$chat_id\"') AND done IS NULL";
     $result = mysqli_query($conn, $sql);
-    if (!$result) {
-        file_put_contents($sender_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+    if ($result === false) {
+        file_put_contents($sender_error_log_file, " | deactivateUser - error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+        return false;
+    } else {
+        if (mysqli_num_rows($result) > 0) {
+            $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            foreach ($rows as $row) {
+                $chat_ids_to_send = $row['chat_ids_to_send'];
+                $chat_ids_to_send = json_decode($chat_ids_to_send);
+                $chat_ids_to_send = array_map('strval', $chat_ids_to_send);
+                $chat_ids_to_send = array_unique($chat_ids_to_send);
+                $chat_ids_to_send = array_values($chat_ids_to_send);
+                sort($chat_ids_to_send);
+                $chat_id_key = array_search($chat_id, $chat_ids_to_send);
+                if ($chat_id_key !== false) {
+                    unset($chat_ids_to_send[$chat_id_key]);
+                }
+                $chat_ids_to_send = json_encode($chat_ids_to_send);
+                $sql = "UPDATE $table_data SET chat_ids_to_send = '$chat_ids_to_send' WHERE id = " . $row['id'];
+                if (mysqli_query($conn, $sql)) {
+                    file_put_contents($sender_log_file, ' | Chat id: ' . $chat_id . ' removed', FILE_APPEND);
+                } else {
+                    file_put_contents($sender_error_log_file, ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                    throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+                    return false;
+                }
+            }
+        }
     }
 
     // Close connection

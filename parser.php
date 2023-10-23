@@ -4,7 +4,7 @@ Parsing apartments from lalafo.kg
 *******************************************
 1. Set all variables & constants
 2. Get rates from fx.kg
-3. Get all chat_id from table users db
+3. Get all chat_id from table user db
 4. Get all city names from table city
 5. Parse apartments from lalafo.kg
 */
@@ -37,11 +37,11 @@ $dbhost = MYSQL_HOST;
 $dbuser = MYSQL_USER;
 $dbpass = MYSQL_PASSWORD;
 $dbname = MYSQL_DB;
-$table_users = MYSQL_TABLE_USERS;
+$table_user = MYSQL_TABLE_USER;
 $table_city = MYSQL_TABLE_CITY;
 $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
-$table_rates = MYSQL_TABLE_RATES;
+$table_rate = MYSQL_TABLE_RATE;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -56,7 +56,6 @@ if (!mysqli_select_db($conn, $dbname)) {
 
 
 // 2. Get rates from fx.kg
-// file_put_contents($parser_log_file, ' | Get rates from fx.kg', FILE_APPEND);
 $rates = [];
 $guzzle_client = new Client();
 $bearer_token = 'Bearer ' . $fx_token;
@@ -81,7 +80,7 @@ try {
 }
 if (count($rates) > 0) {
     // get last date_updated from table rates
-    $sql = "SELECT date_updated FROM $table_rates ORDER BY date_updated DESC LIMIT 1";
+    $sql = "SELECT date_updated FROM $table_rate ORDER BY date_updated DESC LIMIT 1";
     $result = mysqli_query($conn, $sql);
     $last_date_updated = $result->fetch_all(MYSQLI_ASSOC);
     if (count($last_date_updated) === 0) {
@@ -97,7 +96,7 @@ if (count($rates) > 0) {
 
     if ($current_date_updated > $last_date_updated) {
         // insert new rates
-        $insert_sql = "INSERT INTO $table_rates (`usd`, `eur`, `gbp`, `cny`, `rub`, `kzt`, `date_updated`) VALUES ('" . $rates['usd'] . "', '" . $rates['eur'] . "', '" . $rates['gbp'] . "', '" . $rates['cny'] . "', '" . $rates['rub'] . "', '" . $rates['kzt'] . "', '" . $response['updated_at'] . "')";
+        $insert_sql = "INSERT INTO $table_rate (`usd`, `eur`, `gbp`, `cny`, `rub`, `kzt`, `date_updated`) VALUES ('" . $rates['usd'] . "', '" . $rates['eur'] . "', '" . $rates['gbp'] . "', '" . $rates['cny'] . "', '" . $rates['rub'] . "', '" . $rates['kzt'] . "', '" . $response['updated_at'] . "')";
         if (mysqli_query($conn, $insert_sql)) {
             file_put_contents($parser_log_file, ' | Rates updated', FILE_APPEND);
         } else {
@@ -110,9 +109,9 @@ if (count($rates) > 0) {
 
 
 
-// 3. Get all chat_id from table users db
+// 3. Get all chat_id from table user db
 $now = date('Y-m-d H:i:s');
-$sql = "SELECT `chat_id` FROM $table_users WHERE (`is_deleted` IS NULL OR `is_deleted` = 0) AND ('$now' <= `date_payment` OR `date_payment` IS NULL)";
+$sql = "SELECT `chat_id` FROM $table_user WHERE (`is_deleted` IS NULL OR `is_deleted` = 0) AND ('$now' <= `date_payment` OR `date_payment` IS NULL)";
 $result = mysqli_query($conn, $sql);
 $chat_ids = [];
 if ($result !== false) {
@@ -123,7 +122,6 @@ if ($result !== false) {
 
 
 // 4. Get all cities from table city
-// file_put_contents($parser_log_file, ' | Get all cities from table city', FILE_APPEND);
 $cities = [];
 $sql = "SELECT * FROM $table_city";
 $result = mysqli_query($conn, $sql);
@@ -131,11 +129,11 @@ if (mysqli_num_rows($result) > 0) {
     $city_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
     foreach ($city_rows as $city_row) {
         $cities[] = [
-            'id' => $city_row['id'],
-            'name_en' => $city_row['name_en'],
-            'name_ru' => $city_row['name_ru'],
-            'name_kg' => $city_row['name_kg'],
-            'slug' => $city_row['slug'],
+            'city_id' => $city_row['city_id'],
+            'city_name_en' => $city_row['city_name_en'],
+            'city_name_ru' => $city_row['city_name_ru'],
+            'city_name_kg' => $city_row['city_name_kg'],
+            'city_slug' => $city_row['city_slug'],
         ];
     }
 } else {
@@ -146,7 +144,7 @@ if (mysqli_num_rows($result) > 0) {
 
 
 // 5. Parse apartments from lalafo.kg
-$usd_rate_sql = "SELECT usd FROM $table_rates ORDER BY date_updated DESC LIMIT 1";
+$usd_rate_sql = "SELECT usd FROM $table_rate ORDER BY date_updated DESC LIMIT 1";
 $usd_rate_result = mysqli_query($conn, $usd_rate_sql);
 $usd_rate = $usd_rate_result->fetch_all(MYSQLI_ASSOC);
 $usd_rate = floatval($usd_rate[0]['usd']);
@@ -155,14 +153,19 @@ if (count($cities) > 0) {
     $guzzle = new Client();
     $apartments = [];
     foreach ($cities as $city) {
-        $city_id = $city['id'];
-        $city_slug = $city['slug'];
+        $city_id = $city['city_id'];
+        $city_slug = $city['city_slug'];
         if ($city_slug === NULL || $city_slug === '') {
             continue;
         }
         $parse_link = 'https://lalafo.kg/' . $city_slug . '/kvartiry/arenda-kvartir/dolgosrochnaya-arenda-kvartir';
         for ($i = 1; $i < 2; $i++) {
-            $response = $guzzle->get($parse_link . '?page=' . $i);
+            try {
+                $response = $guzzle->get($parse_link . '?page=' . $i);
+            } catch (\Exception $e) {
+                file_put_contents($parser_error_log_file, '[' . date('Y-m-d H:i:s') . '] Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+                continue;
+            }
             $content = $response->getBody()->getContents();
 
             $pq = new PhpQuery;
@@ -325,7 +328,7 @@ if (count($cities) > 0) {
 
                     $chat_ids_to_send = array_unique($chat_ids);
                     foreach ($chat_ids_to_send as $key => $chat_id) {
-                        $user_sql = "SELECT * FROM $table_users WHERE chat_id = '$chat_id'";
+                        $user_sql = "SELECT * FROM $table_user WHERE chat_id = '$chat_id'";
                         $user_result = mysqli_query($conn, $user_sql);
                         $user = $user_result->fetch_all(MYSQLI_ASSOC);
                         $user = $user[0];
@@ -485,55 +488,21 @@ file_put_contents($parser_log_file, ' End [' . date('Y-m-d H:i:s') . ']' . PHP_E
 
 
 
-function deactivateUser($user_id)
+function slug($string, $transliterate = false)
 {
-    global $parser_log_file;
-
-    $dbhost = MYSQL_HOST;
-    $dbuser = MYSQL_USER;
-    $dbpass = MYSQL_PASSWORD;
-    $dbname = MYSQL_DB;
-    $table_users = MYSQL_TABLE_USERS;
-    $table_data = MYSQL_TABLE_DATA;
-
-    // Create connection
-    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
-    if (!$conn) {
-        file_put_contents($parser_log_file, ' | Update User - connection failed', FILE_APPEND);
-        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
-    }
-    $sql = "UPDATE $table_users SET is_deleted = 1 WHERE user_id = " . $user_id;
-    $result = mysqli_query($conn, $sql);
-    if (!$result) {
-        file_put_contents($parser_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
-        throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
-    }
-
-    // remove all from data table
-    $sql = "DELETE FROM $table_data WHERE chat_id = " . $user_id;
-    $result = mysqli_query($conn, $sql);
-    if (!$result) {
-        file_put_contents($parser_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
-        throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
-    }
-
-    // Close connection
-    mysqli_close($conn);
-
-    return true;
-}
-
-function slug($string)
-{
-
     $rus = array('А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я', 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я', ' ');
 
-    $lat = array('a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y', 'y', 'y', 'e', 'yu', 'ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'gh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh', 'sch', 'y', 'y', 'y', 'e', 'yu', 'ya', ' ');
+    $lat = array('A', 'B', 'V', 'G', 'D', 'E', 'E', 'Zh', 'Z', 'I', 'Y', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'F', 'Kh', 'Ts', 'Ch', 'Sh', 'Sch', 'Y', 'I', 'Y', 'E', 'Yu', 'Ya', 'a', 'b', 'v', 'g', 'd', 'e', 'e', 'zh', 'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's', 't', 'u', 'f', 'kh', 'ts', 'ch', 'sh', 'sch', 'y', 'i', 'y', 'e', 'yu', 'ya', ' ');
 
     $string = trim($string);
     $string = str_replace($rus, $lat, $string);
-    $string = str_replace('-', '_', $string);
-    $slug = preg_replace('/[^A-Za-z0-9-]+/', '-', $string);
+    if (!$transliterate) {
+        $string = strtolower($string);
+        $string = str_replace('-', '_', $string);
+        $slug = preg_replace('/[^A-Za-z0-9-]+/', '-', $string);
+    } else {
+        $slug = $string;
+    }
     return $slug;
 }
 
@@ -555,13 +524,16 @@ function getDistrictId($cityId, $districtName)
     }
 
     $districtSlug = slug($districtName);
-    $sql = "SELECT * FROM $table_district WHERE city_id = '$cityId' AND slug = '$districtSlug'";
+    $districtNameEn = slug($districtName, true);
+    $districtNameEn = mysqli_real_escape_string($conn, $districtNameEn);
+    $districtName = mysqli_real_escape_string($conn, $districtName);
+    $sql = "SELECT * FROM $table_district WHERE city_id = '$cityId' AND district_slug = '$districtSlug'";
     $result = mysqli_query($conn, $sql);
     if ($result !== false && mysqli_num_rows($result) > 0) {
         $district = mysqli_fetch_assoc($result);
-        $district_id = $district['id'];
+        $district_id = $district['district_id'];
     } else {
-        $sql = "INSERT INTO $table_district (`city_id`, `name`, `slug`) VALUES ('$cityId', '$districtName', '$districtSlug')";
+        $sql = "INSERT INTO $table_district (`city_id`, `district_name_en`, `district_name_ru`, `district_name_kg`, `district_slug`) VALUES ('$cityId', '$districtNameEn', '$districtName', '$districtName', '$districtSlug')";
         if (mysqli_query($conn, $sql)) {
             $district_id = mysqli_insert_id($conn);
         } else {
