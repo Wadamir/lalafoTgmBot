@@ -387,32 +387,29 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $bot->sendMessage($chatId, $messageText, 'HTML');
             sendLastAds($user_data['tgm_user_id'], $chatId);
         } else {
-            // Send message
-            $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
-            $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
+            $error_array[] = 'Get user data error';
         }
     } else {
-        try {
-            // Send message
-            $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
-            $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
-        } catch (Exception $e) {
-            file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
-        }
+        $error_array[] = 'Update user error';
     }
     file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 } else {
-    file_put_contents($start_log_file, ' | Bot command - undefined', FILE_APPEND);
+    $error_array[] = 'Undefined bot command';
+}
+
+if (!empty($error_array)) {
+    file_put_contents($start_error_log_file, PHP_EOL . 'ERROR - ' . implode(' | ', $error_array) . PHP_EOL, FILE_APPEND);
     try {
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
         $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     } catch (Exception $e) {
-        file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . 'ERROR - ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
     }
-    file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 }
+
+file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 
 function createUser($user_data)
 {
@@ -435,13 +432,12 @@ function createUser($user_data)
     // Check if user exists
     $sql = "SELECT * FROM $table_user WHERE tgm_user_id = " . $user_data['tgm_user_id'];
     $result = mysqli_query($conn, $sql);
-    // $rss_links = '';
     if (mysqli_num_rows($result) > 0) {
         activateUser($user_data['tgm_user_id']);
         file_put_contents($start_log_file, ' | User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
         // Close connection
         mysqli_close($conn);
-        return false; // $rss_links;
+        return false;
     } else {
         // Insert user
         unset($user_data['text']);
