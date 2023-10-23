@@ -418,6 +418,8 @@ function createUser($user_data)
     global $start_log_file;
     global $start_error_log_file;
 
+    file_put_contents($start_log_file, ' | Create user - ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
+
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
@@ -466,7 +468,10 @@ function createUser($user_data)
 function activateUser($tgm_user_id)
 {
     global $log_dir;
+    global $start_log_file;
     global $start_error_log_file;
+
+    file_put_contents($start_log_file, ' | Activate user - ' . $tgm_user_id, FILE_APPEND);
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
