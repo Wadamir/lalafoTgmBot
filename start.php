@@ -269,14 +269,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $log_message_array[] = 'City - ' . $city_slug;
             $update_result = false;
             if ($city_slug !== 'none') {
-                $sql = "SELECT * FROM $table_city WHERE slug = '$city_slug'";
-                $result = mysqli_query($conn, $sql);
-                if ($result !== false && mysqli_num_rows($result) > 0) {
-                    $city_data = mysqli_fetch_assoc($result);
-                    $new_data = [];
-                    $new_data['preference_city'] = $city_data['id'];
-                    $update_result = updateUser($new_data, $user_data['tgm_user_id']);
-                }
+                $city_data = getCity($city_slug);
+                $new_data['preference_city'] = $city_data['city_id'];
+                $update_result = updateUser($new_data, $user_data['tgm_user_id']);
             } else {
                 $update_result = true;
             }
