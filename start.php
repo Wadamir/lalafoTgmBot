@@ -12,7 +12,7 @@ $start_error_log_file = $log_dir . '/start_error.log';
 
 $token = TOKEN;
 if (!$token) {
-    file_put_contents($start_error_log_file, ' | Token not found' . PHP_EOL, FILE_APPEND);
+    file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Token not found', FILE_APPEND);
     die('Token not found');
 }
 
@@ -30,7 +30,7 @@ $table_data = MYSQL_TABLE_DATA;
 // Todo move to api
 $get_content = file_get_contents("php://input");
 if (!$get_content) {
-    file_put_contents($start_error_log_file, ' | Get content failed' . PHP_EOL, FILE_APPEND);
+    file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Get content failed', FILE_APPEND);
     die('Get content failed');
 }
 $update = json_decode($get_content, TRUE);
@@ -175,7 +175,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 // Close connection
                 mysqli_close($conn);
             } catch (Exception $e) {
-                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
             file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
             break;
@@ -198,7 +198,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "\n\n <b>Settings</b> \n\n❓How many minimum rooms in an apartment do you need? \n\n";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
-                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
             file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
             break;
@@ -210,7 +210,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                 $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
             } catch (Exception $e) {
-                file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+                file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ERROR - ' . $e->getMessage(), FILE_APPEND);
             }
             file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
     }
@@ -226,7 +226,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо! Ваше сообщение отправлено." : "Thank you! Your message has been sent.";
         $bot->sendMessage($chatId, $messageText);
     } catch (Exception $e) {
-        file_put_contents($start_error_log_file, ' | ERROR - ' . $e->getMessage(), FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
     file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
 } elseif ($chat_type === 'callback_query' && strpos($command_data, "city") === 0) {
@@ -399,14 +399,14 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 }
 
 if (!empty($error_array)) {
-    file_put_contents($start_error_log_file, PHP_EOL . 'ERROR - ' . implode(' | ', $error_array) . PHP_EOL, FILE_APPEND);
+    file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ERROR - ' . implode(' | ', $error_array), FILE_APPEND);
     try {
         // Send message
         $bot = new \TelegramBot\Api\BotApi($token);
         $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ Что-то пошло не так. Попробуйте позже, пожалуйста...\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ Something went wrong. Try again later, please...\n\nFor feedback, write a message to the bot with the hashtag #feedback";
         $messageResponse = $bot->sendMessage($chatId, $messageText, 'HTML');
     } catch (Exception $e) {
-        file_put_contents($start_error_log_file, PHP_EOL . 'ERROR - ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ERROR - ' . $e->getMessage(), FILE_APPEND);
     }
 }
 
@@ -429,7 +429,7 @@ function createUser($user_data)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | Connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Connection failed', FILE_APPEND);
         throw new ErrorException("Connection failed: " . mysqli_connect_error());
     }
     // Check if user exists
@@ -454,7 +454,7 @@ function createUser($user_data)
         $sql = "INSERT INTO $table_user ($columns) VALUES ('$values')";
         $result = mysqli_query($conn, $sql);
         if (!$result) {
-            file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
             throw new ErrorException("Error: " . $sql . ' | ' . mysqli_error($conn));
         }
         file_put_contents($start_log_file, ' | New user created ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
@@ -482,13 +482,13 @@ function activateUser($tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_user SET is_deleted = NULL, is_returned = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
     // Close connection
@@ -513,13 +513,13 @@ function deactivateUser($tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_user SET is_deleted = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
 
@@ -527,7 +527,7 @@ function deactivateUser($tgm_user_id)
     $sql = "DELETE FROM $table_data WHERE chat_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
 
@@ -553,7 +553,7 @@ function updateUser($user_data, $tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | Update User - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Update User - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -566,7 +566,7 @@ function updateUser($user_data, $tgm_user_id)
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, " | Error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
         // Close connection
         mysqli_close($conn);
@@ -592,7 +592,7 @@ function getUserData($tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | Get User Data - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Get User Data - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "SELECT * FROM $table_user LEFT JOIN $table_city ON $table_user.preference_city = $table_city.id WHERE tgm_user_id = " . $tgm_user_id;
@@ -670,7 +670,7 @@ function sendLastAds($tgm_user_id, $chat_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | Send last ads - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Send last ads - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     file_put_contents($start_log_file, ' | sendLastAds!', FILE_APPEND);
@@ -809,7 +809,7 @@ function sendLastAds($tgm_user_id, $chat_id)
             return true;
         }
     } else {
-        file_put_contents($start_error_log_file, ' | User: ' . $tgm_user_id . ' | User data is empty!' . PHP_EOL, FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] User: ' . $tgm_user_id . ' | User data is empty!', FILE_APPEND);
     }
 }
 
@@ -826,7 +826,7 @@ function getCity($slug = '')
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | getCity - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -840,7 +840,7 @@ function getCity($slug = '')
                 $cities[] = $row;
             }
         } else {
-            file_put_contents($start_error_log_file, ' | getCity - no cities found', FILE_APPEND);
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity - no cities found', FILE_APPEND);
         }
     } else {
         $sql = "SELECT * FROM $table_city WHERE slug = '$slug'";
@@ -850,7 +850,7 @@ function getCity($slug = '')
                 $cities[] = $row;
             }
         } else {
-            file_put_contents($start_error_log_file, ' | getCity with slug ' . $slug . ' - no cities found', FILE_APPEND);
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity with slug ' . $slug . ' - no cities found', FILE_APPEND);
         }
     }
 
@@ -873,12 +873,12 @@ function getCityById($city_id)
     $city = [];
 
     if ($city_id === '') {
-        file_put_contents($start_error_log_file, ' | getCityById - id is empty', FILE_APPEND);
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCityById - id is empty', FILE_APPEND);
     } else {
         // Create connection
         $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
         if (!$conn) {
-            file_put_contents($start_error_log_file, ' | getCityById - connection failed', FILE_APPEND);
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCityById - connection failed', FILE_APPEND);
             throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
         }
 
@@ -889,7 +889,7 @@ function getCityById($city_id)
                 $city = $row;
             }
         } else {
-            file_put_contents($start_error_log_file, ' | getCityById with id ' . $city_id . ' - no cities found', FILE_APPEND);
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCityById with id ' . $city_id . ' - no cities found', FILE_APPEND);
         }
 
         // Close connection
