@@ -156,7 +156,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         if ($get_user_data['preference_city'] === NULL) {
                             $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                         } else {
-                            $city = getCity($get_user_data['preference_city']);
+                            $city = getCityById($get_user_data['preference_city']);
                             $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                         }
                         if ($get_user_data['rooms_min'] === NULL) {
@@ -191,7 +191,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 if ($get_user_data['preference_city'] === NULL) {
                     $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                 } else {
-                    $city = getCity($get_user_data['preference_city']);
+                    $city = getCityById($get_user_data['preference_city']);
                     $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                 }
                 if ($get_user_data['rooms_min'] === NULL) {
@@ -291,7 +291,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 if ($get_user_data['preference_city'] === NULL) {
                     $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                 } else {
-                    $city = getCity($get_user_data['preference_city']);
+                    $city = getCityById($get_user_data['preference_city']);
                     $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                 }
                 if (!empty($get_user_data)) {
@@ -349,7 +349,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 if ($get_user_data['preference_city'] === NULL) {
                     $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                 } else {
-                    $city = getCity($get_user_data['preference_city']);
+                    $city = getCityById($get_user_data['preference_city']);
                     $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                 }
                 if ($get_user_data['rooms_min'] === NULL) {
@@ -415,7 +415,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     if ($get_user_data['preference_city'] === NULL) {
                         $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
                     } else {
-                        $city = getCity($get_user_data['preference_city']);
+                        $city = getCityById($get_user_data['preference_city']);
                         $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
                     }
                     if ($get_user_data['rooms_min'] === NULL) {
@@ -899,7 +899,7 @@ function getCity($slug = '')
             file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity - no cities found', FILE_APPEND);
         }
     } else {
-        $sql = "SELECT * FROM $table_city WHERE slug = '$slug'";
+        $sql = "SELECT * FROM $table_city WHERE city_slug = '$slug'";
         $result = mysqli_query($conn, $sql);
         if ($result && mysqli_num_rows($result) > 0) {
             while ($row = mysqli_fetch_assoc($result)) {
