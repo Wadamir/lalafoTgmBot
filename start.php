@@ -595,7 +595,7 @@ function getUserData($tgm_user_id)
         file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Get User Data - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "SELECT * FROM $table_user LEFT JOIN $table_city ON $table_user.preference_city = $table_city.id WHERE tgm_user_id = " . $tgm_user_id;
+    $sql = "SELECT * FROM $table_user LEFT JOIN $table_city ON $table_user.preference_city = $table_city.city_id WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
