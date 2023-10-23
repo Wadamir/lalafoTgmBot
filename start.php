@@ -477,7 +477,7 @@ function activateUser($tgm_user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_user = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USER;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -507,9 +507,7 @@ function deactivateUser($tgm_user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_user = MYSQL_TABLE_USERS;
-    $table_city = MYSQL_TABLE_CITY;
-    $table_district = MYSQL_TABLE_DISTRICT;
+    $table_user = MYSQL_TABLE_USER;
     $table_data = MYSQL_TABLE_DATA;
 
     // Create connection
@@ -550,7 +548,7 @@ function updateUser($user_data, $tgm_user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_user = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USER;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -588,7 +586,7 @@ function getUserData($tgm_user_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_user = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USER;
     $table_city = MYSQL_TABLE_CITY;
 
     // Create connection
@@ -666,7 +664,7 @@ function sendLastAds($tgm_user_id, $chat_id)
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_user = MYSQL_TABLE_USERS;
+    $table_user = MYSQL_TABLE_USER;
     $table_data = MYSQL_TABLE_DATA;
 
     // Create connection
