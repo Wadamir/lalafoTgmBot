@@ -459,15 +459,17 @@ if (!empty($log_error_array)) {
     }
 }
 
-file_put_contents($start_log_file, PHP_EOL, FILE_APPEND);
+if (!empty($log_message_array)) {
+    $log_message_array[] = 'End [' . date('Y-m-d H:i:s') . ']' . PHP_EOL;
+    file_put_contents($start_log_file, implode(' | ', $log_message_array), FILE_APPEND);
+}
 
 function createUser($user_data)
 {
-    global $log_dir;
-    global $start_log_file;
-    global $start_error_log_file;
+    global $log_message_array;
+    global $log_error_array;
 
-    file_put_contents($start_log_file, ' | Create user - ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
+    $log_message_array[] = 'createUser() - ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'];
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -478,7 +480,7 @@ function createUser($user_data)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Connection failed', FILE_APPEND);
+        $log_error_array[] = 'createUser() - Connection failed';
         throw new ErrorException("Connection failed: " . mysqli_connect_error());
     }
     // Check if user exists
@@ -486,14 +488,14 @@ function createUser($user_data)
     $result = mysqli_query($conn, $sql);
     if (mysqli_num_rows($result) > 0) {
         activateUser($user_data['tgm_user_id']);
-        file_put_contents($start_log_file, ' | User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
+        $log_message_array[] = 'User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'];
+
         // Close connection
         mysqli_close($conn);
         return false;
     } else {
         // Insert user
         unset($user_data['text']);
-        $now = date('Y-m-d H:i:s');
         // Add 1 week
         $now_plus_week = date('Y-m-d H:i:s', strtotime('+1 week'));
         $user_data['date_payment'] = $now_plus_week;
@@ -503,10 +505,11 @@ function createUser($user_data)
         $sql = "INSERT INTO $table_user ($columns) VALUES ('$values')";
         $result = mysqli_query($conn, $sql);
         if (!$result) {
-            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+            $log_error_array[] = 'createUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
             throw new ErrorException("Error: " . $sql . ' | ' . mysqli_error($conn));
         }
-        file_put_contents($start_log_file, ' | New user created ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
+        $log_message_array[] = 'New user created ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'];
+
         // Close connection
         mysqli_close($conn);
         return true;
@@ -516,11 +519,10 @@ function createUser($user_data)
 
 function activateUser($tgm_user_id)
 {
-    global $log_dir;
-    global $start_log_file;
-    global $start_error_log_file;
+    global $log_message_array;
+    global $log_error_array;
 
-    file_put_contents($start_log_file, ' | Activate user - ' . $tgm_user_id, FILE_APPEND);
+    $log_message_array[] = 'activateUser() - ' . $tgm_user_id;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -531,26 +533,27 @@ function activateUser($tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Update User - connection failed', FILE_APPEND);
+        $log_error_array[] = 'activateUser() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_user SET is_deleted = NULL, is_returned = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        $log_error_array[] = 'activateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
     }
     // Close connection
     mysqli_close($conn);
-
     return true;
 }
 
 
 function deactivateUser($tgm_user_id)
 {
-    global $log_dir;
-    global $start_error_log_file;
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'deactivateUser() - ' . $tgm_user_id;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -562,36 +565,40 @@ function deactivateUser($tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Update User - connection failed', FILE_APPEND);
+        $log_error_array[] = 'deactivateUser() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_user SET is_deleted = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        $log_error_array[] = 'deactivateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+    } else {
+        $log_message_array[] = 'User successfully deactivated ' . $tgm_user_id;
     }
 
     // remove all from data table
     $sql = "DELETE FROM $table_data WHERE chat_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        $log_error_array[] = 'deactivateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+    } else {
+        $log_message_array[] = 'Data successfully deleted ' . $tgm_user_id;
     }
 
     // Close connection
     mysqli_close($conn);
-
     return true;
 }
 
 
 function updateUser($user_data, $tgm_user_id)
 {
-    global $log_dir;
-    global $start_log_file;
-    global $start_error_log_file;
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'updateUser() - ' . $tgm_user_id . ' - ' . $user_data['username'];
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -602,7 +609,7 @@ function updateUser($user_data, $tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Update User - connection failed', FILE_APPEND);
+        $log_error_array[] = 'updateUser() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -615,21 +622,26 @@ function updateUser($user_data, $tgm_user_id)
 
     $result = mysqli_query($conn, $sql);
     if (!$result) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Error: ' . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        $log_error_array[] = 'updateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+
         // Close connection
         mysqli_close($conn);
         return false;
     }
-    file_put_contents($start_log_file, ' | User successfully updated ' . $tgm_user_id . ' - ' . $user_data['username'], FILE_APPEND);
+    $log_message_array[] = 'User successfully updated ' . $tgm_user_id;
 
+    // Close connection
+    mysqli_close($conn);
     return true;
 }
 
 function getUserData($tgm_user_id)
 {
-    global $log_dir;
-    global $start_error_log_file;
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'getUserData() - ' . $tgm_user_id;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -641,7 +653,7 @@ function getUserData($tgm_user_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Get User Data - connection failed', FILE_APPEND);
+        $log_error_array[] = 'getUserData() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "SELECT * FROM $table_user LEFT JOIN $table_city ON $table_user.preference_city = $table_city.city_id WHERE tgm_user_id = " . $tgm_user_id;
@@ -697,6 +709,8 @@ function getUserData($tgm_user_id)
             ];
         }
     }
+    $log_message_array[] = 'User data successfully received ' . $tgm_user_id;
+
     // Close connection
     mysqli_close($conn);
     return $user_data;
@@ -704,40 +718,53 @@ function getUserData($tgm_user_id)
 
 function sendLastAds($tgm_user_id, $chat_id)
 {
-    global $log_dir;
-    global $start_log_file;
-    global $start_error_log_file;
     global $token;
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'sendLastAds() - ' . $tgm_user_id;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_user = MYSQL_TABLE_USER;
     $table_data = MYSQL_TABLE_DATA;
+    $table_district = MYSQL_TABLE_DISTRICT;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Send last ads - connection failed', FILE_APPEND);
+        $log_error_array[] = 'sendLastAds() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    file_put_contents($start_log_file, ' | sendLastAds!', FILE_APPEND);
     $user_data = getUserData($tgm_user_id);
 
     if (!empty($user_data)) {
         if (isset($user_data['is_returned']) && $user_data['is_returned'] === '1') {
-            file_put_contents($start_log_file, ' | sendLastAds - User: ' . $user_data['username'] . ' is returned - send nothing', FILE_APPEND);
+            $log_message_array[] = 'User is returned - nothing to send' . $tgm_user_id;
             return false;
         } else {
-            $username = $user_data['username'];
-
-            $sql = "SELECT * FROM $table_data WHERE owner != 'Риэлтор' AND price_usd <= " . $user_data['price_max'] . " AND rooms >= " . $user_data['rooms_min'] . " ORDER BY date_added DESC LIMIT 3";
+            $user_language = $user_data['language_code'];
+            $user_preference_city = $user_data['preference_city'];
+            $parameters_array = [];
+            if ($user_preference_city !== NULL) {
+                $parameters_array[] = "city = " . $user_preference_city;
+            }
+            if ($user_data['price_max'] !== NULL) {
+                $parameters_array[] = "price_usd <= " . $user_data['price_max'];
+            }
+            if ($user_data['rooms_min'] !== NULL) {
+                $parameters_array[] = "rooms >= " . $user_data['rooms_min'];
+            }
+            $parameters = implode(" AND ", $parameters_array);
+            $sql = "SELECT * FROM $table_data WHERE owner != 'Риэлтор'" . $parameters . " ORDER BY date_added DESC LIMIT 3";
             $result = mysqli_query($conn, $sql);
             $result = mysqli_query($conn, $sql);
             $counter = 0;
             $msg_sent = 0;
             $msg_error = 0;
+
+            $bot = new \TelegramBot\Api\BotApi($token);
             if (mysqli_num_rows($result) > 0) {
                 $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 foreach ($rows as $row) {
@@ -748,7 +775,8 @@ function sendLastAds($tgm_user_id, $chat_id)
                     $updated_at = $row['updated_at'];
                     $price_kgs = $row['price_kgs'];
                     $price_usd = $row['price_usd'];
-                    $deposit = $row['deposit'];
+                    $deposit_kgs = $row['deposit_kgs'];
+                    $deposit_usd = $row['deposit_usd'];
                     $owner = $row['owner'];
                     $owner_name = $row['owner_name'];
                     $phone = $row['phone'];
@@ -761,104 +789,88 @@ function sendLastAds($tgm_user_id, $chat_id)
                     $renovation = $row['renovation'];
                     $animals = $row['animals'];
 
-
                     $message = "<b>$title</b>";
-                    if ($renovation !== 'n/d') {
+                    if ($renovation !== 'n/d' && $renovation !== NULL) {
                         $message .= ", $renovation\n";
                     } else {
                         $message .= "\n";
                     }
-                    $message .= "<b>Район:</b> $district\n";
-                    if ($price_kgs !== 'n/d')   $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
-                    if ($deposit !== 'n/d')     $message .= "<b>Депозит:</b> $deposit\n";
-                    if ($house_type !== 'n/d')  $message .= "<b>Серия:</b> $house_type\n";
-                    if ($sharing !== 'n/d')     $message .= "<b>Подселение:</b> $sharing\n";
-                    // if ($rooms !== 'n/d')    $message .= "<b>Комнат:</b> $rooms\n";
-                    if ($floor !== 'n/d')       $message .= "<b>Этаж:</b> $floor\n";
-                    // if ($furniture !== 'n/d') $message .= "<b>Мебель:</b> $furniture\n";
-                    if ($condition !== 'n/d')   $message .= "<b>Состояние:</b> $condition\n";
-                    // if ($renovation !== 'n/d') $message .= "<b>Ремонт:</b> $renovation\n";
-                    if ($animals !== 'n/d')     $message .= "<b>Животные:</b> $animals\n";
-                    if ($owner !== 'n/d' && $owner_name !== 'n/d') {
+                    if ($district) {
+                        if ($user_language === 'ru' || $user_language === 'kg') {
+                            $sql_district = "SELECT district_name_ru FROM $table_district WHERE district_id = $district";
+                        } else {
+                            $sql_district = "SELECT district_name_en FROM $table_district WHERE district_id = $district";
+                        }
+                        $result_district = mysqli_query($conn, $sql_district);
+                        $row_district = mysqli_fetch_assoc($result_district);
+                        if ($user_language === 'ru' || $user_language === 'kg') {
+                            $district_name = $row_district['district_name_ru'];
+                            $message .= "<b>Район:</b> $district_name\n";
+                        } else {
+                            $district_name = $row_district['district_name_en'];
+                            $message .= "<b>District:</b> $district_name\n";
+                        }
+                    }
+                    if ($price_kgs !== 'n/d' && $price_kgs !== NULL)        $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
+                    if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL)    $message .= "<b>Депозит:</b> $deposit_kgs KGS ($deposit_usd USD)\n";
+                    if ($house_type !== 'n/d' && $house_type !== NULL)      $message .= "<b>Серия:</b> $house_type\n";
+                    if ($sharing !== 'n/d' && $sharing !== NULL) {
+                        if ($sharing === '1') {
+                            $message .= "<b>Подселение:</b> без подселения\n";
+                        } elseif ($sharing === '0') {
+                            $message .= "<b>Подселение:</b> с подселением\n";
+                        }
+                    }
+                    // if ($rooms !== 'n/d' && $rooms !== NULL)    $message .= "<b>Комнат:</b> $rooms\n";
+                    if ($floor !== 'n/d' && $floor !== NULL)       $message .= "<b>Этаж:</b> $floor\n";
+                    // if ($furniture !== 'n/d' && $furniture !== NULL) $message .= "<b>Мебель:</b> $furniture\n";
+                    if ($condition !== 'n/d' && $condition !== NULL)   $message .= "<b>Состояние:</b> $condition\n";
+                    if ($animals !== 'n/d' && $animals !== NULL)     $message .= "<b>Животные:</b> $animals\n";
+                    if ($owner !== 'n/d' && $owner !== NULL && $owner_name !== 'n/d' && $owner_name !== NULL) {
                         $message .= "<b>Кто сдает:</b> $owner, $owner_name\n";
                     } else {
-                        if ($owner !== 'n/d')   $message .= "<b>Кто сдает:</b> $owner\n";
-                        if ($owner_name !== 'n/d') $message .= "<b>Имя:</b> $owner_name\n";
+                        if ($owner !== 'n/d' && $owner !== NULL)   $message .= "<b>Кто сдает:</b> $owner\n";
+                        if ($owner_name !== 'n/d' && $owner_name !== NULL) $message .= "<b>Имя:</b> $owner_name\n";
                     }
-                    if ($phone !== 'n/d')       $message .= "<b>Телефон:</b> $phone\n";
+                    if ($phone !== 'n/d' && $phone !== NULL)       $message .= "<b>Телефон:</b> $phone\n";
                     if ($created_at !== $updated_at) {
-                        if ($created_at !== 'n/d') $message .= "<b>Создано:</b> $created_at\n";
-                        if ($updated_at !== 'n/d') $message .= "<b>Обновлено:</b> $updated_at\n";
+                        if ($created_at !== 'n/d' && $created_at !== NULL) $message .= "<b>Создано:</b> $created_at\n";
+                        if ($updated_at !== 'n/d' && $updated_at !== NULL) $message .= "<b>Обновлено:</b> $updated_at\n";
                     } else {
-                        if ($created_at !== 'n/d') $message .= "<b>Создано:</b> $created_at\n";
+                        if ($created_at !== 'n/d' && $created_at !== NULL) $message .= "<b>Создано:</b> $created_at\n";
                     }
                     $message .= "$link\n";
 
                     try {
-                        if (trim($owner) !== 'Агентство' && trim($owner) !== 'Агентство недвижимости' && trim($owner) !== 'Риэлтор') {
-                            $bot = new \TelegramBot\Api\BotApi($token);
-                            $bot->sendMessage($chat_id, $message, 'HTML');
-                            // Update sent_to_user
-                            $chat_ids_sent = [];
-                            if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== null) {
-                                $chat_ids_sent = json_decode($row['chat_ids_sent']);
-                            }
-                            $chat_ids_sent[] = $tgm_user_id;
-                            $chat_ids_sent = array_unique($chat_ids_sent);
-                            $chat_ids_sent = json_encode($chat_ids_sent);
-                            $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
-                            if (mysqli_query($conn, $sql)) {
-                                // file_put_contents($start_log_file, ' | User: ' . $username . ' | Msg sent: ' . $message . PHP_EOL, FILE_APPEND);
-                                $msg_sent++;
-                            } else {
-                                file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
-                                $msg_error++;
-                            }
-                            $chat_ids_to_send = $row['chat_ids_to_send'];
-                            if ($chat_ids_sent === $chat_ids_to_send) {
-                                $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
-                                if (mysqli_query($conn, $sql)) {
-                                    // file_put_contents( $start_log_file, ' | User: ' . $username . ' | Msg sent: ' . $message . PHP_EOL, FILE_APPEND);
-                                    $msg_sent++;
-                                } else {
-                                    file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
-                                    $msg_error++;
-                                }
-                            }
-                        } else {
-                            $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
-                            if (mysqli_query($conn, $sql)) {
-                                // file_put_contents( $start_log_file, ' | User: ' . $username . ' | Msg sent: ' . $message . PHP_EOL, FILE_APPEND);
-                                $msg_sent++;
-                            } else {
-                                file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
-                                $msg_error++;
-                            }
-                        }
+                        $bot->sendMessage($chat_id, $message, 'HTML');
                     } catch (\TelegramBot\Api\Exception $e) {
                         $error = $e->getMessage();
-                        file_put_contents($start_log_file, ' | User: ' . $username . ' Error: ' . $e->getMessage(), FILE_APPEND);
+                        $log_error_array[] = 'sendLastAds() - Error: ' . $e->getMessage();
                         if ($error === 'Forbidden: bot was blocked by the user') {
-                            try {
-                                // file_put_contents( $start_log_file, ' | User: ' . $username . ' try to deactivate', FILE_APPEND);
-                                deactivateUser($tgm_user_id);
-                            } catch (Exception $e) {
-                                file_put_contents($start_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
-                            }
+                            $error = 'User blocked bot';
+                            deactivateUser($tgm_user_id);
                         }
-                        break;
                     }
                     $counter++;
                 }
             } else {
-                file_put_contents($start_log_file, ' | User: ' . $username . ' | No last ads!' . PHP_EOL, FILE_APPEND);
-                $bot = new \TelegramBot\Api\BotApi($token);
-                $messageText = $user_data['language_code'] === 'ru' ? "❌ По Вашим критериям не удалось найти объявлений, попробуйте изменить настройки, для этого используйте команду /settings" : "❌ No ads found for your criteria, try changing the settings, to do this, use the command /settings";
+                $log_error_array[] = 'sendLastAds() - No ads found';
+                $message = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ По Вашим критериям объявлений не найдено\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ No ads found for your criteria\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                try {
+                    $bot->sendMessage($chat_id, $message, 'HTML');
+                } catch (\TelegramBot\Api\Exception $e) {
+                    $error = $e->getMessage();
+                    $log_error_array[] = 'sendLastAds() - Error: ' . $e->getMessage();
+                    if ($error === 'Forbidden: bot was blocked by the user') {
+                        $error = 'User blocked bot';
+                        deactivateUser($tgm_user_id);
+                    }
+                }
             }
             return true;
         }
     } else {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] User: ' . $tgm_user_id . ' | User data is empty!', FILE_APPEND);
+        $log_error_array[] = 'sendLastAds() - User not found';
     }
 }
 
