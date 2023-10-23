@@ -860,7 +860,7 @@ function getCity($slug = '')
     return $cities;
 }
 
-function getCityById($id)
+function getCityById($city_id)
 {
     global $start_error_log_file;
 
@@ -872,7 +872,7 @@ function getCityById($id)
 
     $city = [];
 
-    if ($id === '') {
+    if ($city_id === '') {
         file_put_contents($start_error_log_file, ' | getCityById - id is empty', FILE_APPEND);
     } else {
         // Create connection
@@ -882,14 +882,14 @@ function getCityById($id)
             throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
         }
 
-        $sql = "SELECT * FROM $table_city WHERE id = '$id'";
+        $sql = "SELECT * FROM $table_city WHERE city_id = '$city_id'";
         $result = mysqli_query($conn, $sql);
         if ($result && mysqli_num_rows($result) > 0) {
             while ($row = mysqli_fetch_assoc($result)) {
                 $city = $row;
             }
         } else {
-            file_put_contents($start_error_log_file, ' | getCityById with id ' . $id . ' - no cities found', FILE_APPEND);
+            file_put_contents($start_error_log_file, ' | getCityById with id ' . $city_id . ' - no cities found', FILE_APPEND);
         }
 
         // Close connection
