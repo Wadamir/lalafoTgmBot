@@ -202,6 +202,16 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 }
                 // Send message
                 $messageText = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\nЕсли Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\nIf you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+
+                $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "Изменить настройки" : "Change settings";
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                    [
+                        [
+                            ['text' => $update_settings_text, 'callback_data' => 'update_settings'],
+                        ],
+                    ]
+                );
+
                 $send_result = $bot->sendMessage($chatId, $messageText, 'HTML', false, null, $inline_keyboard);
             } else {
                 $log_error_array[] = 'Get user data error';
