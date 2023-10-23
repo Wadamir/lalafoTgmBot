@@ -270,7 +270,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $update_result = false;
             if ($city_slug !== 'none') {
                 $city_data = getCity($city_slug);
-                $new_data['preference_city'] = $city_data['city_id'];
+                $new_data['preference_city'] = $city_data[0]['city_id'];
                 $update_result = updateUser($new_data, $user_data['tgm_user_id']);
             } else {
                 $update_result = true;
@@ -871,7 +871,14 @@ function sendLastAds($tgm_user_id, $chat_id)
 
 function getCity($slug = '')
 {
-    global $start_error_log_file;
+    global $log_message_array;
+    global $log_error_array;
+
+    if ($slug !== '') {
+        $log_message_array[] = 'getCity() - ' . $slug;
+    } else {
+        $log_message_array[] = 'getCity() - all';
+    }
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -882,7 +889,7 @@ function getCity($slug = '')
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity - connection failed', FILE_APPEND);
+        $log_error_array[] = 'getCity() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -896,7 +903,7 @@ function getCity($slug = '')
                 $cities[] = $row;
             }
         } else {
-            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity - no cities found', FILE_APPEND);
+            $log_error_array[] = 'getCity() - No cities found';
         }
     } else {
         $sql = "SELECT * FROM $table_city WHERE city_slug = '$slug'";
@@ -906,7 +913,7 @@ function getCity($slug = '')
                 $cities[] = $row;
             }
         } else {
-            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getCity with slug ' . $slug . ' - no cities found', FILE_APPEND);
+            $log_error_array[] = 'getCity() - No cities found';
         }
     }
 
