@@ -869,10 +869,10 @@ function sendLastAds($tgm_user_id, $chat_id)
                 $parameters_array[] = "rooms >= " . $user_data['rooms_min'];
             }
             if ($user_data['preference_sharing'] !== NULL) {
-                if ($user_data['preference_sharing'] === 1) {
-                    $parameters_array[] = "sharing = 1";
-                } elseif ($user_data['preference_sharing'] === 0) {
-                    $parameters_array[] = "sharing = 0";
+                if ($user_data['preference_sharing'] === '1') {
+                    $parameters_array[] = "sharing = '1'";
+                } elseif ($user_data['preference_sharing'] === '0') {
+                    $parameters_array[] = "sharing = '0'";
                 }
             }
             if (!empty($parameters_array)) {
