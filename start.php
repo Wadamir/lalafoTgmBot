@@ -978,8 +978,8 @@ function sendLastAds($tgm_user_id, $chat_id)
                     $counter++;
                 }
             } else {
-                $log_error_array[] = 'sendLastAds() - No ads found';
-                $message = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ По Вашим критериям объявлений не найдено\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ No ads found for your criteria\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                $log_message_array[] = 'sendLastAds() - No ads found';
+                $message = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ По Вашим критериям объявлений не найдено.\nПопробуйте изменить критерии, для этого воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ No ads found for your criteria.\nTry to change the criteria, to do this, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                 try {
                     $bot->sendMessage($chat_id, $message, 'HTML');
                 } catch (\TelegramBot\Api\Exception $e) {
