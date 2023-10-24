@@ -704,6 +704,10 @@ function updateUser($user_data, $tgm_user_id)
 
     $sql = "UPDATE $table_user SET";
     foreach ($user_data as $key => $value) {
+        if ($value === NULL) {
+            $sql .= " $key = NULL,";
+            continue;
+        }
         $sql .= " $key = '" . $value . "',";
     }
     $sql = rtrim($sql, ',');
