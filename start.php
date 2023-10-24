@@ -140,7 +140,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 
                         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
                         $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
-                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе Вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
 
                         try {
                             $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
@@ -270,6 +270,11 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $new_data = [];
     switch (true) {
         case strpos($command_data, "update_settings") === 0:
+            try {
+                $bot->deleteMessage($chat_id, $messageId);
+            } catch (Exception $e) {
+                $log_error_array[] = $e->getMessage();
+            }
             // Get all cities
             $cities = getCity();
             if (!empty($cities)) {
@@ -295,7 +300,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 }
 
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
-                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе Вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
 
                 try {
                     $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
