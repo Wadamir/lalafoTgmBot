@@ -377,6 +377,53 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
+                            ['text' => 'С подселением', 'callback_data' => 'sharing_0'],
+                            ['text' => 'Без подселения', 'callback_data' => 'sharing_1'],
+                            ['text' => 'Неважно', 'callback_data' => 'sharing_none'],
+                        ]
+                    ]
+                );
+                $get_user_data = getUserData($user_data['tgm_user_id']);
+                if ($get_user_data['preference_city'] === NULL) {
+                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
+                } else {
+                    $city = getCityById($get_user_data['preference_city']);
+                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
+                }
+                if ($get_user_data['rooms_min'] === NULL) {
+                    $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
+                } else {
+                    $user_rooms_min = $get_user_data['rooms_min'];
+                }
+                if (!empty($get_user_data)) {
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n\n❓Предпочтительный тип аренды?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n\n❓Rental type? \n\n";
+                    $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
+                } else {
+                    $log_error_array[] = 'Get user data error';
+                }
+            } else {
+                $bot->deleteMessage($chat_id, $messageId);
+                $log_error_array[] = 'Update user error';
+            }
+            break;
+        case strpos($command_data, "sharing") === 0:
+            switch ($command_data) {
+                case 'sharing_1':
+                    $new_data['preference_sharing'] = 1;
+                    break;
+                case 'sharing_0':
+                    $new_data['preference_sharing'] = 0;
+                    break;
+                default:
+                    $new_data['preference_sharing'] = NULL;
+            }
+            $update_result = updateUser($new_data, $user_data['tgm_user_id']);
+            if ($update_result) {
+                $bot->deleteMessage($chat_id, $messageId);
+                // Send message
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                    [
+                        [
                             ['text' => '200$', 'callback_data' => 'usd_200'],
                             ['text' => '300$', 'callback_data' => 'usd_300'],
                             ['text' => '400$', 'callback_data' => 'usd_400'],

@@ -68,7 +68,7 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_user (
         `rooms_max` int DEFAULT NULL,
         `preference_city` text DEFAULT NULL,
         `preference_district` text DEFAULT NULL,
-        `preference_sharing` tinyint(1) DEFAULT '1',
+        `preference_sharing` tinyint(1) DEFAULT NULL,
         `preference_owner` tinyint(1) DEFAULT '1',
         `date_payment` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
