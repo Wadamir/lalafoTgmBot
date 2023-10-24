@@ -396,7 +396,6 @@ if (count($cities) > 0) {
                         'title' => mysqli_real_escape_string($conn, $link->textContent),
                         'link' => $apartment_link,
                         'city' => $city_id,
-                        'floor' => (isset($floor) && isset($total_floor)) ? mysqli_real_escape_string($conn, $floor . ' / ' . $total_floor) : NULL,
                         'chat_ids_to_send' => json_encode($chat_ids_to_send),
                     ];
 
@@ -435,6 +434,12 @@ if (count($cities) > 0) {
                     }
                     if ($rooms !== NULL) {
                         $data['rooms'] = $rooms;
+                    }
+                    if ($floor !== NULL) {
+                        $data['floor'] = mysqli_real_escape_string($conn, $floor);
+                    }
+                    if ($floor !== NULL && $total_floor !== NULL) {
+                        $data['floor'] = mysqli_real_escape_string($conn, $floor . ' / ' . $total_floor);
                     }
                     if ($house_type !== NULL) {
                         $data['house_type'] = mysqli_real_escape_string($conn, $house_type);
