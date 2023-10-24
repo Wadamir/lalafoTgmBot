@@ -759,7 +759,11 @@ function sendLastAds($tgm_user_id, $chat_id)
             if ($user_data['rooms_min'] !== NULL) {
                 $parameters_array[] = "rooms >= " . $user_data['rooms_min'];
             }
-            $parameters = implode(" AND ", $parameters_array);
+            if (!empty($parameters_array)) {
+                $parameters = " AND " . implode(" AND ", $parameters_array);
+            } else {
+                $parameters = "";
+            }
             $sql = "SELECT * FROM $table_data WHERE owner != 'Риэлтор'" . $parameters . " ORDER BY date_added DESC LIMIT 3";
             file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] sendLastAds() - ' . $sql, FILE_APPEND);
             $result = mysqli_query($conn, $sql);
