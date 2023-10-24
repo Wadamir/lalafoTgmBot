@@ -96,7 +96,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 // Send message
                 $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Вы отписаны от обновлений бота. Если решите восстановить уведомления, воспользуйтесь командой /start. Для обратной связи напишите боту сообщение с хештегом #feedback" : "You are unsubscribed from bot updates. If you decide to restart notifications, use the /start command. For feedback, write a message to the bot with the hashtag #feedback";
                 $bot->sendMessage($chat_id, $message_text);
-                deactivateUser($user_data['tgm_user_id']);
+                deactivateUser($user_data['tgm_user_id'], $user_data['chat_id']);
             } catch (Exception $e) {
                 $log_error_array[] = $e->getMessage();
             }
@@ -225,27 +225,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             } else {
                 $log_error_array[] = 'Get user data error';
             }
-            /*
-            try {
-                // Send message
-                $bot = new \TelegramBot\Api\BotApi($token);
-
-                // Send message
-                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
-                    [
-                        [
-                            ['text' => '1', 'callback_data' => 'room_1'],
-                            ['text' => '2', 'callback_data' => 'room_2'],
-                            ['text' => '3+', 'callback_data' => 'room_3'],
-                        ],
-                    ]
-                );
-                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "\n\n <b>Settings</b> \n\n❓How many minimum rooms in an apartment do you need? \n\n";
-                $messageResponse = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
-            } catch (Exception $e) {
-                $log_error_array[] = $e->getMessage();
-            }
-            */
             break;
         default:
             $log_error_array[] = 'Undefined bot command';
@@ -650,12 +629,10 @@ function activateUser($tgm_user_id)
 }
 
 
-function deactivateUser($tgm_user_id)
+function deactivateUser($tgm_user_id, $chat_id)
 {
-    global $log_message_array;
     global $log_error_array;
-
-    $log_message_array[] = 'deactivateUser() - ' . $tgm_user_id;
+    global $log_message_array;
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
@@ -672,25 +649,49 @@ function deactivateUser($tgm_user_id)
     }
     $sql = "UPDATE $table_user SET is_deleted = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
-    if (!$result) {
+    if ($result === false) {
         $log_error_array[] = 'deactivateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
-    } else {
-        $log_message_array[] = 'User successfully deactivated ' . $tgm_user_id;
+        return false;
     }
 
-    // remove all from data table
-    $sql = "DELETE FROM $table_data WHERE chat_id = " . $tgm_user_id;
+    // remove  from chat_ids_to_send
+    $sql = "SELECT * FROM $table_data WHERE JSON_CONTAINS(chat_ids_to_send, '\"$chat_id\"') AND done IS NULL";
     $result = mysqli_query($conn, $sql);
-    if (!$result) {
-        $log_error_array[] = 'deactivateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
+    if ($result === false) {
+        $log_error_array = 'deactivateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+        return false;
     } else {
-        $log_message_array[] = 'Data successfully deleted ' . $tgm_user_id;
+        if (mysqli_num_rows($result) > 0) {
+            $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+            foreach ($rows as $row) {
+                $chat_ids_to_send = $row['chat_ids_to_send'];
+                $chat_ids_to_send = json_decode($chat_ids_to_send);
+                $chat_ids_to_send = array_map('strval', $chat_ids_to_send);
+                $chat_ids_to_send = array_unique($chat_ids_to_send);
+                $chat_ids_to_send = array_values($chat_ids_to_send);
+                sort($chat_ids_to_send);
+                $chat_id_key = array_search($chat_id, $chat_ids_to_send);
+                if ($chat_id_key !== false) {
+                    unset($chat_ids_to_send[$chat_id_key]);
+                }
+                $chat_ids_to_send = json_encode($chat_ids_to_send);
+                $sql = "UPDATE $table_data SET chat_ids_to_send = '$chat_ids_to_send' WHERE id = " . $row['id'];
+                if (mysqli_query($conn, $sql)) {
+                    $log_message_array[] = 'Chat id: ' . $chat_id . ' removed';
+                } else {
+                    $log_error_array[] = 'deactivateUser() - Error: ' . $sql . ' | ' . mysqli_error($conn);
+                    throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
+                    return false;
+                }
+            }
+        }
     }
 
     // Close connection
     mysqli_close($conn);
+
     return true;
 }
 
@@ -972,7 +973,7 @@ function sendLastAds($tgm_user_id, $chat_id)
                         $log_error_array[] = 'sendLastAds() - Error: ' . $e->getMessage();
                         if ($error === 'Forbidden: bot was blocked by the user') {
                             $error = 'User blocked bot';
-                            deactivateUser($tgm_user_id);
+                            deactivateUser($tgm_user_id, $chat_id);
                         }
                     }
                     $counter++;
@@ -987,7 +988,7 @@ function sendLastAds($tgm_user_id, $chat_id)
                     $log_error_array[] = 'sendLastAds() - Error: ' . $e->getMessage();
                     if ($error === 'Forbidden: bot was blocked by the user') {
                         $error = 'User blocked bot';
-                        deactivateUser($tgm_user_id);
+                        deactivateUser($tgm_user_id, $chat_id);
                     }
                 }
             }
