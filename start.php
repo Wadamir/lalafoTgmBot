@@ -164,13 +164,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         } else {
                             $user_rooms_min = $get_user_data['rooms_min'];
                         }
-                        if ($get_user_data['preference_sharing'] === 1) {
-                            $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'без подселения' : 'without sharing';
-                        } elseif ($get_user_data['preference_sharing'] === 0) {
-                            $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'с подселением' : 'with sharing';
-                        } else {
-                            $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
-                        }
+                        $user_preference_sharing = $get_user_data['preference_sharing'];
                         if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
                             $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                         } else {
@@ -206,13 +200,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else {
                     $user_rooms_min = $get_user_data['rooms_min'];
                 }
-                if ($get_user_data['preference_sharing'] === 1) {
-                    $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'без подселения' : 'without sharing';
-                } elseif ($get_user_data['preference_sharing'] === 0) {
-                    $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'с подселением' : 'with sharing';
-                } else {
-                    $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
-                }
+                $user_preference_sharing = $get_user_data['preference_sharing'];
                 if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
                     $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                 } else {
@@ -474,13 +462,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else {
                     $user_rooms_min = $get_user_data['rooms_min'];
                 }
-                if ($get_user_data['preference_sharing'] === 1) {
-                    $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'без подселения' : 'without sharing';
-                } elseif ($get_user_data['preference_sharing'] === 0) {
-                    $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'с подселением' : 'with sharing';
-                } else {
-                    $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
-                }
+                $user_preference_sharing = $get_user_data['preference_sharing'];
                 if (!empty($get_user_data)) {
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n\n❓Maximum rental cost per month? \n\n";
                     $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
@@ -547,13 +529,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     } else {
                         $user_rooms_min = $get_user_data['rooms_min'];
                     }
-                    if ($get_user_data['preference_sharing'] === 1) {
-                        $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'без подселения' : 'without sharing';
-                    } elseif ($get_user_data['preference_sharing'] === 0) {
-                        $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'с подселением' : 'with sharing';
-                    } else {
-                        $user_preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
-                    }
+                    $user_preference_sharing = $get_user_data['preference_sharing'];
                     if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
                         $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                     } else {
@@ -793,8 +769,10 @@ function getUserData($tgm_user_id)
         while ($row = mysqli_fetch_assoc($result)) {
             if ($row['preference_sharing'] === '1') {
                 $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'без подселения' : 'without sharing';
+            } elseif ($row['preference_sharing'] === '0') {
+                $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'с подселением' : 'with sharing';
             } else {
-                $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'неважно' : 'any';
+                $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'неважно' : 'no matter';
             }
             if ($row['preference_owner'] === '1') {
                 $preference_owner = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'без посредников' : 'without agents';
