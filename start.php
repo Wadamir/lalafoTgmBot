@@ -269,6 +269,43 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 } elseif ($chat_type === 'callback_query') {
     $new_data = [];
     switch (true) {
+        case strpos($command_data, "update_settings") === 0:
+            // Get all cities
+            $cities = getCity();
+            if (!empty($cities)) {
+                $city_array = [];
+                if ($user_language === 'ru' || $user_language === 'kg') {
+                    foreach ($cities as $city) {
+                        $city_array[] = ['text' => $city['city_name_ru'], 'callback_data' => 'city_' . $city['city_slug']];
+                    }
+                    $city_array[] = ['text' => 'Неважно', 'callback_data' => 'city_none'];
+                } else {
+                    foreach ($cities as $city) {
+                        $city_array[] = ['text' => $city['city_name_en'], 'callback_data' => 'city_' . $city['city_slug']];
+                    }
+                    $city_array[] = ['text' => 'No matter', 'callback_data' => 'city_none'];
+                }
+                $inline_keyboard_array = [];
+                foreach ($city_array as $key => $value) {
+                    if ($key % 2 === 0) {
+                        $inline_keyboard_array[] = [$value];
+                    } else {
+                        $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+                    }
+                }
+
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+
+                try {
+                    $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
+                } catch (Exception $e) {
+                    $log_error_array[] = $e->getMessage();
+                }
+            } else {
+                $log_error_array[] = 'Cities not found';
+            }
+            break;
         case strpos($command_data, "city") === 0:
             $city_slug = str_replace('city_', '', $command_data);
             $log_message_array[] = 'City - ' . $city_slug;
