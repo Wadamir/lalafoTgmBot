@@ -164,7 +164,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         } else {
                             $user_rooms_min = $get_user_data['rooms_min'];
                         }
-                        $user_preference_sharing = $get_user_data['preference_sharing'];
+                        $user_preference_sharing = $get_user_data['preference_sharing_text'];
                         if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
                             $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                         } else {
@@ -200,7 +200,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else {
                     $user_rooms_min = $get_user_data['rooms_min'];
                 }
-                $user_preference_sharing = $get_user_data['preference_sharing'];
+                $user_preference_sharing = $get_user_data['preference_sharing_text'];
                 if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
                     $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                 } else {
@@ -462,7 +462,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else {
                     $user_rooms_min = $get_user_data['rooms_min'];
                 }
-                $user_preference_sharing = $get_user_data['preference_sharing'];
+                $user_preference_sharing = $get_user_data['preference_sharing_text'];
                 if (!empty($get_user_data)) {
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n\n❓Maximum rental cost per month? \n\n";
                     $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
@@ -529,7 +529,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     } else {
                         $user_rooms_min = $get_user_data['rooms_min'];
                     }
-                    $user_preference_sharing = $get_user_data['preference_sharing'];
+                    $user_preference_sharing = $get_user_data['preference_sharing_text'];
                     if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
                         $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
                     } else {
@@ -805,7 +805,8 @@ function getUserData($tgm_user_id)
                 'rooms_max' => $row['rooms_max'],
                 'preference_city' => $row['preference_city'],
                 'preference_district' => $row['preference_district'],
-                'preference_sharing' => $preference_sharing,
+                'preference_sharing' => $row['preference_sharing'],
+                'preference_sharing_text' => $preference_sharing,
                 'preference_owner' => $preference_owner,
                 'date_payment' => $user_payment,
                 'date_updated' => $row['date_updated'],
@@ -868,9 +869,9 @@ function sendLastAds($tgm_user_id, $chat_id)
                 $parameters_array[] = "rooms >= " . $user_data['rooms_min'];
             }
             if ($user_data['preference_sharing'] !== NULL) {
-                if ($user_data['preference_sharing'] === '1') {
+                if ($user_data['preference_sharing'] === 1) {
                     $parameters_array[] = "sharing = 1";
-                } elseif ($user_data['preference_sharing'] === '0') {
+                } elseif ($user_data['preference_sharing'] === 0) {
                     $parameters_array[] = "sharing = 0";
                 }
             }
