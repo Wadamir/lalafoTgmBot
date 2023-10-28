@@ -159,7 +159,7 @@ if (count($cities) > 0) {
             continue;
         }
         $parse_link = 'https://lalafo.kg/' . $city_slug . '/kvartiry/arenda-kvartir/dolgosrochnaya-arenda-kvartir';
-        for ($i = 1; $i < 2; $i++) {
+        for ($i = 1; $i < 3; $i++) {
             try {
                 $response = $guzzle->get($parse_link . '?page=' . $i);
             } catch (\Exception $e) {
@@ -174,9 +174,6 @@ if (count($cities) > 0) {
             $links = $pq->query('.adTile-title');
 
             foreach ($links as $link) {
-                // set timeout
-                $rnd_sec = rand(1, 3);
-                sleep($rnd_sec);
                 $items_total++;
                 try {
                     // check if apartment exists
@@ -194,17 +191,6 @@ if (count($cities) > 0) {
 
                     $apartment_pq = new PhpQuery;
                     $apartment_pq->load_str($apartment_content);
-
-                    $price_kgs = ($apartment_pq->query('.price')->length) ? $apartment_pq->query('.price')[0]->textContent : NULL;
-                    if ($price_kgs === NULL) {
-                        continue;
-                    }
-                    $price_kgs = intval(preg_replace('/[^0-9]/', '', trim(str_replace('KGS', '', $price_kgs))));
-                    if ($price_kgs === 0) {
-                        continue;
-                    }
-                    $price_usd = round($price_kgs / $usd_rate);
-
 
                     $phone = ($apartment_pq->query('.call-button a')->length) ? $apartment_pq->query('.call-button a')[0]->getAttribute('href') : NULL;
                     $phone = ($phone) ? str_replace('tel:', '', $phone) : NULL;
@@ -242,6 +228,8 @@ if (count($cities) > 0) {
                     $animals = NULL;
                     $owner = NULL;
                     $owner_value = 1;
+                    $price_kgs = NULL;
+                    $price_usd = NULL;
 
                     foreach ($details as $detail) {
                         if (mb_strpos($detail->textContent, 'Район') !== false) {
@@ -315,6 +303,14 @@ if (count($cities) > 0) {
                         }
                     }
 
+                    if ($apartment_pq->query('.price')->length) {
+                        $price_kgs_text = $apartment_pq->query('.price')[0]->textContent;
+                        if (preg_replace('/[^0-9]/', '', trim(str_replace('KGS', '', $price_kgs_text))) !== '') {
+                            $price_kgs = intval(preg_replace('/[^0-9]/', '', trim(str_replace('KGS', '', $price_kgs_text))));
+                            $price_usd = round($price_kgs / $usd_rate);
+                        }
+                    }
+
                     $district_id = ($district_id === NULL) ? NULL : intval($district_id);
 
                     $deposit_kgs = (intval($deposit_kgs) === 0) ? NULL : $deposit_kgs;
@@ -347,18 +343,18 @@ if (count($cities) > 0) {
                         }
 
                         if ($user_price_currency === 'USD') {
-                            if ($user_price_max !== NULL && $price_usd > $user_price_max) {
+                            if (($user_price_max !== NULL && $price_usd > $user_price_max) || ($user_price_max !== NULL && $price_usd === NULL)) {
                                 unset($chat_ids_to_send[$key]);
                             }
-                            if ($user_price_min !== NULL && $price_usd < $user_price_min) {
+                            if (($user_price_min !== NULL && $price_usd < $user_price_min) || ($user_price_min !== NULL && $price_usd === NULL)) {
                                 unset($chat_ids_to_send[$key]);
                             }
                         }
                         if ($user_price_currency === 'KGS') {
-                            if ($user_price_max !== NULL && $price_kgs > $user_price_max) {
+                            if (($user_price_max !== NULL && $price_kgs > $user_price_max) || ($user_price_max !== NULL && $price_kgs === NULL)) {
                                 unset($chat_ids_to_send[$key]);
                             }
-                            if ($user_price_min !== NULL && $price_kgs < $user_price_min) {
+                            if (($user_price_min !== NULL && $price_kgs < $user_price_min) || ($user_price_min !== NULL && $price_kgs === NULL)) {
                                 unset($chat_ids_to_send[$key]);
                             }
                         }
@@ -481,7 +477,7 @@ if (count($cities) > 0) {
                 }
             }
             // set timeout
-            $rnd_sec = rand(1, 7);
+            $rnd_sec = rand(1, 3);
             sleep($rnd_sec);
         }
     }
