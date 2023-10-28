@@ -172,7 +172,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         }
                         // Send message
                         $message_text = ($user_language === 'ru' || $user_language === 'kg') ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
-                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\nЕсли Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\nIf you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\n⚙ Если Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\n⚙ If you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                         try {
                             $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                         } catch (Exception $e) {
@@ -980,7 +980,7 @@ function sendLastAds($tgm_user_id, $chat_id)
                 }
             } else {
                 $log_message_array[] = 'sendLastAds() - No ads found';
-                $message = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ По Вашим критериям объявлений не найдено.\nПопробуйте изменить критерии, для этого воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ No ads found for your criteria.\nTry to change the criteria, to do this, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                $message = ($user_language === 'ru' || $user_language === 'kg') ? "⭕ По Вашим критериям объявлений не найдено.\n⚙ Попробуйте изменить критерии, для этого воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "⭕ No ads found for your criteria.\n⚙ Try to change the criteria, to do this, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                 try {
                     $bot->sendMessage($chat_id, $message, 'HTML');
                 } catch (\TelegramBot\Api\Exception $e) {

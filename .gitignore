@@ -3,3 +3,4 @@ logs/*.log
 config.php
 composer.lock
 apartment.html
+.DS_Store
