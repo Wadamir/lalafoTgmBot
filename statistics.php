@@ -204,7 +204,6 @@ function getStatisticsByChatId($chat_id, $period = '1 day')
 
     $now_minus_24_hours = date('Y-m-d H:i:s', strtotime('-24 hours'));
     $sql = "SELECT * FROM $table_data WHERE JSON_CONTAINS(chat_ids_sent, '\"$chat_id\"')" . " AND date_added >= '$now_minus_24_hours'";
-    print_r($sql);
     $result = mysqli_query($conn, $sql);
     $total_sent = 0;
     $prices_usd = [];
