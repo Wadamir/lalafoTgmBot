@@ -85,9 +85,11 @@ if (mysqli_num_rows($users_result)) {
         $msg_footer = getMsgFooter($user_language);
         $message .= $msg_footer;
 
+        $inline_keyboard = getDonationKeyboard($user_language);
+
         try {
             $bot = new \TelegramBot\Api\BotApi($token);
-            $bot->sendMessage($chat_id, $message, 'HTML');
+            $bot->sendMessage($chat_id, $message, 'HTML', false, null, $inline_keyboard);
         } catch (\TelegramBot\Api\Exception $e) {
             $error = $e->getMessage();
             file_put_contents($statistics_error_log_file, ' | User: ' . $username . ' Error: ' . $e->getMessage(), FILE_APPEND);
@@ -238,6 +240,43 @@ function getMsgFooter($user_language)
     $message .= "\n";
     $message .= "\n";
     $message .= ($user_language === 'ru' || $user_language === 'kg') ? '📫 Для обратной связи напишите боту сообщение с хештегом #feedback' : '📫 To give feedback, send a message to the bot with the hashtag #feedback';
+    $message .= "\n";
+    $message .= "\n";
+    $message .= ($user_language === 'ru' || $user_language === 'kg') ? '💰 Если Вы хотите поддержать развитие бота, воспользуйтесь кнопками внизу' : '💰 If you want to support the development of the bot, use the buttons below';
 
     return  $message;
+}
+
+function getDonationKeyboard($user_language)
+{
+
+    $donations = [];
+    $donations[] = [
+        'text'  => ($user_language === 'ru' || $user_language === 'kg') ? 'Бакай' : 'Bakai',
+        'url'   => 'https://bakai24.app#00020101021132520011qr.bakai.kg010131016124208000535187912021113021233330009BAKAIBANK0116%D0%9F%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%D0%B0%D1%80%D1%82%D1%8B5204653853034175909BAKAIBANK5405100006304E2A4'
+    ];
+
+    $donations[] = [
+        'text'  => ($user_language === 'ru' || $user_language === 'kg') ? 'О!Деньги' : 'O!Money',
+        'url'   => 'https://api.dengi.o.kg/#00020101021132680012p2p.dengi.kg01048580111225417362224510129965015512001202111302123408%D0%94%D0%B0%D0%BC%D0%B8%D1%80%20%D0%92.520473995303417540105908O%21Den%27gi6304B7FE'
+    ];
+
+    $donations[] = [
+        'text'  => ($user_language === 'ru' || $user_language === 'kg') ? 'ЮMoney (руб)' :  'YooMoney (rub)',
+        'url'   => 'https://yoomoney.ru/to/410014592945355'
+    ];
+
+
+    $inline_keyboard_array = [];
+    foreach ($donations as $key => $value) {
+        if ($key % 2 === 0) {
+            $inline_keyboard_array[] = [$value];
+        } else {
+            $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+        }
+    }
+
+    $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+
+    return $inline_keyboard;
 }
