@@ -49,9 +49,6 @@ if (!mysqli_select_db($conn, $dbname)) {
     die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
 }
 
-// Get arguments
-$arguments = $_SERVER['argv'];
-
 
 
 // 2. Send messages to telegram where is_statistics = 1
