@@ -74,6 +74,7 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_user (
         `preference_district` int DEFAULT NULL,
         `preference_sharing` tinyint(1) DEFAULT NULL,
         `preference_owner` tinyint(1) DEFAULT '1',
+        `preference_property` tinyint(1) DEFAULT NULL,
         `date_payment` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -115,7 +116,7 @@ $sql = "INSERT INTO `city` (`city_id`, `city_name_en`, `city_name_ru`, `city_nam
 (1, 'Bishkek', 'Бишкек', 'Бишкек', 'bishkek'),
 (2, 'Osh', 'Ош', 'Ош', 'osh'),
 (3, 'Dzhalal-Abad', 'Джалал-Абад', 'Жалал-Абад', 'dzhalal-abad'),
-(4, 'Karakol', 'Каракол', 'Каракол', 'karakol');" ;
+(4, 'Karakol', 'Каракол', 'Каракол', 'karakol');";
 
 if (!mysqli_select_db($conn, $dbname)) {
     file_put_contents($log_dir . '/install.log', 'Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
