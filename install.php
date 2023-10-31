@@ -8,7 +8,8 @@ Create database for Lalafo tgm bot
 4. Create table district
 5. Create table data
 6. Create table rates
-7. Close connection
+7. Create table amenity
+8. Close connection
 */
 
 ini_set('display_errors', 1);
@@ -30,6 +31,7 @@ $table_city = MYSQL_TABLE_CITY;
 $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
 $table_rate = MYSQL_TABLE_RATE;
+$table_amenity = MYSQL_TABLE_AMENITY;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -64,11 +66,11 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_user (
         `refresh_time` bigint DEFAULT NULL,
         `price_min` int DEFAULT NULL,
         `price_max` int DEFAULT NULL,
-        `price_currency` varchar(255) DEFAULT 'USD',
+        `price_currency` varchar(16) DEFAULT 'USD',
         `rooms_min` int DEFAULT NULL,
         `rooms_max` int DEFAULT NULL,
-        `preference_city` text DEFAULT NULL,
-        `preference_district` text DEFAULT NULL,
+        `preference_city` int DEFAULT NULL,
+        `preference_district` int DEFAULT NULL,
         `preference_sharing` tinyint(1) DEFAULT NULL,
         `preference_owner` tinyint(1) DEFAULT '1',
         `date_payment` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -137,27 +139,45 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_data (
         `chat_ids_to_send` TEXT DEFAULT NULL,
         `chat_ids_sent` TEXT DEFAULT NULL,
         `done` tinyint(1) DEFAULT NULL,
+        `property_type` tinyint(1) DEFAULT NULL,
         `city` bigint NOT NULL,
         `district` bigint DEFAULT NULL,
         `title` varchar(255) DEFAULT NULL,
+        `title_ru` varchar(255) DEFAULT NULL,
+        `title_en` varchar(255) DEFAULT NULL,
+        `description` text DEFAULT NULL,
+        `description_ru` text DEFAULT NULL,
+        `description_en` text DEFAULT NULL,
+        `gallery` text DEFAULT NULL,
         `link` text DEFAULT NULL,
-        `created_at` varchar(255) DEFAULT NULL,
-        `updated_at` varchar(255) DEFAULT NULL,
+        `created_at` datetime DEFAULT NULL,
+        `updated_at` datetime DEFAULT NULL,
         `price_kgs` int DEFAULT NULL,
         `price_usd` int DEFAULT NULL,
         `deposit_kgs` int DEFAULT NULL,
         `deposit_usd` int DEFAULT NULL,
-        `owner` varchar(255) DEFAULT NULL,
+        `owner` tinyint(1) DEFAULT NULL,
         `owner_name` varchar(255) DEFAULT NULL,
         `phone` varchar(255) DEFAULT NULL,
-        `rooms` int DEFAULT NULL,
-        `floor` varchar(255) DEFAULT NULL,
+        `rooms` tinyint(1) DEFAULT NULL,
+        `floor` tinyint(1) DEFAULT NULL,
+        `total_floor` tinyint(1) DEFAULT NULL,
         `house_type` varchar(255) DEFAULT NULL,
         `sharing` tinyint(1) DEFAULT NULL,
-        `furniture` varchar(255) DEFAULT NULL,
+        `animals` tinyint(1) DEFAULT NULL,
+        `house_area` int DEFAULT NULL,
+        `land_area` int DEFAULT NULL,
+        `min_rent_month` int DEFAULT NULL,
         `condition` varchar(255) DEFAULT NULL,
+        `additional` varchar(255) DEFAULT NULL,
+        `heating` varchar(255) DEFAULT NULL,
         `renovation` varchar(255) DEFAULT NULL,
-        `animals` varchar(255) DEFAULT NULL,
+        `improvement_in` varchar(255) DEFAULT NULL,
+        `improvement_out` varchar(255) DEFAULT NULL,
+        `nearby` varchar(255) DEFAULT NULL,
+        `furniture` varchar(255) DEFAULT NULL,
+        `appliances` varchar(255) DEFAULT NULL,
+        `utility` varchar(255) DEFAULT NULL,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
@@ -198,6 +218,27 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_rate: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
-// 7. Close connection
+// 7. Create table amenity
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 7. Create table ' . $table_amenity . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_amenity (
+        `amenity_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `amenity_name_en` varchar(255) NOT NULL,
+        `amenity_name_ru` varchar(255) NOT NULL,
+        `amenity_name_kg` varchar(255) NOT NULL,
+        `amenity_slug` varchar(255) NOT NULL
+    ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+if (!mysqli_select_db($conn, $dbname)) {
+    file_put_contents($log_dir . '/install.log', 'Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
+    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+}
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Table $table_amenity created successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_amenity: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+// 8. Close connection
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 7. Close connection' . PHP_EOL . PHP_EOL, FILE_APPEND);
 mysqli_close($conn);

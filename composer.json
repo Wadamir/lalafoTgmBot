@@ -21,6 +21,7 @@
     "require": {
         "phpquery/phpquery": "^0.0.4",
         "guzzlehttp/guzzle": "^7.8",
-        "telegram-bot/api": "^2.5"
+        "telegram-bot/api": "^2.5",
+        "google/cloud-translate": "^1.15"
     }
 }

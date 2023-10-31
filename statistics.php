@@ -67,14 +67,14 @@ if (mysqli_num_rows($users_result)) {
         $statistics = getStatisticsByChatId($chat_id);
 
         if (!empty($statistics) && $statistics['total'] > 1) {
-            $message = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ваша статистика за последние 24 часа:</b>\n\n" : "<b>Your statistics for the last 24 hours:</b>\n\n";
+            $message = ($user_language === 'ru' || $user_language === 'kg') ? "<b>📊 Ваша статистика за последние 24 часа:</b>\n\n" : "<b>📊 Your statistics for the last 24 hours:</b>\n\n";
             $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>✅ Всего объявлений по Вашим критериям:</b> " . $statistics['total'] : "<b>Total ads for your criteria:</b> " . $statistics['total'];
             $message .= "\n";
             $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>💵 Минимальная цена:</b> " . $statistics['min_price_usd'] . ' USD' : "<b>Minimum price:</b> " . $statistics['min_price_usd'] . ' USD';
             $message .= "\n";
             $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>💵 Максимальная цена:</b> " . $statistics['max_price_usd'] . ' USD' : "<b>Maximum price:</b> " . $statistics['max_price_usd'] . ' USD';
         } elseif (!empty($statistics) && $statistics['total'] > 0) {
-            $message = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ваша статистика за последние 24 часа:</b>\n\n" : "<b>Your statistics for the last 24 hours:</b>\n\n";
+            $message = ($user_language === 'ru' || $user_language === 'kg') ? "<b>📊 Ваша статистика за последние 24 часа:</b>\n\n" : "<b>📊 Your statistics for the last 24 hours:</b>\n\n";
             $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>✅ Всего объявлений по Вашим критериям:</b> " . $statistics['total'] : "<b>Total ads for your criteria:</b> " . $statistics['total'];
             $message .= "\n";
             $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>💵 Цена:</b> " . $statistics['min_price_usd'] . ' USD' : "<b>Price:</b> " . $statistics['min_price_usd'] . ' USD';
