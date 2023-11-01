@@ -274,7 +274,7 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_rate: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
-$sql = "ALTER $table_rate ADD UNIQUE KEY `rate_id` (`rate_id`);";
+$sql = "ALTER TABLE $table_rate ADD UNIQUE KEY `rate_id` (`rate_id`);";
 
 if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Unique key rate_id added successfully" . PHP_EOL, FILE_APPEND);
