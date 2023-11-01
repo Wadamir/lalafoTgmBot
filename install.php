@@ -32,6 +32,8 @@ $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
 $table_rate = MYSQL_TABLE_RATE;
 $table_amenity = MYSQL_TABLE_AMENITY;
+$table_property = MYSQL_TABLE_PROPERTY;
+$table_owner = MYSQL_TABLE_OWNER;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -91,6 +93,15 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_user: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
+$sql = "ALTER TABLE $table_user ADD UNIQUE KEY `user_id` (`user_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key user_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key user_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+
 // 3. Create table city
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 3. Create table ' . $table_city . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_city (
@@ -110,6 +121,14 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Table $table_city created successfully" . PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_city: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "ALTER TABLE $table_city ADD UNIQUE KEY `city_id` (`city_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key city_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key city_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 $sql = "INSERT INTO `city` (`city_id`, `city_name_en`, `city_name_ru`, `city_name_kg`, `city_slug`) VALUES
@@ -149,6 +168,14 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Table $table_district created successfully" . PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_district: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "ALTER TABLE $table_district ADD UNIQUE KEY `district_id` (`district_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key district_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key district_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 // 5. Create table data
@@ -212,6 +239,14 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_data: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
+$sql = "ALTER TABLE $table_data ADD UNIQUE KEY `id` (`id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
 // 6. Create table rate
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 6. Create table ' . $table_rate . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_rate (
@@ -237,6 +272,25 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_rate: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
+$sql = "ALTER $table_rate ADD UNIQUE KEY `rate_id` (`rate_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key rate_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key rate_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "INSERT INTO `rate` (`rate_id`, `usd`, `eur`, `gbp`, `cny`, `rub`, `kzt`, `date_updated`, `date_added`) VALUES
+(1, 89.3200, 94.3398, 108.3362, 12.2059, 0.9506, 0.1899, '2023-10-27T10:00:08.000000Z', '2023-10-30 00:35:00'),
+(2, 89.3200, 94.3666, 108.3362, 12.2059, 0.9548, 0.1893, '2023-10-30T10:10:05.000000Z', '2023-10-30 00:35:00'),
+(3, 89.3192, 95.0803, 108.3362, 12.2059, 0.9642, 0.1902, '2023-10-31T10:00:07.000000Z', '2023-10-31 00:35:00');";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Data inserted into table $table_rate successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error inserting data into table $table_rate: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
 // 7. Create table amenity
 file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 7. Create table ' . $table_amenity . PHP_EOL, FILE_APPEND);
 $sql = "CREATE TABLE IF NOT EXISTS $table_amenity (
@@ -256,6 +310,14 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Table $table_amenity created successfully" . PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/install.log', "Error creating table $table_amenity: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "ALTER TABLE $table_amenity ADD UNIQUE KEY `amenity_id` (`amenity_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key amenity_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key amenity_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 $sql = "INSERT INTO `amenity` (`amenity_id`, `amenity_name_en`, `amenity_name_ru`, `amenity_name_kg`, `amenity_slug`) VALUES
@@ -344,17 +406,95 @@ $sql = "INSERT INTO `amenity` (`amenity_id`, `amenity_name_en`, `amenity_name_ru
 (83, 'Needs renovation', 'Требуется ремонт', 'Требуется ремонт', 'trebuetsya-remont'),
 (84, 'Yes', 'Да', 'Да', 'da');";
 
-if (!mysqli_select_db($conn, $dbname)) {
-    file_put_contents($log_dir . '/install.log', 'Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
-    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
-}
-
 if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Data inserted into table $table_amenity successfully" . PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/install.log', "Error inserting data into table $table_amenity: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
-// 8. Close connection
-file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 7. Close connection' . PHP_EOL . PHP_EOL, FILE_APPEND);
+// 8. Create table property
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 8. Create table ' . $table_property . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_property (
+        `property_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `property_name_en` varchar(255) NOT NULL,
+        `property_name_ru` varchar(255) NOT NULL,
+        `property_name_kg` varchar(255) NOT NULL,
+        `property_slug` varchar(255) NOT NULL,
+        `property_icon` varchar(255) NOT NULL,
+        `property_link` varchar(255) NOT NULL
+    ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+if (!mysqli_select_db($conn, $dbname)) {
+    file_put_contents($log_dir . '/install.log', 'Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
+    die("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+}
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Table $table_property created successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_property: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "ALTER TABLE $table_property ADD UNIQUE KEY `property_id` (`property_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key property_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key property_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "INSERT INTO `property` (`property_id`, `property_name_en`, `property_name_ru`, `property_name_kg`, `property_slug`, `property_icon`, `property_link`) VALUES
+(0, 'Apartment', 'Квартира', 'Квартира', 'apartment', '🏢', '/kvartiry/arenda-kvartir/dolgosrochnaya-arenda-kvartir'),
+(1, 'House', 'Дом', 'Дом', 'house', '🏠', '/doma-i-dachi/arenda-domov/dolgosrochno-dom'),
+(2, 'Room', 'Комната', 'Комната', 'room', '🛏', '/komnaty/arenda-komnat/dolgosrochnaya');";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Data inserted into table $table_property successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error inserting data into table $table_property: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+// 9. Create table owner
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 9. Create table ' . $table_owner . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_owner (
+        `owner_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `owner_name_en` varchar(255) NOT NULL,
+        `owner_name_ru` varchar(255) NOT NULL,
+        `owner_name_kg` varchar(255) NOT NULL,
+        `owner_slug` varchar(255) NOT NULL
+    ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+if (!mysqli_select_db($conn, $dbname)) {
+    file_put_contents($log_dir . '/install.log', 'Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
+    die("Connection failed: " . mysqli_connect_error());
+}
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Table $table_owner created successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_owner: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "ALTER TABLE $table_owner ADD UNIQUE KEY `owner_id` (`owner_id`);";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Unique key owner_id added successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error adding unique key owner_id: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+$sql = "INSERT INTO `owner` (`owner_id`, `owner_name_en`, `owner_name_ru`, `owner_name_kg`, `owner_slug`) VALUES
+(0, 'Agent', 'Риэлтор', 'Риэлтор', 'agent'),
+(1, 'Owner', 'Собственник', 'Собственник', 'owner'),
+(2, 'Agent not allowed', 'Риэлторам не беспокоить', 'Риэлторам не беспокоить', 'agent_not_allowed'),
+(3, 'Agent allowed', 'Готов к работе с риэлторами', 'Готов к работе с риэлторами', 'agent_allowed');";
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Data inserted into table $table_owner successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error inserting data into table $table_owner: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+// 10. Close connection
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 10. Close connection' . PHP_EOL . PHP_EOL, FILE_APPEND);
 mysqli_close($conn);
