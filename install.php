@@ -446,9 +446,9 @@ if (mysqli_query($conn, $sql)) {
 }
 
 $sql = "INSERT INTO `property` (`property_id`, `property_name_en`, `property_name_ru`, `property_name_kg`, `property_slug`, `property_icon`, `property_link`) VALUES
-(0, 'Apartment', 'Квартира', 'Квартира', 'apartment', '🏢', '/kvartiry/arenda-kvartir/dolgosrochnaya-arenda-kvartir'),
-(1, 'House', 'Дом', 'Дом', 'house', '🏠', '/doma-i-dachi/arenda-domov/dolgosrochno-dom'),
-(2, 'Room', 'Комната', 'Комната', 'room', '🛏', '/komnaty/arenda-komnat/dolgosrochnaya');";
+(1, 'Apartment', 'Квартира', 'Квартира', 'apartment', '🏢', '/kvartiry/arenda-kvartir/dolgosrochnaya-arenda-kvartir'),
+(2, 'House', 'Дом', 'Дом', 'house', '🏠', '/doma-i-dachi/arenda-domov/dolgosrochno-dom'),
+(3, 'Room', 'Комната', 'Комната', 'room', '🛏', '/komnaty/arenda-komnat/dolgosrochnaya');";
 
 if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Data inserted into table $table_property successfully" . PHP_EOL, FILE_APPEND);
@@ -486,10 +486,10 @@ if (mysqli_query($conn, $sql)) {
 }
 
 $sql = "INSERT INTO `owner` (`owner_id`, `owner_name_en`, `owner_name_ru`, `owner_name_kg`, `owner_slug`) VALUES
-(0, 'Agent', 'Риэлтор', 'Риэлтор', 'agent'),
-(1, 'Owner', 'Собственник', 'Собственник', 'owner'),
-(2, 'Agent not allowed', 'Риэлторам не беспокоить', 'Риэлторам не беспокоить', 'agent_not_allowed'),
-(3, 'Agent allowed', 'Готов к работе с риэлторами', 'Готов к работе с риэлторами', 'agent_allowed');";
+(1, 'Agent', 'Риэлтор', 'Риэлтор', 'agent'),
+(2, 'Owner', 'Собственник', 'Собственник', 'owner'),
+(3, 'Agent not allowed', 'Риэлторам не беспокоить', 'Риэлторам не беспокоить', 'agent_not_allowed'),
+(4, 'Agent allowed', 'Готов к работе с риэлторами', 'Готов к работе с риэлторами', 'agent_allowed');";
 
 if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Data inserted into table $table_owner successfully" . PHP_EOL, FILE_APPEND);
