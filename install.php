@@ -9,7 +9,9 @@ Create database for Lalafo tgm bot
 5. Create table data
 6. Create table rates
 7. Create table amenity
-8. Close connection
+8. Create table property
+9. Create table owner
+10. Close connection
 */
 
 ini_set('display_errors', 1);
