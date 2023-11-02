@@ -17,8 +17,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 require_once __DIR__ . '/config.php';
 $log_dir = __DIR__ . '/logs';
-$sender_log_file = $log_dir . '/sender.log';
-$sender_error_log_file = $log_dir . '/sender_error.log';
+$sender_log_file = $log_dir . '/sender_premium.log';
+$sender_error_log_file = $log_dir . '/sender_premium_error.log';
 file_put_contents($sender_log_file, '[' . date('Y-m-d H:i:s') . '] Start', FILE_APPEND);
 
 $users_total = 0;

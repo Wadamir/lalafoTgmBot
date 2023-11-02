@@ -379,6 +379,11 @@ if (count($cities) > 0) {
                             }
                             if (mb_strpos($detail->textContent, 'Этаж') !== false) {
                                 $floor = trim(str_replace('Этаж:', '', $detail->textContent));
+                                if (mb_strpos($floor, 'цоколь') !== false) {
+                                    $floor = 0;
+                                } else {
+                                    $floor = intval(preg_replace('/[^0-9]/', '', $floor));
+                                }
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Количество этажей') !== false) {
