@@ -185,9 +185,11 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                             $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                         } catch (Exception $e) {
                             $log_error_array[] = $e->getMessage();
+                            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ' . $e->getMessage(), FILE_APPEND);
                         }
                     } else {
                         $log_error_array[] = 'Get user data error';
+                        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Get user data error', FILE_APPEND);
                     }
                 }
             } catch (Exception $e) {
