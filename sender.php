@@ -61,8 +61,8 @@ $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
 
 // 2. Send messages to telegram users without payment
-$now_minus_15_min = date('Y-m-d H:i:s', strtotime('-15 minutes'));
-$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND date_payment IS NULL OR date_payment > '$now_minus_15_min'";
+$now_plus_3_min = date('Y-m-d H:i:s', strtotime('+3 minutes'));
+$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND date_payment IS NULL OR date_payment < '$now_plus_3_min'";
 $users_result = mysqli_query($conn, $sql);
 if ($users_result && mysqli_num_rows($users_result)) {
     file_put_contents($sender_log_file, ' | Active ordinary users: ' . mysqli_num_rows($users_result), FILE_APPEND);
@@ -270,7 +270,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
                         $image_counter = 0;
                         foreach ($gallery as $image) {
-                            if ($image_counter === 3) break;
+                            if ($image_counter === 1) break;
                             if ($image_counter === 0) {
                                 $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message, 'HTML');
                             } else {
@@ -343,7 +343,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
         file_put_contents($sender_log_file, ' | Msgs for ' . $username . ' sent: ' . $counter, FILE_APPEND);
     }
 } else {
-    file_put_contents($sender_log_file, ' | No active users found', FILE_APPEND);
+    file_put_contents($sender_log_file, ' | No active ordinary users found', FILE_APPEND);
 }
 
 file_put_contents($sender_log_file, ' | End: ' . date('Y-m-d H:i:s') . PHP_EOL, FILE_APPEND);
