@@ -236,9 +236,11 @@ if ($users_result && mysqli_num_rows($users_result)) {
                     $owner_name_en = slug($owner_name, true);
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
                 }
-                if ($phone !== 'n/d' && $phone !== NULL) {
+                if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone\n";
                     $message .= "<a href='https://wa.me/$phone'>Whatsapp</a>\n";
+                } else {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка:</b> $link\n" : "<b>Link:</b> $link\n";
                 }
                 /*
                 if ($created_at !== $updated_at) {

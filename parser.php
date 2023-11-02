@@ -311,7 +311,7 @@ if (count($cities) > 0) {
                             $phone_script_currentAdId = $phone_script_text['props']['initialState']['feed']['adDetails']['currentAdId'];
                             $phone_script_text = $phone_script_text['props']['initialState']['feed']['adDetails'][$phone_script_currentAdId]['item']['mobile'];
                             // remove all symbols exclude numbers and plus
-                            $phone = preg_replace('/[^0-9+]/', '', $phone_script_text);
+                            $phone = ($phone_script_text) ? preg_replace('/[^0-9+]/', '', $phone_script_text) : NULL;
                         }
 
                         $gallery = json_encode($gallery_array);
