@@ -1487,8 +1487,7 @@ function getPropertyById($property_id)
 function getDonation($user_language)
 {
 
-    global $statistics_log_file;
-    global $statistics_error_log_file;
+    global $start_error_log_file;
 
     $message = null;
 
@@ -1503,7 +1502,7 @@ function getDonation($user_language)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($statistics_error_log_file, ' | getDonation - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | getDonation - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -1533,7 +1532,7 @@ function getDonation($user_language)
 
         $message = "\n";
         $message .= "\n";
-        $message .= ($user_language === 'ru' || $user_language === 'kg') ? '💰 Если Вы хотите поддержать развитие бота, воспользуйтесь кнопками внизу' : '💰 If you want to support the development of the bot, use the buttons below';
+        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум доступа:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полноый набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум доступа на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум доступа на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум доступа на 14 дней - 500 сом (550 руб)\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "💪 Benefits of premium access:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium access for 3 days is 200 soms (220 rubles)\n👑 The cost of premium access for 7 days is 300 soms (330 rubles)\n👑 The cost of premium access for 14 days is 500 soms ( 550 rubles)\n\n💰 To pay, use the buttons below ⬇";
     } else {
         $inline_keyboard = null;
     }
