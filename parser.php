@@ -172,7 +172,7 @@ if (count($rates) > 0) {
 
 // 3. Get all chat_id from table user db
 $now = date('Y-m-d H:i:s');
-$sql = "SELECT `chat_id` FROM $table_user WHERE (`is_deleted` IS NULL OR `is_deleted` = 0) AND ('$now' <= `date_payment` OR `date_payment` IS NULL)";
+$sql = "SELECT `chat_id` FROM $table_user WHERE `is_deleted` IS NULL OR `is_deleted` = 0";
 $result = mysqli_query($conn, $sql);
 $chat_ids = [];
 if ($result !== false) {

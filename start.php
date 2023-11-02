@@ -544,8 +544,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $user_rooms_min = $get_user_data['rooms_min'];
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
                     $user_max_price = $get_user_data['price_max_text'];
+                    $user_date_payment = $get_user_data['date_payment'];
 
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройки успешно сохранены!</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "<b>Settings successfully saved!</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+
+                    $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> до " . $user_date_payment . "\nПо окончании премиум подписки Вы <b><u>продолжите</u></b> получать оповещения, но в сжатом виде. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> until " . $user_date_payment . "\nAfter the premium subscription expires, you will <b><u>continue</u></b> to receive notifications, but in a shorter form. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
+
                     $bot->sendMessage($chat_id, $message_text, 'HTML');
 
                     // set timeout
