@@ -1517,7 +1517,7 @@ function getDonation($user_language)
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
-    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY id ASC";
+    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY donation_id ASC";
     $result = mysqli_query($conn, $sql);
     if ($result && mysqli_num_rows($result) > 0) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
