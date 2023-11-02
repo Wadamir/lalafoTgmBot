@@ -62,7 +62,7 @@ $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
 // 2. Send messages to telegram users without payment
 $now_plus_9_min = date('Y-m-d H:i:s', strtotime('+9 minutes'));
-$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND date_payment IS NULL OR date_payment < '$now_plus_9_min'";
+$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND date_payment < '$now_plus_9_min'";
 $users_result = mysqli_query($conn, $sql);
 if ($users_result && mysqli_num_rows($users_result)) {
     file_put_contents($sender_log_file, ' | Active ordinary users: ' . mysqli_num_rows($users_result), FILE_APPEND);
