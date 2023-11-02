@@ -113,6 +113,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         case '/start':
             try {
                 $user_result = createUser($user_data);
+                file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] User result: ' . print_r($user_result, true), FILE_APPEND);
                 if ($user_result === true) { // New user
                     // Get all cities
                     $cities = getCity();
