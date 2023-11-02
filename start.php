@@ -10,8 +10,6 @@ $log_dir = __DIR__ . '/logs';
 $start_log_file = $log_dir . '/start.log';
 $start_error_log_file = $log_dir . '/start_error.log';
 
-file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . ']', FILE_APPEND);
-
 $token = TOKEN;
 if (!$token) {
     file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Token not found', FILE_APPEND);
@@ -156,7 +154,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     }
                 } else { // Returned user
                     $get_user_data = getUserData($user_data['tgm_user_id']);
-                    file_put_contents($start_log_file, ' | get_user_data - ' . json_encode($get_user_data), FILE_APPEND);
                     if (!empty($get_user_data)) {
                         $user_preference_city = $get_user_data['preference_city_text'];
                         $user_preference_district = $get_user_data['preference_district_text'];
@@ -179,6 +176,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         }
 
                         $donation_array = getDonation($user_language);
+                        file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Donation array: ' . print_r($donation_array, true), FILE_APPEND);
                         $inline_keyboard = $donation_array[1];
                         if (!empty($donation_array[0])) {
                             $message_text .= $donation_array[0];
