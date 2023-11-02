@@ -94,7 +94,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         case '/stop':
             try {
                 // Send message
-                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Вы отписаны от обновлений бота. Если решите восстановить уведомления, воспользуйтесь командой /start. 📯 Для обратной связи напишите боту сообщение с хештегом #feedback" : "You are unsubscribed from bot updates. If you decide to restart notifications, use the /start command. 📯 For feedback, write a message to the bot with the hashtag #feedback";
+                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "⛔ Вы отписаны от обновлений бота. Если решите восстановить уведомления, воспользуйтесь командой /start\n\n📯 Для обратной связи напишите боту сообщение с хештегом #feedback" : "⛔ You are unsubscribed from bot updates. If you decide to restart notifications, use the /start command\n\n📯 For feedback, write a message to the bot with the hashtag #feedback";
                 $bot->sendMessage($chat_id, $message_text);
                 deactivateUser($user_data['tgm_user_id'], $user_data['chat_id']);
             } catch (Exception $e) {
@@ -140,15 +140,17 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 
                         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
                         $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Привет, " . $user_data['first_name'] . "! Вы успешно зарегистрированы!" : "Hello, " . $user_data['first_name'] . "! You are successfully registered!";
-                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе Вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Настройка</b> \n\n❓В каком городе Вы ищете жилье? \n\n" : "\n\n<b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
 
                         try {
                             $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                         } catch (Exception $e) {
                             $log_error_array[] = $e->getMessage();
+                            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ' . $e->getMessage(), FILE_APPEND);
                         }
                     } else {
                         $log_error_array[] = 'Cities not found';
+                        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Cities not found', FILE_APPEND);
                     }
                 } else { // Returned user
                     $get_user_data = getUserData($user_data['tgm_user_id']);
@@ -285,7 +287,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 }
 
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
-                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n <b>Настройка</b> \n\n❓В каком городе Вы ищете жилье? \n\n" : "\n\n <b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
+                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Настройка</b> \n\n❓В каком городе Вы ищете жилье? \n\n" : "\n\n<b>Settings</b> \n\n❓In which city are you looking for housing? \n\n";
 
                 try {
                     $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
