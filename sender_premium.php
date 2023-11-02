@@ -133,6 +133,18 @@ if ($users_result && mysqli_num_rows($users_result)) {
 
                 $message = "<b>$title</b>\n\n";
 
+                if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone ";
+                    $message .= "(<a href='https://wa.me/$phone'>Whatsapp</a>)\n";
+                }
+                if ($owner_name !== 'n/d' && $owner_name !== NULL) {
+                    $owner_name_en = slug($owner_name, true);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
+                }
+                if ($link !== 'n/d' && $link !== NULL) {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ссылка на объявление:</b> $link\n" : "\n<b>Link:</b> $link\n\n";
+                }
+
                 if ($district !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Район:</b> $district\n" : "<b>District:</b> $district\n";
                 }
@@ -142,32 +154,42 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 }
                 if ($sharing !== 'n/d' && $sharing !== NULL) {
                     if ($sharing === '1') {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Подселение:</b> без подселения\n" : "<b>Sharing:</b> without sharing\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "➕ <b>Подселение:</b> без подселения\n" : "➕ <b>Sharing:</b> without sharing\n";
                     } elseif ($sharing === '0') {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Подселение:</b> с подселением\n" : "<b>Sharing:</b> with sharing\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "➕ <b>Подселение:</b> с подселением\n" : "➕ <b>Sharing:</b> with sharing\n";
                     }
                 }
                 if ($floor !== 'n/d' && $floor !== NULL && $total_floor !== 'n/d' && $total_floor !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Этаж:</b> $floor/$total_floor\n" : "<b>Floor:</b> $floor/$total_floor\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "↗ <b>Этаж:</b> $floor/$total_floor\n" : "↗ <b>Floor:</b> $floor/$total_floor\n";
                 } elseif ($floor !== 'n/d' && $floor !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Этаж:</b> $floor\n" : "<b>Floor:</b> $floor\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "↗ <b>Этаж:</b> $floor\n" : "↗ <b>Floor:</b> $floor\n";
                 } elseif ($total_floor !== 'n/d' && $total_floor !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Всего этажей:</b> $total_floor\n" : "<b>Total floor:</b> $total_floor\n";
                 }
-                if ($property_type === 1) {
-                    if ($house_area !== 'n/d' && $house_area !== NULL) {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Площадь дома:</b> $house_area м²\n" : "<b>House area:</b> $house_area sq.m.\n";
-                    }
-                    if ($land_area !== 'n/d' && $land_area !== NULL) {
-                        $sqm = intval($land_area) * 100;
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Площадь участка:</b> $land_area соток\n" : "<b>Land area:</b> $sqm sq.m.\n";
-                    }
+
+                if ($min_rent_month !== 'n/d' && $min_rent_month !== NULL) {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n❗ <b>Мин. срок аренды:</b> $min_rent_month месяцев\n" : "\n❗ <b>Min. rent period:</b> $min_rent_month months\n";
                 }
+                if ($price_kgs !== 'n/d' && $price_kgs !== NULL) {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n💵 <b>Цена:</b> $price_kgs ($price_usd)\n" : "\n💵 <b>Price:</b> $price_kgs ($price_usd)\n";
+                }
+                if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL) {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💵 <b>Депозит:</b> $deposit_kgs ($deposit_usd)\n" : "💵 <b>Deposit:</b> $deposit_kgs ($deposit_usd)\n";
+                }
+
+                if ($house_area !== 'n/d' && $house_area !== NULL) {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Площадь дома:</b> $house_area м²\n" : "👉 <b>House area:</b> $house_area sq.m.\n";
+                }
+                if ($land_area !== 'n/d' && $land_area !== NULL) {
+                    $sqm = intval($land_area) * 100;
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Площадь участка:</b> $land_area соток\n" : "👉 <b>Land area:</b> $sqm sq.m.\n";
+                }
+
                 if ($animals !== 'n/d' && $animals !== NULL) {
                     if ($animals === '1') {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Животные:</b> да\n" : "<b>Animals:</b> yes\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Животные:</b> да\n" : "👉 <b>Animals:</b> yes\n";
                     } elseif ($animals === '0') {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Животные:</b> нет\n" : "<b>Animals:</b> no\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Животные:</b> нет\n" : "👉 <b>Animals:</b> no\n";
                     }
                 }
 
@@ -179,7 +201,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $furniture_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $furniture_data['amenity_name_ru'] : $furniture_data['amenity_name_en'];
                     }
                     $furniture = implode(', ', $furniture_array_name);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Мебель:</b> $furniture\n" : "<b>Furniture:</b> $furniture\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Мебель:</b> $furniture\n" : "👉 <b>Furniture:</b> $furniture\n";
                 }
                 if ($condition !== 'n/d' && $condition !== NULL) {
                     $condition_array = json_decode($condition);
@@ -189,7 +211,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $condition_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $condition_data['amenity_name_ru'] : $condition_data['amenity_name_en'];
                     }
                     $condition = implode(', ', $condition_array_name);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Состояние:</b> $condition\n" : "<b>Condition:</b> $condition\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Состояние:</b> $condition\n" : "👉 <b>Condition:</b> $condition\n";
                 }
                 if ($appliances !== 'n/d' && $appliances !== NULL) {
                     $appliances_array = json_decode($appliances);
@@ -199,7 +221,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $appliances_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $appliances_data['amenity_name_ru'] : $appliances_data['amenity_name_en'];
                     }
                     $appliances = implode(', ', $appliances_array_name);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Бытовая техника:</b> $appliances\n" : "<b>Appliances:</b> $appliances\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Бытовая техника:</b> $appliances\n" : "👉 <b>Appliances:</b> $appliances\n";
                 }
                 if ($improvement_in !== 'n/d' && $improvement_in !== NULL) {
                     $improvement_in_array = json_decode($improvement_in);
@@ -209,7 +231,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $improvement_in_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_in_data['amenity_name_ru'] : $improvement_in_data['amenity_name_en'];
                     }
                     $improvement_in = implode(', ', $improvement_in_array_name);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Удобства:</b> $improvement_in\n" : "<b>Improvements:</b> $improvement_in\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Удобства:</b> $improvement_in\n" : "👉 <b>Improvements:</b> $improvement_in\n";
                 }
                 if ($improvement_out !== 'n/d' && $improvement_out !== NULL) {
                     $improvement_out_array = json_decode($improvement_out);
@@ -219,7 +241,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $improvement_out_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_out_data['amenity_name_ru'] : $improvement_out_data['amenity_name_en'];
                     }
                     $improvement_out = implode(', ', $improvement_out_array_name);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Благоустройство:</b> $improvement_out\n" : "<b>Improvements:</b> $improvement_out\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Благоустройство:</b> $improvement_out\n" : "👉 <b>Improvements:</b> $improvement_out\n";
                 }
                 if ($property_type === 1) {
                     if ($utility !== 'n/d' && $utility !== NULL) {
@@ -230,29 +252,8 @@ if ($users_result && mysqli_num_rows($users_result)) {
                             $utility_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $utility_data['amenity_name_ru'] : $utility_data['amenity_name_en'];
                         }
                         $utility = implode(', ', $utility_array_name);
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Коммуникации:</b> $utility\n" : "<b>Utility:</b> $utility\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Коммуникации:</b> $utility\n" : "👉 <b>Utility:</b> $utility\n";
                     }
-                }
-
-                if ($min_rent_month !== 'n/d' && $min_rent_month !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Мин. срок аренды:</b> $min_rent_month месяцев\n" : "\n<b>Min. rent period:</b> $min_rent_month months\n";
-                }
-                if ($price_kgs !== 'n/d' && $price_kgs !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Цена:</b> $price_kgs ($price_usd)\n" : "\n<b>Price:</b> $price_kgs ($price_usd)\n";
-                }
-                if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Депозит:</b> $deposit_kgs ($deposit_usd)\n" : "<b>Deposit:</b> $deposit_kgs ($deposit_usd)\n";
-                }
-                if ($owner_name !== 'n/d' && $owner_name !== NULL) {
-                    $owner_name_en = slug($owner_name, true);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
-                }
-                if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone\n";
-                    $message .= "<a href='https://wa.me/$phone'>Whatsapp</a>\n";
-                }
-                if ($link !== 'n/d' && $link !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка на объявление:</b> $link\n" : "<b>Link:</b> $link\n";
                 }
                 /*
                 if ($created_at !== $updated_at) {
