@@ -638,9 +638,10 @@ function createUser($user_data)
         throw new ErrorException("Connection failed: " . mysqli_connect_error());
     }
     // Check if user exists
-    $sql = "SELECT * FROM $table_user WHERE tgm_user_id = " . $user_data['tgm_user_id'];
+    $sql = "SELECT * FROM $table_user WHERE tgm_user_id = '" . $user_data['tgm_user_id'] . "'";
     file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ' . $sql, FILE_APPEND);
     $result = mysqli_query($conn, $sql);
+    file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] ' . mysqli_num_rows($result), FILE_APPEND);
     if (mysqli_num_rows($result) > 0) {
         activateUser($user_data['tgm_user_id']);
         $log_message_array[] = 'User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'];
