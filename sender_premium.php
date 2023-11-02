@@ -60,8 +60,9 @@ $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
 
 
-// 2. Send messages to telegram
-$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 OR is_deleted IS NULL";
+// 2. Send messages to telegram users with active subscription
+$now_minus_9_min = date('Y-m-d H:i:s', strtotime('9 minutes'));
+$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND date_payment IS NULL OR date_payment > '$now_minus_9_min'";
 $users_result = mysqli_query($conn, $sql);
 if ($users_result && mysqli_num_rows($users_result)) {
     file_put_contents($sender_log_file, ' | Active users: ' . mysqli_num_rows($users_result), FILE_APPEND);
@@ -200,6 +201,16 @@ if ($users_result && mysqli_num_rows($users_result)) {
                     $appliances = implode(', ', $appliances_array_name);
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Бытовая техника:</b> $appliances\n" : "<b>Appliances:</b> $appliances\n";
                 }
+                if ($improvement_in !== 'n/d' && $improvement_in !== NULL) {
+                    $improvement_in_array = json_decode($improvement_in);
+                    $improvement_in_array_name = [];
+                    foreach ($improvement_in_array as $improvement_in_item) {
+                        $improvement_in_data = getAmenityById($improvement_in_item);
+                        $improvement_in_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_in_data['amenity_name_ru'] : $improvement_in_data['amenity_name_en'];
+                    }
+                    $improvement_in = implode(', ', $improvement_in_array_name);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Удобства:</b> $improvement_in\n" : "<b>Improvements:</b> $improvement_in\n";
+                }
                 if ($improvement_out !== 'n/d' && $improvement_out !== NULL) {
                     $improvement_out_array = json_decode($improvement_out);
                     $improvement_out_array_name = [];
@@ -239,8 +250,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone\n";
                     $message .= "<a href='https://wa.me/$phone'>Whatsapp</a>\n";
-                } else {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка:</b> $link\n" : "<b>Link:</b> $link\n";
+                }
+                if ($link !== 'n/d' && $link !== NULL) {
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка на объявление:</b> $link\n" : "<b>Link:</b> $link\n";
                 }
                 /*
                 if ($created_at !== $updated_at) {
