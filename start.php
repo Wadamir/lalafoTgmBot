@@ -155,6 +155,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else { // Returned user
                     $get_user_data = getUserData($user_data['tgm_user_id']);
                     if (!empty($get_user_data)) {
+                        file_put_contents('get_user_data.log', PHP_EOL . '[' . date('Y-m-d H:i:s') . '] gjgjjgjgj', FILE_APPEND);
                         $user_preference_city = $get_user_data['preference_city_text'];
                         $user_preference_district = $get_user_data['preference_district_text'];
                         $user_preference_property = $get_user_data['preference_property_text'];
