@@ -153,26 +153,23 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 } else { // Returned user
                     $get_user_data = getUserData($user_data['tgm_user_id']);
                     if (!empty($get_user_data)) {
-                        if ($get_user_data['preference_city'] === NULL) {
-                            $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
-                        } else {
-                            $city = getCityById($get_user_data['preference_city']);
-                            $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
-                        }
-                        if ($get_user_data['rooms_min'] === NULL) {
-                            $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
-                        } else {
-                            $user_rooms_min = $get_user_data['rooms_min'];
-                        }
+                        $user_preference_city = $get_user_data['preference_city_text'];
+                        $user_preference_district = $get_user_data['preference_district_text'];
+                        $user_preference_property = $get_user_data['preference_property_text'];
+                        $user_rooms_min = $get_user_data['rooms_min'];
                         $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                        if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
-                            $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
-                        } else {
-                            $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
-                        }
+                        $user_max_price = $get_user_data['price_max'];
+
                         // Send message
                         $message_text = ($user_language === 'ru' || $user_language === 'kg') ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
-                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\n⚙ Если Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\n⚙ If you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Тип жилья: <b>" . $user_preference_property . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\n⚙ Если Вы хотите изменить настройки воспользуйтесь командой /settings\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Property type: <b>" . $user_preference_property . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\n⚙ If you want to change the settings, use the /settings command\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+
+                        $donation_array = getDonation($user_language);
+                        $inline_keyboard = $donation_array[1];
+                        if (!empty($donation_array[0])) {
+                            $message_text .= $donation_array[0];
+                        }
+
                         try {
                             $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                         } catch (Exception $e) {
@@ -189,25 +186,15 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         case '/settings':
             $get_user_data = getUserData($user_data['tgm_user_id']);
             if (!empty($get_user_data)) {
-                if ($get_user_data['preference_city'] === NULL) {
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
-                } else {
-                    $city = getCityById($get_user_data['preference_city']);
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
-                }
-                if ($get_user_data['rooms_min'] === NULL) {
-                    $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
-                } else {
-                    $user_rooms_min = $get_user_data['rooms_min'];
-                }
+                $user_preference_city = $get_user_data['preference_city_text'];
+                $user_preference_district = $get_user_data['preference_district_text'];
+                $user_preference_property = $get_user_data['preference_property_text'];
+                $user_rooms_min = $get_user_data['rooms_min'];
                 $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
-                    $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
-                } else {
-                    $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
-                }
+                $user_max_price = $get_user_data['price_max'];
+
                 // Send message
-                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\nFor feedback, write a message to the bot with the hashtag #feedback";
+                $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Тип жилья: <b>" . $user_preference_property . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Property type: <b>" . $user_preference_property . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\nFor feedback, write a message to the bot with the hashtag #feedback";
 
                 $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "Изменить настройки" : "Change settings";
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
@@ -305,6 +292,68 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             }
             if ($update_result) {
                 $bot->deleteMessage($chat_id, $messageId);
+                $properties = getProperties();
+                if (!empty($properties)) {
+                    $properties_array = [];
+                    if ($user_language === 'ru' || $user_language === 'kg') {
+                        foreach ($properties as $property) {
+                            $properties_array[] = ['text' => $property['property_name_ru'], 'callback_data' => 'property_' . $property['property_slug']];
+                        }
+                        $properties_array[] = ['text' => 'Неважно', 'callback_data' => 'property_none'];
+                    } else {
+                        foreach ($properties as $property) {
+                            $properties_array[] = ['text' => $property['property_name_en'], 'callback_data' => 'property_' . $property['property_slug']];
+                        }
+                        $properties_array[] = ['text' => 'No matter', 'callback_data' => 'property_none'];
+                    }
+                    $inline_keyboard_array = [];
+                    foreach ($properties_array as $key => $value) {
+                        if ($key % 2 === 0) {
+                            $inline_keyboard_array[] = [$value];
+                        } else {
+                            $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+                        }
+                    }
+
+                    $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+                    $get_user_data = getUserData($user_data['tgm_user_id']);
+                    if (!empty($get_user_data)) {
+                        $user_preference_city = $get_user_data['preference_city_text'];
+                        $user_preference_district = $get_user_data['preference_district_text'];
+                        $user_preference_property = $get_user_data['preference_property_text'];
+                        $user_rooms_min = $get_user_data['rooms_min'];
+                        $user_preference_sharing = $get_user_data['preference_sharing_text'];
+                        $user_max_price = $get_user_data['price_max'];
+                        $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n\n❓Какой тип жилья Вам нужен?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n\n❓What type of housing do you need? \n\n";
+                        try {
+                            $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
+                        } catch (Exception $e) {
+                            $log_error_array[] = $e->getMessage();
+                        }
+                    } else {
+                        $log_error_array[] = 'Get user data error';
+                    }
+                } else {
+                    $log_error_array[] = 'Properties not found';
+                }
+            } else {
+                $bot->deleteMessage($chat_id, $messageId);
+                $log_error_array[] = 'Update user error';
+            }
+            break;
+        case strpos($command_data, "property") === 0:
+            $property_slug = str_replace('property_', '', $command_data);
+            $log_message_array[] = 'Property type - ' . $property_slug;
+            $update_result = false;
+            if ($property_slug !== 'none') {
+                $property_data = getPropertyBySlug($property_slug);
+                $new_data['preference_property'] = $property_data[0]['property_id'];
+                $update_result = updateUser($new_data, $user_data['tgm_user_id']);
+            } else {
+                $update_result = true;
+            }
+            if ($update_result) {
+                $bot->deleteMessage($chat_id, $messageId);
                 // Send message
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
@@ -316,14 +365,14 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     ]
                 );
                 $get_user_data = getUserData($user_data['tgm_user_id']);
-                if ($get_user_data['preference_city'] === NULL) {
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
-                } else {
-                    $city = getCityById($get_user_data['preference_city']);
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
-                }
                 if (!empty($get_user_data)) {
-                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n\n❓How many minimum rooms in an apartment do you need? \n\n";
+                    $user_preference_city = $get_user_data['preference_city_text'];
+                    $user_preference_district = $get_user_data['preference_district_text'];
+                    $user_preference_property = $get_user_data['preference_property_text'];
+                    $user_rooms_min = $get_user_data['rooms_min'];
+                    $user_preference_sharing = $get_user_data['preference_sharing_text'];
+                    $user_max_price = $get_user_data['price_max'];
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Тип жилья: " . $user_preference_property . "\n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Property type: " . $user_preference_property . "\n\n❓How many minimum rooms do you need in the apartment? \n\n";
                     try {
                         $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                     } catch (Exception $e) {
@@ -374,19 +423,14 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     ]
                 );
                 $get_user_data = getUserData($user_data['tgm_user_id']);
-                if ($get_user_data['preference_city'] === NULL) {
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
-                } else {
-                    $city = getCityById($get_user_data['preference_city']);
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
-                }
-                if ($get_user_data['rooms_min'] === NULL) {
-                    $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
-                } else {
-                    $user_rooms_min = $get_user_data['rooms_min'];
-                }
                 if (!empty($get_user_data)) {
-                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n\n❓Предпочтительный тип аренды?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n\n❓Rental type? \n\n";
+                    $user_preference_city = $get_user_data['preference_city_text'];
+                    $user_preference_district = $get_user_data['preference_district_text'];
+                    $user_preference_property = $get_user_data['preference_property_text'];
+                    $user_rooms_min = $get_user_data['rooms_min'];
+                    $user_preference_sharing = $get_user_data['preference_sharing_text'];
+                    $user_max_price = $get_user_data['price_max'];
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Тип жилья: " . $user_preference_property . "\n✅ Минимум комнат: " . $user_rooms_min . "\n\n❓Предпочтительный тип аренды?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Property type: " . $user_preference_property . "\n✅ Minimum rooms: " . $user_rooms_min . "\n\n❓Rental type? \n\n";
                     $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                 } else {
                     $log_error_array[] = 'Get user data error';
@@ -430,20 +474,14 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     ]
                 );
                 $get_user_data = getUserData($user_data['tgm_user_id']);
-                if ($get_user_data['preference_city'] === NULL) {
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
-                } else {
-                    $city = getCityById($get_user_data['preference_city']);
-                    $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
-                }
-                if ($get_user_data['rooms_min'] === NULL) {
-                    $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
-                } else {
-                    $user_rooms_min = $get_user_data['rooms_min'];
-                }
-                $user_preference_sharing = $get_user_data['preference_sharing_text'];
                 if (!empty($get_user_data)) {
-                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n\n❓Maximum rental cost per month? \n\n";
+                    $user_preference_city = $get_user_data['preference_city_text'];
+                    $user_preference_district = $get_user_data['preference_district_text'];
+                    $user_preference_property = $get_user_data['preference_property_text'];
+                    $user_rooms_min = $get_user_data['rooms_min'];
+                    $user_preference_sharing = $get_user_data['preference_sharing_text'];
+                    $user_max_price = $get_user_data['price_max'];
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Тип жилья: " . $user_preference_property . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Property type: " . $user_preference_property . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n\n❓Maximum rental cost per month? \n\n";
                     $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                 } else {
                     $log_error_array[] = 'Get user data error';
@@ -497,25 +535,19 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $bot->deleteMessage($chat_id, $messageId);
                 $get_user_data = getUserData($user_data['tgm_user_id']);
                 if (!empty($get_user_data)) {
-                    if ($get_user_data['preference_city'] === NULL) {
-                        $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбран' : 'not selected';
-                    } else {
-                        $city = getCityById($get_user_data['preference_city']);
-                        $user_preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $city['city_name_ru'] : $city['city_name_en'];
-                    }
-                    if ($get_user_data['rooms_min'] === NULL) {
-                        $user_rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'не выбрано' : 'not selected';
-                    } else {
-                        $user_rooms_min = $get_user_data['rooms_min'];
-                    }
+                    $user_preference_city = $get_user_data['preference_city_text'];
+                    $user_preference_district = $get_user_data['preference_district_text'];
+                    $user_preference_property = $get_user_data['preference_property_text'];
+                    $user_rooms_min = $get_user_data['rooms_min'];
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                    if ($get_user_data['price_max'] === 1000000 || $get_user_data['price_max'] === NULL) {
-                        $user_max_price = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
-                    } else {
-                        $user_max_price = $get_user_data['price_max'] . ' ' . $get_user_data['price_currency'];
-                    }
+                    $user_max_price = $get_user_data['price_max'];
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройки успешно сохранены!</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "<b>Settings successfully saved!</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                     $bot->sendMessage($chat_id, $message_text, 'HTML');
+
+                    // set timeout
+                    $rnd_sec = rand(2, 5);
+                    sleep($rnd_sec);
+
                     sendLastAds($user_data['tgm_user_id'], $chat_id);
                 } else {
                     $log_error_array[] = 'Get user data error';
@@ -748,6 +780,12 @@ function getUserData($tgm_user_id)
     global $log_message_array;
     global $log_error_array;
 
+    $formatter_usd = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
+    $formatter_usd->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
+
+    $formatter_kgs = new NumberFormatter('ru_RU', NumberFormatter::CURRENCY);
+    $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
+
     $log_message_array[] = 'getUserData() - ' . $tgm_user_id;
 
     $dbhost = MYSQL_HOST;
@@ -756,6 +794,9 @@ function getUserData($tgm_user_id)
     $dbname = MYSQL_DB;
     $table_user = MYSQL_TABLE_USER;
     $table_city = MYSQL_TABLE_CITY;
+    $table_district = MYSQL_TABLE_DISTRICT;
+    $table_property = MYSQL_TABLE_PROPERTY;
+    $table_owner = MYSQL_TABLE_OWNER;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
@@ -763,23 +804,55 @@ function getUserData($tgm_user_id)
         $log_error_array[] = 'getUserData() - Connection failed';
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
-    $sql = "SELECT * FROM $table_user LEFT JOIN $table_city ON $table_user.preference_city = $table_city.city_id WHERE tgm_user_id = " . $tgm_user_id;
+
+    $sql = "SELECT * FROM $table_user 
+            LEFT JOIN $table_city ON $table_user.preference_city = $table_city.city_id 
+            LEFT JOIN $table_property ON $table_user.preference_property = $table_property.property_id 
+            LEFT JOIN $table_owner ON $table_user.preference_owner = $table_owner.owner_id 
+            LEFT JOIN $table_district ON $table_user.preference_district = $table_district.district_id 
+            WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     $user_data = [];
     if (mysqli_num_rows($result) > 0) {
         while ($row = mysqli_fetch_assoc($result)) {
-            if ($row['preference_sharing'] === '1') {
-                $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'без подселения' : 'without sharing';
-            } elseif ($row['preference_sharing'] === '0') {
-                $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'с подселением' : 'with sharing';
-            } else {
-                $preference_sharing = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'неважно' : 'no matter';
+
+            $user_language = ($row['language_code']) ? $row['language_code'] : 'en';
+
+            $price_max = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
+            if ($row['price_max'] !== NULL && $row['price_max'] !== 1000000) {
+                $price_max = ($row['price_currency'] === 'USD') ? $formatter_usd->formatCurrency($row['price_max'], 'USD') : $formatter_kgs->formatCurrency($row['price_max'], 'KGS');
             }
-            if ($row['preference_owner'] === '1') {
-                $preference_owner = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'без посредников' : 'without agents';
-            } else {
-                $preference_owner = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'неважно' : 'any';
+
+            $rooms_min = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
+            if ($row['rooms_min'] !== NULL) {
+                $rooms_min = $row['rooms_min'];
             }
+
+            $preference_city = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
+            if ($row['preference_city'] !== NULL) {
+                $preference_city = ($user_language === 'ru' || $user_language === 'kg') ? $row['city_name_ru'] : $row['city_name_en'];
+            }
+
+            $preference_district = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
+            if ($row['preference_district'] !== NULL) {
+                $preference_district = ($user_language === 'ru' || $user_language === 'kg') ? $row['district_name_ru'] : $row['district_name_en'];
+            }
+
+            $preference_sharing = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
+            if ($row['preference_sharing'] !== NULL) {
+                $preference_sharing = ($row['preference_sharing'] === '1') ? (($user_language === 'ru' || $user_language === 'kg') ? 'без подселения' : 'without sharing') : (($user_language === 'ru' || $user_language === 'kg') ? 'с подселением' : 'with sharing');
+            }
+
+            $preference_owner = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
+            if ($row['preference_owner'] !== NULL) {
+                $preference_owner = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? $row['owner_name_ru']  : $row['owner_name_en'];
+            }
+
+            $preference_property = ($user_language === 'ru' || $user_language === 'kg') ? 'неважно' : 'no matter';
+            if ($row['preference_property'] !== NULL) {
+                $preference_property = ($user_language === 'ru' || $user_language === 'kg') ? $row['property_name_ru'] : $row['property_name_en'];
+            }
+
             $now = date('Y-m-d H:m:s');
             $user_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'не оплачена' : 'not paid';
             if ($row['date_payment']) {
@@ -787,35 +860,41 @@ function getUserData($tgm_user_id)
                     $user_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'оплачена до ' . $row['date_payment'] : 'paid until ' . $row['date_payment'];
                 }
             }
+
+
             $user_data = [
-                'tgm_user_id' => $row['tgm_user_id'],
-                'is_bot' => $row['is_bot'],
-                'is_deleted' => $row['is_deleted'],
-                'is_premium' => $row['is_premium'],
-                'is_returned' => $row['is_returned'],
-                'first_name' => $row['first_name'],
-                'last_name' => $row['last_name'],
-                'username' => $row['username'],
-                'language_code' => $row['language_code'],
-                'chat_id' => $row['chat_id'],
-                'refresh_time' => $row['refresh_time'],
-                'price_min' => $row['price_min'],
-                'price_max' => $row['price_max'],
-                'price_currency' => $row['price_currency'],
-                'rooms_min' => $row['rooms_min'],
-                'rooms_max' => $row['rooms_max'],
-                'preference_city' => $row['preference_city'],
-                'preference_district' => $row['preference_district'],
-                'preference_sharing' => $row['preference_sharing'],
-                'preference_sharing_text' => $preference_sharing,
-                'preference_owner' => $preference_owner,
-                'date_payment' => $user_payment,
-                'date_updated' => $row['date_updated'],
-                'date_added' => $row['date_added'],
-                'city_name_ru' => $row['name_ru'],
-                'city_name_en' => $row['name_en'],
-                'city_name_kg' => $row['name_kg'],
-                'city_slug' => $row['slug'],
+                'tgm_user_id'               => $row['tgm_user_id'],
+                'is_bot'                    => $row['is_bot'],
+                'is_deleted'                => $row['is_deleted'],
+                'is_premium'                => $row['is_premium'],
+                'is_admin'                  => $row['is_admin'],
+                'is_returned'               => $row['is_returned'],
+                'is_ads'                    => $row['is_ads'],
+                'is_statistics'             => $row['is_statistics'],
+                'first_name'                => $row['first_name'],
+                'last_name'                 => $row['last_name'],
+                'username'                  => $row['username'],
+                'language_code'             => $row['language_code'],
+                'chat_id'                   => $row['chat_id'],
+                'refresh_time'              => $row['refresh_time'],
+                'price_min'                 => $row['price_min'],
+                'price_max'                 => $row['price_max'],
+                'price_max_text'            => $price_max,
+                'price_currency'            => $row['price_currency'],
+                'rooms_min'                 => $row['rooms_min'],
+                'rooms_min_text'            => $rooms_min,
+                'rooms_max'                 => $row['rooms_max'],
+                'preference_city'           => $row['preference_city'],
+                'preference_city_text'      => $preference_city,
+                'preference_district'       => $row['preference_district'],
+                'preference_district_text'  => $preference_district,
+                'preference_sharing'        => $row['preference_sharing'],
+                'preference_sharing_text'   => $preference_sharing,
+                'preference_owner'          => $row['preference_owner'],
+                'preference_owner_text'     => $preference_owner,
+                'preference_property'       => $row['preference_property'],
+                'preference_property_text'  => $preference_property,
+                'date_payment'              => $user_payment,
             ];
         }
     }
@@ -832,6 +911,12 @@ function sendLastAds($tgm_user_id, $chat_id)
     global $log_message_array;
     global $log_error_array;
     global $start_log_file;
+
+    $formatter_usd = new NumberFormatter('en_US', NumberFormatter::CURRENCY);
+    $formatter_usd->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
+
+    $formatter_kgs = new NumberFormatter('ru_RU', NumberFormatter::CURRENCY);
+    $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
     file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] sendLastAds() - ' . $tgm_user_id, FILE_APPEND);
 
@@ -859,9 +944,13 @@ function sendLastAds($tgm_user_id, $chat_id)
         } else {
             $user_language = $user_data['language_code'];
             $user_preference_city = $user_data['preference_city'];
+            $username = $user_data['username'];
             $parameters_array = [];
             if ($user_preference_city !== NULL) {
                 $parameters_array[] = "city = " . $user_preference_city;
+            }
+            if ($user_data['preference_property'] !== NULL) {
+                $parameters_array[] = "property_type = " . $user_data['preference_property'];
             }
             if ($user_data['price_max'] !== NULL) {
                 $parameters_array[] = "price_usd <= " . $user_data['price_max'];
@@ -893,89 +982,235 @@ function sendLastAds($tgm_user_id, $chat_id)
             if (mysqli_num_rows($result) > 0) {
                 $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
                 foreach ($rows as $row) {
-                    $title = $row['title'];
-                    $district = $row['district'];
+                    $property_type = ($row['property_type']) ? intval($row['property_type']) : NULL;
+                    $title = ($user_language === 'ru' || $user_language === 'kg') ? $row['title_ru'] : $row['title_en'];
+                    $district = ($row['district']) ? $row['district'] : NULL;
+                    if ($district !== NULL) {
+                        $district = getDistrictById($district);
+                        $district = ($user_language === 'ru' || $user_language === 'kg') ? $district['district_name_ru'] : $district['district_name_en'];
+                    }
                     $link = $row['link'];
-                    $created_at = $row['created_at'];
-                    $updated_at = $row['updated_at'];
-                    $price_kgs = $row['price_kgs'];
-                    $price_usd = $row['price_usd'];
-                    $deposit_kgs = $row['deposit_kgs'];
-                    $deposit_usd = $row['deposit_usd'];
-                    $owner = $row['owner'];
-                    $owner_name = $row['owner_name'];
-                    $phone = $row['phone'];
-                    $rooms = $row['rooms'];
-                    $floor = $row['floor'];
-                    $house_type = $row['house_type'];
-                    $sharing = $row['sharing'];
-                    $furniture = $row['furniture'];
-                    $condition = $row['condition'];
-                    $renovation = $row['renovation'];
-                    $animals = $row['animals'];
-
-                    $message = "<b>$title</b>";
-                    if ($renovation !== 'n/d' && $renovation !== NULL) {
-                        $message .= ", $renovation\n";
+                    $created_at = ($row['created_at']) ? date('d.m.Y', strtotime($row['created_at'])) : NULL;
+                    $updated_at = ($row['updated_at']) ? date('d.m.Y', strtotime($row['updated_at'])) : NULL;
+                    $price_kgs = ($row['price_kgs']) ? $formatter_kgs->formatCurrency($row['price_kgs'], 'KGS') : NULL;
+                    $price_usd = ($row['price_usd']) ? $formatter_usd->formatCurrency($row['price_usd'], 'USD') : NULL;
+                    $deposit_kgs = ($row['deposit_kgs']) ? $formatter_kgs->formatCurrency($row['deposit_kgs'], 'KGS') : NULL;
+                    $deposit_usd = ($row['deposit_usd']) ? $formatter_usd->formatCurrency($row['deposit_usd'], 'USD') : NULL;
+                    $owner = ($row['owner']) ? $row['owner'] : NULL;
+                    if ($row['owner_name']) {
+                        $owner_name = ($user_language === 'ru' || $user_language === 'kg') ? $row['owner_name'] : slug($row['owner_name'], true);
                     } else {
-                        $message .= "\n";
+                        $owner_name = NULL;
                     }
-                    if ($district) {
-                        if ($user_language === 'ru' || $user_language === 'kg') {
-                            $sql_district = "SELECT district_name_ru FROM $table_district WHERE district_id = $district";
-                        } else {
-                            $sql_district = "SELECT district_name_en FROM $table_district WHERE district_id = $district";
-                        }
-                        $result_district = mysqli_query($conn, $sql_district);
-                        $row_district = mysqli_fetch_assoc($result_district);
-                        if ($user_language === 'ru' || $user_language === 'kg') {
-                            $district_name = $row_district['district_name_ru'];
-                            $message .= "<b>Район:</b> $district_name\n";
-                        } else {
-                            $district_name = $row_district['district_name_en'];
-                            $message .= "<b>District:</b> $district_name\n";
-                        }
+                    $phone = ($row['phone']) ? $row['phone'] : NULL;
+                    $rooms = ($row['rooms']) ? $row['rooms'] : NULL;
+                    $floor = ($row['floor']) ? $row['floor'] : NULL;
+                    $total_floor = ($row['total_floor']) ? $row['total_floor'] : NULL;
+                    $house_type = ($row['house_type']) ? $row['house_type'] : NULL;
+                    $sharing = ($row['sharing']) ? $row['sharing'] : NULL;
+                    $animals = ($row['animals']) ? $row['animals'] : NULL;
+                    $house_area = ($row['house_area']) ? $row['house_area'] : NULL;
+                    $land_area = ($row['land_area']) ? $row['land_area'] : NULL;
+                    $min_rent_month = ($row['min_rent_month']) ? $row['min_rent_month'] : NULL;
+                    $condition = ($row['condition']) ? $row['condition'] : NULL;
+                    $additional = ($row['additional']) ? $row['additional'] : NULL;
+                    $heating = ($row['heating']) ? $row['heating'] : NULL;
+                    $renovation = ($row['renovation']) ? $row['renovation'] : NULL;
+                    $improvement_in = ($row['improvement_in']) ? $row['improvement_in'] : NULL;
+                    $improvement_out = ($row['improvement_out']) ? $row['improvement_out'] : NULL;
+                    $furniture = ($row['furniture']) ? $row['furniture'] : NULL;
+                    $appliances = ($row['appliances']) ? $row['appliances'] : NULL;
+                    $utility = ($row['utility']) ? $row['utility'] : NULL;
+
+                    $message = "<b>$title</b>\n\n";
+
+                    if ($district !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Район:</b> $district\n" : "<b>District:</b> $district\n";
                     }
-                    if ($price_kgs !== 'n/d' && $price_kgs !== NULL)        $message .= "<b>Цена:</b> $price_kgs KGS ($price_usd USD)\n";
-                    if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL)    $message .= "<b>Депозит:</b> $deposit_kgs KGS ($deposit_usd USD)\n";
-                    if ($house_type !== 'n/d' && $house_type !== NULL)      $message .= "<b>Серия:</b> $house_type\n";
+                    if ($house_type !== 'n/d' && $house_type !== NULL) {
+                        $house_type_en = slug($house_type, true);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Серия:</b> $house_type\n" : "<b>House type:</b> $house_type_en\n";
+                    }
                     if ($sharing !== 'n/d' && $sharing !== NULL) {
                         if ($sharing === '1') {
-                            $message .= "<b>Подселение:</b> без подселения\n";
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Подселение:</b> без подселения\n" : "<b>Sharing:</b> without sharing\n";
                         } elseif ($sharing === '0') {
-                            $message .= "<b>Подселение:</b> с подселением\n";
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Подселение:</b> с подселением\n" : "<b>Sharing:</b> with sharing\n";
                         }
                     }
-                    // if ($rooms !== 'n/d' && $rooms !== NULL)    $message .= "<b>Комнат:</b> $rooms\n";
-                    if ($floor !== 'n/d' && $floor !== NULL)       $message .= "<b>Этаж:</b> $floor\n";
-                    // if ($furniture !== 'n/d' && $furniture !== NULL) $message .= "<b>Мебель:</b> $furniture\n";
-                    if ($condition !== 'n/d' && $condition !== NULL)   $message .= "<b>Состояние:</b> $condition\n";
-                    if ($animals !== 'n/d' && $animals !== NULL)     $message .= "<b>Животные:</b> $animals\n";
-                    if ($owner !== 'n/d' && $owner !== NULL && $owner_name !== 'n/d' && $owner_name !== NULL) {
-                        $message .= "<b>Кто сдает:</b> $owner, $owner_name\n";
-                    } else {
-                        if ($owner !== 'n/d' && $owner !== NULL)   $message .= "<b>Кто сдает:</b> $owner\n";
-                        if ($owner_name !== 'n/d' && $owner_name !== NULL) $message .= "<b>Имя:</b> $owner_name\n";
+                    if ($floor !== 'n/d' && $floor !== NULL && $total_floor !== 'n/d' && $total_floor !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Этаж:</b> $floor/$total_floor\n" : "<b>Floor:</b> $floor/$total_floor\n";
+                    } elseif ($floor !== 'n/d' && $floor !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Этаж:</b> $floor\n" : "<b>Floor:</b> $floor\n";
+                    } elseif ($total_floor !== 'n/d' && $total_floor !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Всего этажей:</b> $total_floor\n" : "<b>Total floor:</b> $total_floor\n";
                     }
-                    if ($phone !== 'n/d' && $phone !== NULL)       $message .= "<b>Телефон:</b> $phone\n";
-                    if ($created_at !== $updated_at) {
-                        if ($created_at !== 'n/d' && $created_at !== NULL) $message .= "<b>Создано:</b> $created_at\n";
-                        if ($updated_at !== 'n/d' && $updated_at !== NULL) $message .= "<b>Обновлено:</b> $updated_at\n";
-                    } else {
-                        if ($created_at !== 'n/d' && $created_at !== NULL) $message .= "<b>Создано:</b> $created_at\n";
+                    if ($property_type === 1) {
+                        if ($house_area !== 'n/d' && $house_area !== NULL) {
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Площадь дома:</b> $house_area м²\n" : "<b>House area:</b> $house_area sq.m.\n";
+                        }
+                        if ($land_area !== 'n/d' && $land_area !== NULL) {
+                            $sqm = intval($land_area) * 100;
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Площадь участка:</b> $land_area соток\n" : "<b>Land area:</b> $sqm sq.m.\n";
+                        }
                     }
-                    $message .= "$link\n";
+                    if ($animals !== 'n/d' && $animals !== NULL) {
+                        if ($animals === '1') {
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Животные:</b> да\n" : "<b>Animals:</b> yes\n";
+                        } elseif ($animals === '0') {
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Животные:</b> нет\n" : "<b>Animals:</b> no\n";
+                        }
+                    }
 
+                    if ($furniture !== 'n/d' && $furniture !== NULL) {
+                        $furniture_array = json_decode($furniture);
+                        $furniture_array_name = [];
+                        foreach ($furniture_array as $furniture_item) {
+                            $furniture_data = getAmenityById($furniture_item);
+                            $furniture_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $furniture_data['amenity_name_ru'] : $furniture_data['amenity_name_en'];
+                        }
+                        $furniture = implode(', ', $furniture_array_name);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Мебель:</b> $furniture\n" : "<b>Furniture:</b> $furniture\n";
+                    }
+                    if ($condition !== 'n/d' && $condition !== NULL) {
+                        $condition_array = json_decode($condition);
+                        $condition_array_name = [];
+                        foreach ($condition_array as $condition_item) {
+                            $condition_data = getAmenityById($condition_item);
+                            $condition_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $condition_data['amenity_name_ru'] : $condition_data['amenity_name_en'];
+                        }
+                        $condition = implode(', ', $condition_array_name);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Состояние:</b> $condition\n" : "<b>Condition:</b> $condition\n";
+                    }
+                    if ($appliances !== 'n/d' && $appliances !== NULL) {
+                        $appliances_array = json_decode($appliances);
+                        $appliances_array_name = [];
+                        foreach ($appliances_array as $appliances_item) {
+                            $appliances_data = getAmenityById($appliances_item);
+                            $appliances_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $appliances_data['amenity_name_ru'] : $appliances_data['amenity_name_en'];
+                        }
+                        $appliances = implode(', ', $appliances_array_name);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Бытовая техника:</b> $appliances\n" : "<b>Appliances:</b> $appliances\n";
+                    }
+                    if ($improvement_out !== 'n/d' && $improvement_out !== NULL) {
+                        $improvement_out_array = json_decode($improvement_out);
+                        $improvement_out_array_name = [];
+                        foreach ($improvement_out_array as $improvement_out_item) {
+                            $improvement_out_data = getAmenityById($improvement_out_item);
+                            $improvement_out_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_out_data['amenity_name_ru'] : $improvement_out_data['amenity_name_en'];
+                        }
+                        $improvement_out = implode(', ', $improvement_out_array_name);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Благоустройство:</b> $improvement_out\n" : "<b>Improvements:</b> $improvement_out\n";
+                    }
+                    if ($property_type === 1) {
+                        if ($utility !== 'n/d' && $utility !== NULL) {
+                            $utility_array = json_decode($utility);
+                            $utility_array_name = [];
+                            foreach ($utility_array as $utility_item) {
+                                $utility_data = getAmenityById($utility_item);
+                                $utility_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $utility_data['amenity_name_ru'] : $utility_data['amenity_name_en'];
+                            }
+                            $utility = implode(', ', $utility_array_name);
+                            $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Коммуникации:</b> $utility\n" : "<b>Utility:</b> $utility\n";
+                        }
+                    }
+
+                    if ($min_rent_month !== 'n/d' && $min_rent_month !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Мин. срок аренды:</b> $min_rent_month месяцев\n" : "\n<b>Min. rent period:</b> $min_rent_month months\n";
+                    }
+                    if ($price_kgs !== 'n/d' && $price_kgs !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Цена:</b> $price_kgs ($price_usd)\n" : "\n<b>Price:</b> $price_kgs ($price_usd)\n";
+                    }
+                    if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Депозит:</b> $deposit_kgs ($deposit_usd)\n" : "<b>Deposit:</b> $deposit_kgs ($deposit_usd)\n";
+                    }
+                    if ($owner_name !== 'n/d' && $owner_name !== NULL) {
+                        $owner_name_en = slug($owner_name, true);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
+                    }
+                    if ($phone !== 'n/d' && $phone !== NULL) {
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone\n";
+                        $message .= "<a href='https://wa.me/$phone'>Whatsapp</a>\n";
+                    }
+
+                    $gallery = ($row['gallery']) ? json_decode($row['gallery']) : NULL;
                     try {
-                        $bot->sendMessage($chat_id, $message, 'HTML');
+                        if (!empty($gallery)) {
+                            $bot = new \TelegramBot\Api\BotApi($token);
+                            $gallery = array_map('strval', $gallery);
+                            $gallery = array_unique($gallery);
+                            $gallery = array_values($gallery);
+                            sort($gallery);
+                            $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
+                            $image_counter = 0;
+                            foreach ($gallery as $image) {
+                                if ($image_counter === 9) break;
+                                if ($image_counter === 0) {
+                                    $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message, 'HTML');
+                                } else {
+                                    $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image);
+                                }
+                                $media->addItem($photo);
+                                $image_counter++;
+                            }
+                            $bot->sendMediaGroup($chat_id, $media);
+                        } else {
+                            $bot = new \TelegramBot\Api\BotApi($token);
+                            $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
+                            $image = "https://wadamir.ru/no_photo.png";
+                            $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message, 'HTML');
+                            $media->addItem($photo);
+                            $bot->sendMediaGroup($chat_id, $media);
+                        }
+                        // Update sent_to_user
+                        $chat_ids_sent = [];
+                        if ($row['chat_ids_sent'] !== '[]' && $row['chat_ids_sent'] !== '' && $row['chat_ids_sent'] !== NULL) {
+                            $chat_ids_sent = json_decode($row['chat_ids_sent']);
+                        }
+                        $chat_ids_sent = array_map('strval', $chat_ids_sent);
+                        $chat_ids_sent[] = strval($chat_id);
+                        $chat_ids_sent = array_unique($chat_ids_sent);
+                        $chat_ids_sent = array_values($chat_ids_sent);
+                        sort($chat_ids_sent);
+                        $chat_ids_sent = json_encode($chat_ids_sent);
+                        $sql = "UPDATE $table_data SET chat_ids_sent = '$chat_ids_sent' WHERE id = " . $row['id'];
+                        if (mysqli_query($conn, $sql)) {
+                            $msg_sent++;
+                        } else {
+                            file_put_contents($start_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                            $msg_error++;
+                        }
+                        $chat_ids_to_send = $row['chat_ids_to_send'];
+                        $chat_ids_to_send = json_decode($chat_ids_to_send);
+                        $chat_ids_to_send = array_map('strval', $chat_ids_to_send);
+                        $chat_ids_to_send = array_unique($chat_ids_to_send);
+                        $chat_ids_to_send = array_values($chat_ids_to_send);
+                        sort($chat_ids_to_send);
+                        $chat_ids_to_send = json_encode($chat_ids_to_send);
+                        if ($chat_ids_sent === $chat_ids_to_send) {
+                            $sql = "UPDATE $table_data SET done = '1' WHERE id = " . $row['id'];
+                            if (mysqli_query($conn, $sql)) {
+                                $msg_sent++;
+                            } else {
+                                $log_error_array[] = 'sendLastAds() - Error: ' . mysqli_error($conn);
+                                $msg_error++;
+                            }
+                        }
                     } catch (\TelegramBot\Api\Exception $e) {
                         $error = $e->getMessage();
                         $log_error_array[] = 'sendLastAds() - Error: ' . $e->getMessage();
                         if ($error === 'Forbidden: bot was blocked by the user') {
-                            $error = 'User blocked bot';
-                            deactivateUser($tgm_user_id, $chat_id);
+                            try {
+                                deactivateUser($tgm_user_id, $chat_id);
+                            } catch (Exception $e) {
+                                $log_error_array[] = 'sendLastAds() - Error: ' . $e->getMessage();
+                            }
                         }
+                        break;
                     }
+                    // set timeout
+                    $rnd_sec = rand(1, 3);
+                    sleep($rnd_sec);
                     $counter++;
                 }
             } else {
@@ -1090,4 +1325,183 @@ function getCityById($city_id)
     }
 
     return $city;
+}
+
+function getProperties()
+{
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'getProperties()';
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_property = MYSQL_TABLE_PROPERTY;
+
+    $properties = [];
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        $log_error_array[] = 'getProperties() - Connection failed';
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+
+    $sql = "SELECT * FROM $table_property";
+    $result = mysqli_query($conn, $sql);
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $properties[] = $row;
+        }
+    } else {
+        $log_error_array[] = 'getProperties() - No properties found';
+    }
+
+    // Close connection
+    mysqli_close($conn);
+
+    return $properties;
+}
+
+function getPropertyBySlug($property_slug)
+{
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'getPropertyBySlug() - ' . $property_slug;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_property = MYSQL_TABLE_PROPERTY;
+
+    $property = [];
+
+    if ($property_slug === '') {
+        $log_error_array[] = 'getPropertyBySlug() - Slug is empty';
+    } else {
+        // Create connection
+        $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+        if (!$conn) {
+            $log_error_array[] = 'getPropertyBySlug() - Connection failed';
+            throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+        }
+
+        $sql = "SELECT * FROM $table_property WHERE property_slug = '$property_slug'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $property = $row;
+            }
+        } else {
+            $log_error_array[] = 'getPropertyBySlug() - No properties found';
+        }
+
+        // Close connection
+        mysqli_close($conn);
+    }
+
+    return $property;
+}
+
+function getPropertyById($property_id)
+{
+    global $log_message_array;
+    global $log_error_array;
+
+    $log_message_array[] = 'getPropertyById() - ' . $property_id;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_property = MYSQL_TABLE_PROPERTY;
+
+    $property = [];
+
+    if ($property_id !== '') {
+        $log_error_array = 'getPropertyById() - Id is empty';
+    } else {
+        // create connection
+        $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+        if (!$conn) {
+            $log_error_array[] = 'getPropertyById() - Connection failed';
+            throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+        }
+
+        $sql = "SELECT * FROM $table_property WHERE property_id = '$property_id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $property = $row;
+            }
+        } else {
+            $log_error_array[] = 'getPropertyById() - No properties found';
+        }
+
+        // close connection
+        mysqli_close($conn);
+    }
+
+    return $property;
+}
+
+function getDonation($user_language)
+{
+
+    global $statistics_log_file;
+    global $statistics_error_log_file;
+
+    $message = null;
+
+    $donations = [];
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_donation = MYSQL_TABLE_DONATION;
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($statistics_error_log_file, ' | getDonation - connection failed', FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+
+    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY id ASC";
+    $result = mysqli_query($conn, $sql);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        foreach ($rows as $row) {
+            $donations[] = [
+                'text' => $row['donation_icon'] . ' ' . $row['donation_name_' . $user_language],
+                'url' => $row['donation_link']
+            ];
+        }
+    }
+
+    if (!empty($donations)) {
+        $inline_keyboard_array = [];
+        foreach ($donations as $key => $value) {
+            if ($key % 2 === 0) {
+                $inline_keyboard_array[] = [$value];
+            } else {
+                $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+            }
+        }
+
+        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+
+        $message = "\n";
+        $message .= "\n";
+        $message .= ($user_language === 'ru' || $user_language === 'kg') ? '💰 Если Вы хотите поддержать развитие бота, воспользуйтесь кнопками внизу' : '💰 If you want to support the development of the bot, use the buttons below';
+    } else {
+        $inline_keyboard = null;
+    }
+
+    return [$message, $inline_keyboard];
 }

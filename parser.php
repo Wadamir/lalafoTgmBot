@@ -49,6 +49,10 @@ $table_district = MYSQL_TABLE_DISTRICT;
 $table_data = MYSQL_TABLE_DATA;
 $table_rate = MYSQL_TABLE_RATE;
 $table_amenity = MYSQL_TABLE_AMENITY;
+$table_owner = MYSQL_TABLE_OWNER;
+$table_property = MYSQL_TABLE_PROPERTY;
+$table_donation = MYSQL_TABLE_DONATION;
+
 
 
 // Create connection
@@ -67,6 +71,48 @@ $formatter_usd->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
 $formatter_kgs = new NumberFormatter('ru_RU', NumberFormatter::CURRENCY);
 $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
+
+
+// Get all owners
+$owner_types = [];
+$sql = "SELECT * FROM $table_owner";
+$result = mysqli_query($conn, $sql);
+if (mysqli_num_rows($result) > 0) {
+    $owner_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    foreach ($owner_rows as $owner_row) {
+        $owner_types[] = [
+            'id' => $owner_row['owner_id'],
+            'name_ru' => $owner_row['owner_name_ru'],
+            'name_en' => $owner_row['owner_name_en'],
+        ];
+    }
+} else {
+    file_put_contents($parser_error_log_file, '[' . date('Y-m-d H:i:s') . '] No owners found' . PHP_EOL, FILE_APPEND);
+    die('No owners found');
+}
+
+
+// Get all property types
+$property_types = [];
+$sql = "SELECT * FROM $table_property";
+$result = mysqli_query($conn, $sql);
+if (mysqli_num_rows($result) > 0) {
+    $property_rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    foreach ($property_rows as $property_row) {
+        $property_types[] = [
+            'id' => $property_row['property_id'],
+            'name_ru' => $property_row['property_name_ru'],
+            'name_en' => $property_row['property_name_en'],
+            'name_kg' => $property_row['property_name_kg'],
+            'slug' => $property_row['property_slug'],
+            'icon' => $property_row['property_icon'],
+            'link' => $property_row['property_link'],
+        ];
+    }
+} else {
+    file_put_contents($parser_error_log_file, '[' . date('Y-m-d H:i:s') . '] No property types found' . PHP_EOL, FILE_APPEND);
+    die('No property types found');
+}
 
 
 
@@ -175,6 +221,7 @@ if (count($cities) > 0) {
         }
         foreach ($property_types as $property_type) {
             $parse_link = 'https://lalafo.kg/' . $city_slug . $property_type['link'];
+            $property_type_id = $property_type['id'];
             $property_type_slug = $property_type['slug'];
             for ($i = 1; $i < 2; $i++) {
                 try {
@@ -569,6 +616,7 @@ if (count($cities) > 0) {
                             $user_rooms_max = isset($user['rooms_max']) ? $user['rooms_max'] : NULL;
                             $user_preference_city = isset($user['preference_city']) ? $user['preference_city'] : NULL;
                             $user_preference_district = isset($user['preference_district']) ? $user['preference_district'] : NULL;
+                            $user_preference_property = isset($user['preference_property']) ? $user['preference_property'] : NULL;
                             $user_preference_sharing = isset($user['preference_sharing']) ? $user['preference_sharing'] : NULL;
                             $user_preference_owner = isset($user['preference_owner']) ? $user['preference_owner'] : NULL;
 
@@ -608,6 +656,10 @@ if (count($cities) > 0) {
                                 unset($chat_ids_to_send[$key]);
                             }
 
+                            if ($user_preference_property !== NULL && $user_preference_property !== $property_type_id) {
+                                unset($chat_ids_to_send[$key]);
+                            }
+
                             if ($user_preference_sharing !== NULL) {
                                 if (intval($user_preference_sharing) === 1 && $sharing === 0) {
                                     unset($chat_ids_to_send[$key]);
@@ -615,7 +667,7 @@ if (count($cities) > 0) {
                             }
 
                             if ($user_preference_owner !== NULL && $owner !== NULL) {
-                                if (intval($user_preference_owner) > $owner_value) {
+                                if (intval($owner_value) < intval($user_preference_owner)) {
                                     unset($chat_ids_to_send[$key]);
                                 }
                             }
@@ -625,10 +677,10 @@ if (count($cities) > 0) {
                         $done = count($chat_ids_to_send) === 0 ? 1 : NULL;
 
                         $data = [
+                            'property_type' => $property_type_id,
+                            'city' => $city_id,
                             'title' => mysqli_real_escape_string($conn, $link->textContent),
                             'link' => $apartment_link,
-                            'city' => $city_id,
-                            'property_type' => $property_type['id'],
                             'chat_ids_to_send' => json_encode($chat_ids_to_send),
                         ];
 

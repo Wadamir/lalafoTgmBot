@@ -85,7 +85,11 @@ if (mysqli_num_rows($users_result)) {
         $msg_footer = getMsgFooter($user_language);
         $message .= $msg_footer;
 
-        $inline_keyboard = getDonationKeyboard($user_language);
+        $donation_array = getDonation($user_language);
+        $inline_keyboard = $donation_array[1];
+        if (!empty($donation_array[0])) {
+            $message .= $donation_array[0];
+        }
 
         try {
             $bot = new \TelegramBot\Api\BotApi($token);
@@ -239,43 +243,63 @@ function getMsgFooter($user_language)
     $message .= "\n";
     $message .= "\n";
     $message .= ($user_language === 'ru' || $user_language === 'kg') ? '📫 Для обратной связи напишите боту сообщение с хештегом #feedback' : '📫 To give feedback, send a message to the bot with the hashtag #feedback';
-    $message .= "\n";
-    $message .= "\n";
-    $message .= ($user_language === 'ru' || $user_language === 'kg') ? '💰 Если Вы хотите поддержать развитие бота, воспользуйтесь кнопками внизу' : '💰 If you want to support the development of the bot, use the buttons below';
 
     return  $message;
 }
 
-function getDonationKeyboard($user_language)
+function getDonation($user_language)
 {
 
+    global $statistics_log_file;
+    global $statistics_error_log_file;
+
+    $message = null;
+
     $donations = [];
-    $donations[] = [
-        'text'  => ($user_language === 'ru' || $user_language === 'kg') ? 'Бакай' : 'Bakai',
-        'url'   => 'https://bakai24.app#00020101021132520011qr.bakai.kg010131016124208000535187912021113021233330009BAKAIBANK0116%D0%9F%D0%BE%D0%BF%D0%BE%D0%BB%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%D0%B0%D1%80%D1%82%D1%8B5204653853034175909BAKAIBANK5405100006304E2A4'
-    ];
 
-    $donations[] = [
-        'text'  => ($user_language === 'ru' || $user_language === 'kg') ? 'О!Деньги' : 'O!Money',
-        'url'   => 'https://api.dengi.o.kg/#00020101021132680012p2p.dengi.kg01048580111225417362224510129965015512001202111302123408%D0%94%D0%B0%D0%BC%D0%B8%D1%80%20%D0%92.520473995303417540105908O%21Den%27gi6304B7FE'
-    ];
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_donation = MYSQL_TABLE_DONATION;
 
-    $donations[] = [
-        'text'  => ($user_language === 'ru' || $user_language === 'kg') ? 'ЮMoney (руб)' :  'YooMoney (rub)',
-        'url'   => 'https://yoomoney.ru/to/410014592945355'
-    ];
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($statistics_error_log_file, ' | getDonation - connection failed', FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
 
-
-    $inline_keyboard_array = [];
-    foreach ($donations as $key => $value) {
-        if ($key % 2 === 0) {
-            $inline_keyboard_array[] = [$value];
-        } else {
-            $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY id ASC";
+    $result = mysqli_query($conn, $sql);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        foreach ($rows as $row) {
+            $donations[] = [
+                'text' => $row['donation_icon'] . ' ' . $row['donation_name_' . $user_language],
+                'url' => $row['donation_link']
+            ];
         }
     }
 
-    $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+    if (!empty($donations)) {
+        $inline_keyboard_array = [];
+        foreach ($donations as $key => $value) {
+            if ($key % 2 === 0) {
+                $inline_keyboard_array[] = [$value];
+            } else {
+                $inline_keyboard_array[count($inline_keyboard_array) - 1][] = $value;
+            }
+        }
 
-    return $inline_keyboard;
+        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
+
+        $message = "\n";
+        $message .= "\n";
+        $message .= ($user_language === 'ru' || $user_language === 'kg') ? '💰 Если Вы хотите поддержать развитие бота, воспользуйтесь кнопками внизу' : '💰 If you want to support the development of the bot, use the buttons below';
+    } else {
+        $inline_keyboard = null;
+    }
+
+    return [$message, $inline_keyboard];
 }

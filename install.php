@@ -11,7 +11,8 @@ Create database for Lalafo tgm bot
 7. Create table amenity
 8. Create table property
 9. Create table owner
-10. Close connection
+10. Create table donation
+11. Close connection
 */
 
 ini_set('display_errors', 1);
@@ -36,6 +37,7 @@ $table_rate = MYSQL_TABLE_RATE;
 $table_amenity = MYSQL_TABLE_AMENITY;
 $table_property = MYSQL_TABLE_PROPERTY;
 $table_owner = MYSQL_TABLE_OWNER;
+$table_donation = MYSQL_TABLE_DONATION;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -62,6 +64,7 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_user (
         `is_premium` tinyint(1) DEFAULT NULL,
         `is_admin` tinyint(1) DEFAULT NULL,
         `is_returned` tinyint(1) DEFAULT NULL,
+        `is_ads` tinyint(1) DEFAULT '1',
         `is_statistics` tinyint(1) DEFAULT '1',
         `first_name` varchar(255) DEFAULT NULL,
         `last_name` varchar(255) DEFAULT NULL,
@@ -77,7 +80,7 @@ $sql = "CREATE TABLE IF NOT EXISTS $table_user (
         `preference_city` int DEFAULT NULL,
         `preference_district` int DEFAULT NULL,
         `preference_sharing` tinyint(1) DEFAULT NULL,
-        `preference_owner` tinyint(1) DEFAULT '1',
+        `preference_owner` tinyint(1) DEFAULT '2',
         `preference_property` tinyint(1) DEFAULT NULL,
         `date_payment` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
         `date_updated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -246,7 +249,7 @@ $sql = "INSERT INTO `district` (`district_id`, `city_id`, `district_name_en`, `d
 (63, 1, 'Stariy tolchok rinok / bazar', 'Старый толчок рынок / базар', 'Старый толчок рынок / базар', 'stariy-tolchok-rinok-bazar'),
 (64, 1, 'Archa-Beshik zh/m', 'Арча-Бешик ж/м', 'Арча-Бешик ж/м', 'archa-beshik-zh-m'),
 (65, 1, '4 mkr', '4 мкр', '4 мкр', '4-mkr'),
-(66, 4, '3 mkr', '3 мкр', '3 мкр', '3-mkr'),
+(66, 1, '3 mkr', '3 мкр', '3 мкр', '3-mkr'),
 (69, 1, 'Shlagbaum', 'Шлагбаум', 'Шлагбаум', 'shlagbaum'),
 (70, 1, 'Ala-Too zh/m', 'Ала-Тоо ж/м', 'Ала-Тоо ж/м', 'ala-too-zh-m'),
 (71, 2, 'Dzhal mkr (v t.ch. Verkhniy, Nizhniy, Sredniy)', 'Джал мкр (в т.ч. Верхний, Нижний, Средний)', 'Джал мкр (в т.ч. Верхний, Нижний, Средний)', 'dzhal-mkr-v-t-ch-verkhniy-nizhniy-sredniy-'),
@@ -577,6 +580,30 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Data inserted into table $table_owner successfully" . PHP_EOL, FILE_APPEND);
 } else {
     file_put_contents($log_dir . '/install.log', "Error inserting data into table $table_owner: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+}
+
+// 10. Create table donation
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 10. Create table ' . $table_donation . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_donation (
+        `donation_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `is_active` tinyint(1) DEFAULT '1',
+        `donation_name_en` varchar(255) NOT NULL,
+        `donation_name_ru` varchar(255) NOT NULL,
+        `donation_name_kg` varchar(255) NOT NULL,
+        `donation_icon` varchar(255) NOT NULL,
+        `donation_slug` varchar(255) NOT NULL,
+        `donation_link` text NOT NULL
+    ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+if (!mysqli_select_db($conn, $dbname)) {
+    file_put_contents($log_dir . '/install.log', 'Database NOT SELECTED' . PHP_EOL, FILE_APPEND);
+    die("Connection failed: " . mysqli_connect_error());
+}
+
+if (mysqli_query($conn, $sql)) {
+    file_put_contents($log_dir . '/install.log', "Table $table_donation created successfully" . PHP_EOL, FILE_APPEND);
+} else {
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_donation: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 // 10. Close connection
