@@ -142,7 +142,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 $message = "<b>$title</b>\n\n";
 
                 if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone ";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone " : "<b>Phone:</b> $phone ";
                     $message .= "(<a href='https://wa.me/$phone'>Whatsapp</a>)\n";
                 }
                 if ($owner_name !== 'n/d' && $owner_name !== NULL) {
