@@ -10,6 +10,8 @@ $log_dir = __DIR__ . '/logs';
 $start_log_file = $log_dir . '/start.log';
 $start_error_log_file = $log_dir . '/start_error.log';
 
+file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . ']', FILE_APPEND);
+
 $token = TOKEN;
 if (!$token) {
     file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Token not found', FILE_APPEND);
