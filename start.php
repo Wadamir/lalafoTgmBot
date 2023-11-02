@@ -191,9 +191,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $user_preference_property = $get_user_data['preference_property_text'];
                 $user_rooms_min = $get_user_data['rooms_min'];
                 $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                $user_max_price = $get_user_data['price_max'];
+                $user_max_price = $get_user_data['price_max_text'];
 
-                // Send message
                 $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Тип жилья: <b>" . $user_preference_property . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Property type: <b>" . $user_preference_property . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\nFor feedback, write a message to the bot with the hashtag #feedback";
 
                 $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "Изменить настройки" : "Change settings";
@@ -323,7 +322,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $user_preference_property = $get_user_data['preference_property_text'];
                         $user_rooms_min = $get_user_data['rooms_min'];
                         $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                        $user_max_price = $get_user_data['price_max'];
+                        $user_max_price = $get_user_data['price_max_text'];
+
                         $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n\n❓Какой тип жилья Вам нужен?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n\n❓What type of housing do you need? \n\n";
                         try {
                             $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
@@ -371,7 +371,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $user_preference_property = $get_user_data['preference_property_text'];
                     $user_rooms_min = $get_user_data['rooms_min'];
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                    $user_max_price = $get_user_data['price_max'];
+                    $user_max_price = $get_user_data['price_max_text'];
+
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Тип жилья: " . $user_preference_property . "\n\n❓Сколько минимум комнат в квартире вам нужно? \n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Property type: " . $user_preference_property . "\n\n❓How many minimum rooms do you need in the apartment? \n\n";
                     try {
                         $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
@@ -429,7 +430,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $user_preference_property = $get_user_data['preference_property_text'];
                     $user_rooms_min = $get_user_data['rooms_min'];
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                    $user_max_price = $get_user_data['price_max'];
+                    $user_max_price = $get_user_data['price_max_text'];
+
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Тип жилья: " . $user_preference_property . "\n✅ Минимум комнат: " . $user_rooms_min . "\n\n❓Предпочтительный тип аренды?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Property type: " . $user_preference_property . "\n✅ Minimum rooms: " . $user_rooms_min . "\n\n❓Rental type? \n\n";
                     $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                 } else {
@@ -480,7 +482,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $user_preference_property = $get_user_data['preference_property_text'];
                     $user_rooms_min = $get_user_data['rooms_min'];
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                    $user_max_price = $get_user_data['price_max'];
+                    $user_max_price = $get_user_data['price_max_text'];
+
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройка</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Тип жилья: " . $user_preference_property . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n\n❓Максимальная стоимость аренды в месяц?\n\n" : "<b>Settings</b>\n\n✅ City: " . $user_preference_city . "\n✅ Property type: " . $user_preference_property . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n\n❓Maximum rental cost per month? \n\n";
                     $send_result = $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                 } else {
@@ -540,7 +543,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $user_preference_property = $get_user_data['preference_property_text'];
                     $user_rooms_min = $get_user_data['rooms_min'];
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
-                    $user_max_price = $get_user_data['price_max'];
+                    $user_max_price = $get_user_data['price_max_text'];
+
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройки успешно сохранены!</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡\n\nДля обратной связи напишите боту сообщение с хештегом #feedback" : "<b>Settings successfully saved!</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡\n\nFor feedback, write a message to the bot with the hashtag #feedback";
                     $bot->sendMessage($chat_id, $message_text, 'HTML');
 
