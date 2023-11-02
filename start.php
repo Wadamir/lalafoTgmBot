@@ -887,7 +887,7 @@ function getUserData($tgm_user_id)
 
             $now = date('Y-m-d H:m:s');
             $date_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'не оплачена' : 'not paid';
-            if ($row['date_payment']) {
+            if ($row['date_payment'] !== NULL) {
                 if ($row['date_payment'] > $now) {
                     $date_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'оплачена до ' . $row['date_payment'] : 'paid until ' . $row['date_payment'];
                 }
