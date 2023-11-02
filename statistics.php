@@ -86,7 +86,6 @@ if (mysqli_num_rows($users_result)) {
         $message .= $msg_footer;
 
         $donation_array = getDonation($user_language);
-        var_dump($donation_array);
         $inline_keyboard = $donation_array[1];
         if (!empty($donation_array[0])) {
             $message .= $donation_array[0];
