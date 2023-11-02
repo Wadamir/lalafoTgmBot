@@ -819,7 +819,7 @@ function getUserData($tgm_user_id)
             $user_language = ($row['language_code']) ? $row['language_code'] : 'en';
 
             $price_max = ($user_language === 'ru' || $user_language === 'kg') ? 'без ограничений' : 'no limit';
-            if ($row['price_max'] !== NULL && $row['price_max'] !== 1000000) {
+            if ($row['price_max'] !== NULL && intval($row['price_max']) !== 1000000) {
                 $price_max = ($row['price_currency'] === 'USD') ? $formatter_usd->formatCurrency($row['price_max'], 'USD') : $formatter_kgs->formatCurrency($row['price_max'], 'KGS');
             }
 
