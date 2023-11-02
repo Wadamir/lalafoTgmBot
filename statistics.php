@@ -86,6 +86,7 @@ if (mysqli_num_rows($users_result)) {
         $message .= $msg_footer;
 
         $donation_array = getDonation($user_language);
+        var_dump($donation_array);
         $inline_keyboard = $donation_array[1];
         if (!empty($donation_array[0])) {
             $message .= $donation_array[0];
@@ -270,7 +271,7 @@ function getDonation($user_language)
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
-    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY id ASC";
+    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY donation_id ASC";
     $result = mysqli_query($conn, $sql);
     if ($result && mysqli_num_rows($result) > 0) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
