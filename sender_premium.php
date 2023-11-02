@@ -139,12 +139,12 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 }
                 if ($owner_name !== 'n/d' && $owner_name !== NULL) {
                     $owner_name_en = slug($owner_name, true);
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Кто сдаёт:</b> $owner_name\n" : "<b>Owner:</b> $owner_name_en\n";
                 }
                 if ($link !== 'n/d' && $link !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ссылка на объявление:</b> $link\n" : "\n<b>Link:</b> $link\n\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка на объявление:</b> $link\n" : "<b>Link:</b> $link\n";
                 }
-
+                $messag .= "\n";
                 if ($district !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Район:</b> $district\n" : "<b>District:</b> $district\n";
                 }
