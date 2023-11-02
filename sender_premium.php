@@ -131,6 +131,14 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 $appliances = ($row['appliances']) ? $row['appliances'] : NULL;
                 $utility = ($row['utility']) ? $row['utility'] : NULL;
 
+                $description = ($row['description']) ? $row['description'] : NULL;
+                if ($description !== NULL) {
+                    $description_ru = ($row['description_ru'] !== '' && $row['description_ru'] !== NULL) ? $row['description_ru'] : NULL;
+                    $description_en = ($row['description_en'] !== '' && $row['description_en'] !== NULL) ? $row['description_en'] : NULL;
+                }
+                $description = ($user_language === 'ru' || $user_language === 'kg') ? $description_ru : $description_en;
+
+
                 $message = "<b>$title</b>\n\n";
 
                 if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
@@ -144,7 +152,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($link !== 'n/d' && $link !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка на объявление:</b> $link\n" : "<b>Link:</b> $link\n";
                 }
-                $messag .= "\n";
+                $message .= "\n";
                 if ($district !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Район:</b> $district\n" : "<b>District:</b> $district\n";
                 }
@@ -154,15 +162,15 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 }
                 if ($sharing !== 'n/d' && $sharing !== NULL) {
                     if ($sharing === '1') {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "➕ <b>Подселение:</b> без подселения\n" : "➕ <b>Sharing:</b> without sharing\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Подселение:</b> без подселения\n" : "👉 <b>Sharing:</b> without sharing\n";
                     } elseif ($sharing === '0') {
-                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "➕ <b>Подселение:</b> с подселением\n" : "➕ <b>Sharing:</b> with sharing\n";
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Подселение:</b> с подселением\n" : "👉 <b>Sharing:</b> with sharing\n";
                     }
                 }
                 if ($floor !== 'n/d' && $floor !== NULL && $total_floor !== 'n/d' && $total_floor !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "↗ <b>Этаж:</b> $floor/$total_floor\n" : "↗ <b>Floor:</b> $floor/$total_floor\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Этаж:</b> $floor/$total_floor\n" : "👉 <b>Floor:</b> $floor/$total_floor\n";
                 } elseif ($floor !== 'n/d' && $floor !== NULL) {
-                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "↗ <b>Этаж:</b> $floor\n" : "↗ <b>Floor:</b> $floor\n";
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Этаж:</b> $floor\n" : "👉 <b>Floor:</b> $floor\n";
                 } elseif ($total_floor !== 'n/d' && $total_floor !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Всего этажей:</b> $total_floor\n" : "<b>Total floor:</b> $total_floor\n";
                 }
@@ -176,7 +184,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💵 <b>Депозит:</b> $deposit_kgs ($deposit_usd)\n" : "💵 <b>Deposit:</b> $deposit_kgs ($deposit_usd)\n";
                 }
-
+                $message .= "\n";
                 if ($house_area !== 'n/d' && $house_area !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Площадь дома:</b> $house_area м²\n" : "👉 <b>House area:</b> $house_area sq.m.\n";
                 }
@@ -254,6 +262,10 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $utility = implode(', ', $utility_array_name);
                         $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Коммуникации:</b> $utility\n" : "👉 <b>Utility:</b> $utility\n";
                     }
+                }
+                if ($description !== NULL) {
+                    $message .= "\n";
+                    $message .= "<i>$description</i>\n";
                 }
                 /*
                 if ($created_at !== $updated_at) {
