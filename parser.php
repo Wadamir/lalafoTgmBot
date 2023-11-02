@@ -378,7 +378,7 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Этаж') !== false) {
-                                $floor = trim(str_replace('Этаж:', '', $detail->textContent));
+                                $floor = mb_strtolower(trim(str_replace('Этаж:', '', $detail->textContent)));
                                 if (mb_strpos($floor, 'цоколь') !== false) {
                                     $floor = 0;
                                 } else {
