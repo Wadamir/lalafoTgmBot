@@ -38,7 +38,7 @@ file_put_contents($start_log_file, '[' . date('Y-m-d H:i:s') . '] Received:', FI
 
 $command_data = '';
 if (isset($update['message'])) {
-    file_put_contents($start_log_file, ' | Message: ' . $update['message']['text'], FILE_APPEND);
+    file_put_contents($start_log_file, ' Message: ' . $update['message']['text'], FILE_APPEND);
     $user_data = [
         'tgm_user_id' => $update['message']['from']['id'],
         'is_bot' => (isset($update['message']['from']['is_bot']) && $update['message']['from']['is_bot'] !== 'false' && $update['message']['from']['is_bot'] !== false) ? 1 : 0,
@@ -56,7 +56,7 @@ if (isset($update['message'])) {
     $message = $update["message"]["text"];
     $message_type = $update["message"]["entities"][0]["type"];
 } elseif (isset($update['callback_query'])) {
-    file_put_contents($start_log_file, ' | Callback: ' . $update['callback_query']['data'], FILE_APPEND);
+    file_put_contents($start_log_file, ' Callback: ' . $update['callback_query']['data'], FILE_APPEND);
     $user_data = [
         'tgm_user_id' => $update['callback_query']['from']['id'],
         'is_bot' => (isset($update['callback_query']['from']['is_bot']) && $update['messacallback_querye']['from']['is_bot'] !== 'false' && $update['callback_query']['from']['is_bot'] !== false) ? 1 : 0,
@@ -113,7 +113,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         case '/start':
             try {
                 $user_result = createUser($user_data);
-                file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] leqkrjglqeakrgjeqklrjg User result: ' . print_r($user_result, true), FILE_APPEND);
                 if ($user_result === true) { // New user
                     // Get all cities
                     $cities = getCity();
@@ -155,9 +154,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     }
                 } else { // Returned user
                     $get_user_data = getUserData($user_data['tgm_user_id']);
-                    file_put_contents('get_user_data.log', PHP_EOL . '[' . date('Y-m-d H:i:s') . '] gjgjjgjgj', FILE_APPEND);
                     if (!empty($get_user_data)) {
-                        file_put_contents('get_user_data.log', PHP_EOL . '[' . date('Y-m-d H:i:s') . '] gjgjjgjgj', FILE_APPEND);
                         $user_preference_city = $get_user_data['preference_city_text'];
                         $user_preference_district = $get_user_data['preference_district_text'];
                         $user_preference_property = $get_user_data['preference_property_text'];
@@ -179,7 +176,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         }
 
                         $donation_array = getDonation($user_language);
-                        file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Donation array: ' . print_r($donation_array, true), FILE_APPEND);
                         $inline_keyboard = $donation_array[1];
                         if (!empty($donation_array[0])) {
                             $message_text .= $donation_array[0];
