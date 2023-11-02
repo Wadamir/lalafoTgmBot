@@ -17,9 +17,9 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 require_once __DIR__ . '/config.php';
 $log_dir = __DIR__ . '/logs';
-$sender_log_file = $log_dir . '/sender_premium.log';
-$sender_error_log_file = $log_dir . '/sender_premium_error.log';
-file_put_contents($sender_log_file, '[' . date('Y-m-d H:i:s') . '] Start', FILE_APPEND);
+$sender_log_file = $log_dir . '/sender.log';
+$sender_error_log_file = $log_dir . '/sender_error.log';
+file_put_contents($sender_log_file, '[' . date('Y-m-d H:i:s') . '] Start Premium', FILE_APPEND);
 
 $users_total = 0;
 $users_active = 0;
@@ -65,7 +65,7 @@ $now_minus_9_min = date('Y-m-d H:i:s', strtotime('9 minutes'));
 $sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND (date_payment IS NULL OR date_payment > '$now_minus_9_min')";
 $users_result = mysqli_query($conn, $sql);
 if ($users_result && mysqli_num_rows($users_result)) {
-    file_put_contents($sender_log_file, ' | Active users: ' . mysqli_num_rows($users_result), FILE_APPEND);
+    file_put_contents($sender_log_file, ' | Active premium users: ' . mysqli_num_rows($users_result), FILE_APPEND);
     $users_rows = mysqli_fetch_all($users_result, MYSQLI_ASSOC);
     foreach ($users_rows as $user) {
         $tgm_user_id = $user['tgm_user_id'];
@@ -367,7 +367,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
         file_put_contents($sender_log_file, ' | Msgs for ' . $username . ' sent: ' . $counter, FILE_APPEND);
     }
 } else {
-    file_put_contents($sender_log_file, ' | No active users found', FILE_APPEND);
+    file_put_contents($sender_log_file, ' | No active premium users found', FILE_APPEND);
 }
 
 file_put_contents($sender_log_file, ' | End: ' . date('Y-m-d H:i:s') . PHP_EOL, FILE_APPEND);
