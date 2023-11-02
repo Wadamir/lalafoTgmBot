@@ -621,6 +621,7 @@ function createUser($user_data)
 {
     global $log_message_array;
     global $log_error_array;
+    global $start_error_log_file;
 
     $log_message_array[] = 'createUser() - ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'];
 
@@ -642,7 +643,7 @@ function createUser($user_data)
     if (mysqli_num_rows($result) > 0) {
         activateUser($user_data['tgm_user_id']);
         $log_message_array[] = 'User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'];
-
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] User already exists ' . $user_data['tgm_user_id'] . ' - ' . $user_data['username'], FILE_APPEND);
         // Close connection
         mysqli_close($conn);
         return false;
