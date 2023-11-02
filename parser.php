@@ -232,7 +232,7 @@ if (count($cities) > 0) {
                 }
                 $content = $response->getBody()->getContents();
 
-                file_put_contents('apartment.html', $content);
+                // file_put_contents('apartment.html', $content);
 
                 $pq = new PhpQuery;
                 $pq->load_str($content);
@@ -240,7 +240,7 @@ if (count($cities) > 0) {
                 $links = $pq->query('.adTile-title');
 
                 foreach ($links as $link) {
-                    file_put_contents($parser_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Parsing: ' . $link->getAttribute('href'), FILE_APPEND);
+                    // file_put_contents($parser_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] Parsing: ' . $link->getAttribute('href'), FILE_APPEND);
                     $items_total++;
                     try {
                         // check if apartment exists
@@ -254,7 +254,7 @@ if (count($cities) > 0) {
 
                         $apartment_response = $guzzle->get($apartment_link);
                         $apartment_content = $apartment_response->getBody()->getContents();
-                        file_put_contents('apartment.html', $apartment_content);
+                        // file_put_contents('apartment.html', $apartment_content);
 
                         $apartment_pq = new PhpQuery;
                         $apartment_pq->load_str($apartment_content);
