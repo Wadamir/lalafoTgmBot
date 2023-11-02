@@ -160,6 +160,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $user_preference_sharing = $get_user_data['preference_sharing_text'];
                         $user_max_price = $get_user_data['price_max'];
                         $user_date_payment = $get_user_data['date_payment'];
+                        $user_date_payment_text = $get_user_data['date_payment_text'];
 
                         // Send message
                         $message_text = ($user_language === 'ru' || $user_language === 'kg') ?  "С возвращением, " . $user_data['first_name'] . "!" : "Welcome back, " . $user_data['first_name'] . "!";
@@ -167,7 +168,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 
                         $now = date('Y-m-d H:i:s');
                         if ($now < $user_date_payment) {
-                            $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> до " . $user_date_payment . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> until " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
+                            $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                         } else {
                             $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Ваша премиум подписка истекла</b>\nЧтобы продлить премиум подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Your premium subscription has expired</b>\nTo renew the premium subscription, use the /premium command \n\n";
                         }
@@ -201,12 +202,13 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $user_preference_sharing = $get_user_data['preference_sharing_text'];
                 $user_max_price = $get_user_data['price_max_text'];
                 $user_date_payment = $get_user_data['date_payment'];
+                $user_date_payment_text = $get_user_data['date_payment_text'];
 
                 $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "\n\n<b>Ваши настройки</b>\n\n✅ Город: <b>" . $user_preference_city . "</b>\n✅ Тип жилья: <b>" . $user_preference_property . "</b>\n✅ Минимум комнат: <b>" . $user_rooms_min . "</b>\n✅ Тип аренды: <b>" . $user_preference_sharing . "</b>\n✅ Максимальная стоимость аренды в месяц: <b>" . $user_max_price . "</b>\n\nДля обратной связи напишите боту сообщение с хештегом #feedback\n\n" : "\n\n<b>Your search settings</b>\n\n✅ City: <b>" . $user_preference_city . "</b>\n✅ Property type: <b>" . $user_preference_property . "</b>\n✅ Minimum rooms: <b>" . $user_rooms_min . "</b>\n✅ Rental type: <b>" . $user_preference_sharing . "</b>\n✅ Maximum rental cost per month: <b>" . $user_max_price . "</b>\n\nFor feedback, write a message to the bot with the hashtag #feedback\n\n";
 
                 $now = date('Y-m-d H:i:s');
                 if ($now < $user_date_payment) {
-                    $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> до " . $user_date_payment . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> until " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
+                    $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment_text . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                 } else {
                     $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Ваша премиум подписка истекла</b>\nЧтобы продлить премиум подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Your premium subscription has expired</b>\nTo renew the premium subscription, use the /premium command \n\n";
                 }
@@ -561,12 +563,13 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $user_preference_sharing = $get_user_data['preference_sharing_text'];
                     $user_max_price = $get_user_data['price_max_text'];
                     $user_date_payment = $get_user_data['date_payment'];
+                    $user_date_payment_text = $get_user_data['date_payment_text'];
 
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "<b>Настройки успешно сохранены!</b>\n\n✅ Город: " . $user_preference_city . "\n✅ Минимум комнат: " . $user_rooms_min . "\n✅ Тип аренды: " . $user_preference_sharing . "\n✅ Максимальная стоимость аренды в месяц: " . $user_max_price . "\n\n👉 Вы будете получать мгновенные уведомления обо всех новых объявлениях ⚡⚡⚡\n\nДля обратной связи напишите боту сообщение с хештегом #feedback\n\n" : "<b>Settings successfully saved!</b>\n\n✅ City: " . $user_preference_city . "\n✅ Minimum rooms: " . $user_rooms_min . "\n✅ Rental type: " . $user_preference_sharing . "\n✅ Maximum rental cost per month: " . $user_max_price . "\n\n👉 You will receive instant notifications of all new ads ⚡⚡⚡\n\nFor feedback, write a message to the bot with the hashtag #feedback\n\n";
 
                     $now = date('Y-m-d H:i:s');
                     if ($now < $user_date_payment) {
-                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> до " . $user_date_payment . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> until " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
+                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                     } else {
                         $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Ваша премиум подписка истекла</b>\nЧтобы продлить премиум подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Your premium subscription has expired</b>\nTo renew the premium subscription, use the /premium command \n\n";
                     }
@@ -883,10 +886,10 @@ function getUserData($tgm_user_id)
             }
 
             $now = date('Y-m-d H:m:s');
-            $user_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'не оплачена' : 'not paid';
+            $date_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'не оплачена' : 'not paid';
             if ($row['date_payment']) {
                 if ($row['date_payment'] > $now) {
-                    $user_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'оплачена до ' . $row['date_payment'] : 'paid until ' . $row['date_payment'];
+                    $date_payment = ($row['language_code'] === 'ru' || $row['language_code'] === 'kg') ? 'оплачена до ' . $row['date_payment'] : 'paid until ' . $row['date_payment'];
                 }
             }
 
@@ -923,7 +926,8 @@ function getUserData($tgm_user_id)
                 'preference_owner_text'     => $preference_owner,
                 'preference_property'       => $row['preference_property'],
                 'preference_property_text'  => $preference_property,
-                'date_payment'              => $user_payment,
+                'date_payment'              => $row['date_payment'],
+                'date_payment_text'         => $date_payment,
             ];
         }
     }
