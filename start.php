@@ -614,8 +614,8 @@ function createUser($user_data)
         // Insert user
         unset($user_data['text']);
         // Add 1 week
-        $now_plus_2week = date('Y-m-d H:i:s', strtotime('+2 week'));
-        $user_data['date_payment'] = $now_plus_2week;
+        $now_plus_day = date('Y-m-d H:i:s', strtotime('+1 day'));
+        $user_data['date_payment'] = $now_plus_day;
         $columns = implode(", ", array_keys($user_data));
         $escaped_values = array_map(array($conn, 'real_escape_string'), array_values($user_data));
         $values  = implode("', '", $escaped_values);

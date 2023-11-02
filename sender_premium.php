@@ -60,12 +60,11 @@ $formatter_kgs->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, 0);
 
 
 
-// 2. Send messages to telegram users without payment
-$now_plus_15_min = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 AND date_payment IS NULL OR date_payment < '$now_plus_15_min'";
+// 2. Send messages to telegram
+$sql = "SELECT * FROM $table_user WHERE is_deleted = 0 OR is_deleted IS NULL";
 $users_result = mysqli_query($conn, $sql);
 if ($users_result && mysqli_num_rows($users_result)) {
-    file_put_contents($sender_log_file, ' | Active ordinary users: ' . mysqli_num_rows($users_result), FILE_APPEND);
+    file_put_contents($sender_log_file, ' | Active users: ' . mysqli_num_rows($users_result), FILE_APPEND);
     $users_rows = mysqli_fetch_all($users_result, MYSQLI_ASSOC);
     foreach ($users_rows as $user) {
         $tgm_user_id = $user['tgm_user_id'];
@@ -136,10 +135,10 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($district !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Район:</b> $district\n" : "<b>District:</b> $district\n";
                 }
-                // if ($house_type !== 'n/d' && $house_type !== NULL) {
-                //     $house_type_en = slug($house_type, true);
-                //     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Серия:</b> $house_type\n" : "<b>House type:</b> $house_type_en\n";
-                // }
+                if ($house_type !== 'n/d' && $house_type !== NULL) {
+                    $house_type_en = slug($house_type, true);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Серия:</b> $house_type\n" : "<b>House type:</b> $house_type_en\n";
+                }
                 if ($sharing !== 'n/d' && $sharing !== NULL) {
                     if ($sharing === '1') {
                         $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Подселение:</b> без подселения\n" : "<b>Sharing:</b> without sharing\n";
@@ -171,58 +170,58 @@ if ($users_result && mysqli_num_rows($users_result)) {
                     }
                 }
 
-                // if ($furniture !== 'n/d' && $furniture !== NULL) {
-                //     $furniture_array = json_decode($furniture);
-                //     $furniture_array_name = [];
-                //     foreach ($furniture_array as $furniture_item) {
-                //         $furniture_data = getAmenityById($furniture_item);
-                //         $furniture_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $furniture_data['amenity_name_ru'] : $furniture_data['amenity_name_en'];
-                //     }
-                //     $furniture = implode(', ', $furniture_array_name);
-                //     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Мебель:</b> $furniture\n" : "<b>Furniture:</b> $furniture\n";
-                // }
-                // if ($condition !== 'n/d' && $condition !== NULL) {
-                //     $condition_array = json_decode($condition);
-                //     $condition_array_name = [];
-                //     foreach ($condition_array as $condition_item) {
-                //         $condition_data = getAmenityById($condition_item);
-                //         $condition_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $condition_data['amenity_name_ru'] : $condition_data['amenity_name_en'];
-                //     }
-                //     $condition = implode(', ', $condition_array_name);
-                //     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Состояние:</b> $condition\n" : "<b>Condition:</b> $condition\n";
-                // }
-                // if ($appliances !== 'n/d' && $appliances !== NULL) {
-                //     $appliances_array = json_decode($appliances);
-                //     $appliances_array_name = [];
-                //     foreach ($appliances_array as $appliances_item) {
-                //         $appliances_data = getAmenityById($appliances_item);
-                //         $appliances_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $appliances_data['amenity_name_ru'] : $appliances_data['amenity_name_en'];
-                //     }
-                //     $appliances = implode(', ', $appliances_array_name);
-                //     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Бытовая техника:</b> $appliances\n" : "<b>Appliances:</b> $appliances\n";
-                // }
-                // if ($improvement_out !== 'n/d' && $improvement_out !== NULL) {
-                //     $improvement_out_array = json_decode($improvement_out);
-                //     $improvement_out_array_name = [];
-                //     foreach ($improvement_out_array as $improvement_out_item) {
-                //         $improvement_out_data = getAmenityById($improvement_out_item);
-                //         $improvement_out_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_out_data['amenity_name_ru'] : $improvement_out_data['amenity_name_en'];
-                //     }
-                //     $improvement_out = implode(', ', $improvement_out_array_name);
-                //     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Благоустройство:</b> $improvement_out\n" : "<b>Improvements:</b> $improvement_out\n";
-                // }
-                // if ($property_type === 1) {
-                //     if ($utility !== 'n/d' && $utility !== NULL) {
-                //         $utility_array = json_decode($utility);
-                //         $utility_array_name = [];
-                //         foreach ($utility_array as $utility_item) {
-                //             $utility_data = getAmenityById($utility_item);
-                //             $utility_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $utility_data['amenity_name_ru'] : $utility_data['amenity_name_en'];
-                //         }
-                //         $utility = implode(', ', $utility_array_name);
-                //         $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Коммуникации:</b> $utility\n" : "<b>Utility:</b> $utility\n";
-                //     }
-                // }
+                if ($furniture !== 'n/d' && $furniture !== NULL) {
+                    $furniture_array = json_decode($furniture);
+                    $furniture_array_name = [];
+                    foreach ($furniture_array as $furniture_item) {
+                        $furniture_data = getAmenityById($furniture_item);
+                        $furniture_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $furniture_data['amenity_name_ru'] : $furniture_data['amenity_name_en'];
+                    }
+                    $furniture = implode(', ', $furniture_array_name);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Мебель:</b> $furniture\n" : "<b>Furniture:</b> $furniture\n";
+                }
+                if ($condition !== 'n/d' && $condition !== NULL) {
+                    $condition_array = json_decode($condition);
+                    $condition_array_name = [];
+                    foreach ($condition_array as $condition_item) {
+                        $condition_data = getAmenityById($condition_item);
+                        $condition_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $condition_data['amenity_name_ru'] : $condition_data['amenity_name_en'];
+                    }
+                    $condition = implode(', ', $condition_array_name);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Состояние:</b> $condition\n" : "<b>Condition:</b> $condition\n";
+                }
+                if ($appliances !== 'n/d' && $appliances !== NULL) {
+                    $appliances_array = json_decode($appliances);
+                    $appliances_array_name = [];
+                    foreach ($appliances_array as $appliances_item) {
+                        $appliances_data = getAmenityById($appliances_item);
+                        $appliances_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $appliances_data['amenity_name_ru'] : $appliances_data['amenity_name_en'];
+                    }
+                    $appliances = implode(', ', $appliances_array_name);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Бытовая техника:</b> $appliances\n" : "<b>Appliances:</b> $appliances\n";
+                }
+                if ($improvement_out !== 'n/d' && $improvement_out !== NULL) {
+                    $improvement_out_array = json_decode($improvement_out);
+                    $improvement_out_array_name = [];
+                    foreach ($improvement_out_array as $improvement_out_item) {
+                        $improvement_out_data = getAmenityById($improvement_out_item);
+                        $improvement_out_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_out_data['amenity_name_ru'] : $improvement_out_data['amenity_name_en'];
+                    }
+                    $improvement_out = implode(', ', $improvement_out_array_name);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Благоустройство:</b> $improvement_out\n" : "<b>Improvements:</b> $improvement_out\n";
+                }
+                if ($property_type === 1) {
+                    if ($utility !== 'n/d' && $utility !== NULL) {
+                        $utility_array = json_decode($utility);
+                        $utility_array_name = [];
+                        foreach ($utility_array as $utility_item) {
+                            $utility_data = getAmenityById($utility_item);
+                            $utility_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $utility_data['amenity_name_ru'] : $utility_data['amenity_name_en'];
+                        }
+                        $utility = implode(', ', $utility_array_name);
+                        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Коммуникации:</b> $utility\n" : "<b>Utility:</b> $utility\n";
+                    }
+                }
 
                 if ($min_rent_month !== 'n/d' && $min_rent_month !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Мин. срок аренды:</b> $min_rent_month месяцев\n" : "\n<b>Min. rent period:</b> $min_rent_month months\n";
@@ -233,13 +232,13 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($deposit_kgs !== 'n/d' && $deposit_kgs !== NULL) {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Депозит:</b> $deposit_kgs ($deposit_usd)\n" : "<b>Deposit:</b> $deposit_kgs ($deposit_usd)\n";
                 }
-                // if ($owner_name !== 'n/d' && $owner_name !== NULL) {
-                //     $owner_name_en = slug($owner_name, true);
-                //     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
-                // }
+                if ($owner_name !== 'n/d' && $owner_name !== NULL) {
+                    $owner_name_en = slug($owner_name, true);
+                    $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n<b>Кто сдаёт:</b> $owner_name\n" : "\n<b>Owner:</b> $owner_name_en\n";
+                }
                 if ($phone !== 'n/d' && $phone !== NULL && $phone !== '') {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Телефон:</b> $phone\n" : "<b>Phone:</b> $phone\n";
-                    // $message .= "<a href='https://wa.me/$phone'>Whatsapp</a>\n";
+                    $message .= "<a href='https://wa.me/$phone'>Whatsapp</a>\n";
                 } else {
                     $message .= ($user_language === 'ru' || $user_language === 'kg') ? "<b>Ссылка:</b> $link\n" : "<b>Link:</b> $link\n";
                 }
@@ -270,7 +269,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
                         $image_counter = 0;
                         foreach ($gallery as $image) {
-                            if ($image_counter === 3) break;
+                            if ($image_counter === 9) break;
                             if ($image_counter === 0) {
                                 $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message, 'HTML');
                             } else {
