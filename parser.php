@@ -51,7 +51,6 @@ $table_rate = MYSQL_TABLE_RATE;
 $table_amenity = MYSQL_TABLE_AMENITY;
 $table_owner = MYSQL_TABLE_OWNER;
 $table_property = MYSQL_TABLE_PROPERTY;
-$table_donation = MYSQL_TABLE_DONATION;
 
 
 

@@ -85,10 +85,10 @@ if (mysqli_num_rows($users_result)) {
         $msg_footer = getMsgFooter($user_language);
         $message .= $msg_footer;
 
-        $donation_array = getDonation($user_language);
-        $inline_keyboard = $donation_array[1];
-        if (!empty($donation_array[0])) {
-            $message .= $donation_array[0];
+        $payment_array = getPayment($user_language);
+        $inline_keyboard = $payment_array[1];
+        if (!empty($payment_array[0])) {
+            $message .= $payment_array[0];
         }
 
         try {
@@ -247,43 +247,43 @@ function getMsgFooter($user_language)
     return  $message;
 }
 
-function getDonation($user_language)
+function getPayment($user_language)
 {
 
     global $start_error_log_file;
 
     $message = null;
 
-    $donations = [];
+    $payments = [];
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_donation = MYSQL_TABLE_DONATION;
+    $table_payment = MYSQL_TABLE_PAYMENT;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | getDonation - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | getPayment - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
-    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY donation_id ASC";
+    $sql = "SELECT * FROM $table_payment WHERE is_active = 1 ORDER BY payment_id ASC";
     $result = mysqli_query($conn, $sql);
     if ($result && mysqli_num_rows($result) > 0) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         foreach ($rows as $row) {
-            $donations[] = [
-                'text' => $row['donation_icon'] . ' ' . $row['donation_name_' . $user_language],
-                'url' => $row['donation_link']
+            $payments[] = [
+                'text' => $row['payment_icon'] . ' ' . $row['payment_name_' . $user_language],
+                'callback_data' => 'payment_' . $row['payment_id']
             ];
         }
     }
 
-    if (!empty($donations)) {
+    if (!empty($payments)) {
         $inline_keyboard_array = [];
-        foreach ($donations as $key => $value) {
+        foreach ($payments as $key => $value) {
             if ($key % 2 === 0) {
                 $inline_keyboard_array[] = [$value];
             } else {
@@ -294,8 +294,7 @@ function getDonation($user_language)
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
 
         $message = "\n";
-        $message .= "\n";
-        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум доступа:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полноый набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум доступа на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум доступа на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум доступа на 14 дней - 500 сом (550 руб)\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "💪 Benefits of premium access:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium access for 3 days is 200 soms (220 rubles)\n👑 The cost of premium access for 7 days is 300 soms (330 rubles)\n👑 The cost of premium access for 14 days is 500 soms ( 550 rubles)\n\n💰 To pay, use the buttons below ⬇";
+        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)\n\n💰 To pay, use the buttons below ⬇";
     } else {
         $inline_keyboard = null;
     }
