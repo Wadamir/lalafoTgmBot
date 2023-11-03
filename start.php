@@ -226,7 +226,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         [
                             [
                                 ['text' => $update_settings_text, 'callback_data' => 'update_settings'],
-                                ['text' => $update_premium_text, 'callback_data' => '/premium'],
+                            ],
+                            [
+                                ['text' => $update_premium_text, 'callback_data' => 'update_premium'],
                             ],
                         ]
                     );
@@ -587,6 +589,18 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     } else {
                         $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "🙀 <b>Ваша премиум подписка истекла.</b>\n\n" : "🙀 <b>Your premium subscription has expired.</b>\n\n";
                         $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)\n\nЧтобы продлить премиум подписку - воспользуйтесь командой /premium" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)\n\nTo renew the premium subscription, use the /premium command";
+                        $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "⚙ Изменить настройки" : "⚙ Change settings";
+                        $update_premium_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 Продлить премиум подписку" : "👑 Renew premium subscription";
+                        $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                            [
+                                [
+                                    ['text' => $update_settings_text, 'callback_data' => 'update_settings'],
+                                ],
+                                [
+                                    ['text' => $update_premium_text, 'callback_data' => 'update_premium'],
+                                ],
+                            ]
+                        );
                     }
 
                     $bot->sendMessage($chat_id, $message_text, 'HTML');
