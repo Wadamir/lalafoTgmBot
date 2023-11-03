@@ -1576,7 +1576,7 @@ function getDonation($user_language)
         foreach ($rows as $row) {
             $donations[] = [
                 'text' => $row['donation_icon'] . ' ' . $row['donation_name_' . $user_language],
-                'callback_query' => 'donation_' . $row['donation_id']
+                'callback_data' => 'donation_' . $row['donation_id']
             ];
         }
     }
