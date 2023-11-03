@@ -205,7 +205,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             break;
         case '/settings':
             $get_user_data = getUserData($user_data['tgm_user_id']);
-            file_put_contents($start_log_file, ' | ' . json_encode($get_user_data), FILE_APPEND);
             if (!empty($get_user_data)) {
                 $user_preference_city = $get_user_data['preference_city_text'];
                 $user_preference_district = $get_user_data['preference_district_text'];
@@ -248,6 +247,46 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 
                 file_put_contents($start_log_file, ' | ' . $message_text, FILE_APPEND);
 
+
+                try {
+                    $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
+                } catch (Exception $e) {
+                    $log_error_array[] = $e->getMessage();
+                }
+            } else {
+                $log_error_array[] = 'Get user data error';
+            }
+            break;
+        case '/premium':
+            $get_user_data = getUserData($user_data['tgm_user_id']);
+            if (!empty($get_user_data)) {
+                $user_preference_city = $get_user_data['preference_city_text'];
+                $user_preference_district = $get_user_data['preference_district_text'];
+                $user_preference_property = $get_user_data['preference_property_text'];
+                $user_rooms_min = $get_user_data['rooms_min'];
+                $user_preference_sharing = $get_user_data['preference_sharing_text'];
+                $user_max_price = $get_user_data['price_max_text'];
+                $user_date_payment = $get_user_data['date_payment'];
+                $user_date_payment_text = $get_user_data['date_payment_text'];
+
+                $now = date('Y-m-d H:i:s');
+                if ($now < $user_date_payment) {
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\n\n" : "👑 <b>Premium subscription:" . $user_date_payment_text . "\n\n";
+                } else {
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "🙀 <b>Ваша премиум подписка истекла.</b>\n\n" : "🙀 <b>Your premium subscription has expired.</b>\n\n";
+                }
+
+                $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)";
+                $update_premium_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 Продлить премиум подписку" : "👑 Renew premium subscription";
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                    [
+                        [
+                            ['text' => $update_premium_text, 'callback_data' => 'update_premium'],
+                        ],
+                    ]
+                );
+
+                file_put_contents($start_log_file, ' | ' . $message_text, FILE_APPEND);
 
                 try {
                     $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
