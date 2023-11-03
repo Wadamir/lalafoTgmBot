@@ -1534,7 +1534,7 @@ function getDonation($user_language)
         $donation[] = [
             'text'  => ($user_language === 'ru' || $user_language === 'kg') ? '✅ Я оплатил' : '✅ I paid',
             'callback_data' => 'donation_paid'
-        ]
+        ];
     }
 
     if (!empty($donations)) {
