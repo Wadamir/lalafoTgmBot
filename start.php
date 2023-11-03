@@ -282,6 +282,21 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
 } elseif ($chat_type === 'callback_query') {
     $new_data = [];
     switch (true) {
+        case strpos($command_data, "update_premium") === 0:
+            $donation = getDonation($user_language);
+            if (!empty($donation)) {
+                $message_text = $donation[0];
+                $inline_keyboard = $donation[1];
+            } else {
+                $log_error_array[] = 'Donation not found';
+            }
+
+            try {
+                $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
+            } catch (Exception $e) {
+                $log_error_array[] = $e->getMessage();
+            }
+            break;
         case strpos($command_data, "update_settings") === 0:
             try {
                 $bot->deleteMessage($chat_id, $messageId);
