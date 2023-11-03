@@ -692,6 +692,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $log_message_array[] = 'Payment - ' . $payment_id;
             $payment = getPaymentById($payment_id);
             if (!empty($payment)) {
+                $bot->deleteMessage($chat_id, $messageId);
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
                         $message_text = $payment['payment_description_ru'];
@@ -702,13 +703,25 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $message_text = $payment['payment_description_en'];
                     }
                 }
+                if ($payment['payment_account'] !== '' && $payment['payment_account'] !== null) {
+                    $message_text .= "\n\n" . '```' . $payment['payment_account'] . '```';
+                }
+                if ($payment['payment_link'] !== '' && $payment['payment_link'] !== null) {
+                    $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                        [
+                            [
+                                ['text' => 'Оплатить', 'url' => $payment['payment_link']],
+                            ],
+                        ]
+                    );
+                }
+                try {
+                    $bot->sendMessage($chat_id, $message_text, 'Markdown', false, null, $inline_keyboard);
+                } catch (Exception $e) {
+                    $log_error_array[] = $e->getMessage();
+                }
             } else {
                 $log_error_array[] = 'Payment not found';
-            }
-            try {
-                $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
-            } catch (Exception $e) {
-                $log_error_array[] = $e->getMessage();
             }
             break;
     }
