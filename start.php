@@ -1523,6 +1523,10 @@ function getDonation($user_language)
                 'url' => $row['donation_link']
             ];
         }
+        $donation[] = [
+            'text'  => ($user_language === 'ru' || $user_language === 'kg') ? '✅ Я оплатил' : '✅ I paid',
+            'callback_data' => 'donation_paid'
+        ]
     }
 
     if (!empty($donations)) {
@@ -1539,7 +1543,7 @@ function getDonation($user_language)
 
         $message = "\n";
         $message .= "\n";
-        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум доступа:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полноый набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум доступа на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум доступа на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум доступа на 14 дней - 500 сом (550 руб)\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "💪 Benefits of premium access:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium access for 3 days is 200 soms (220 rubles)\n👑 The cost of premium access for 7 days is 300 soms (330 rubles)\n👑 The cost of premium access for 14 days is 500 soms ( 550 rubles)\n\n💰 To pay, use the buttons below ⬇";
+        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум доступа:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум доступа на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум доступа на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум доступа на 14 дней - 500 сом (550 руб)\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "💪 Benefits of premium access:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium access for 3 days is 200 soms (220 rubles)\n👑 The cost of premium access for 7 days is 300 soms (330 rubles)\n👑 The cost of premium access for 14 days is 500 soms (550 rubles)\n\n💰 To pay, use the buttons below ⬇";
     } else {
         $inline_keyboard = null;
     }
