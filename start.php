@@ -198,6 +198,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             break;
         case '/settings':
             $get_user_data = getUserData($user_data['tgm_user_id']);
+            file_put_contents($start_log_file, ' | ' . json_encode($get_user_data), FILE_APPEND);
             if (!empty($get_user_data)) {
                 $user_preference_city = $get_user_data['preference_city_text'];
                 $user_preference_district = $get_user_data['preference_district_text'];
