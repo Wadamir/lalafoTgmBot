@@ -283,6 +283,11 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $new_data = [];
     switch (true) {
         case strpos($command_data, "update_premium") === 0:
+            try {
+                $bot->deleteMessage($chat_id, $messageId);
+            } catch (Exception $e) {
+                $log_error_array[] = $e->getMessage();
+            }
             $donation = getDonation($user_language);
             if (!empty($donation)) {
                 $message_text = $donation[0];
@@ -290,7 +295,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             } else {
                 $log_error_array[] = 'Donation not found';
             }
-
             try {
                 $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
             } catch (Exception $e) {
@@ -1572,13 +1576,9 @@ function getDonation($user_language)
         foreach ($rows as $row) {
             $donations[] = [
                 'text' => $row['donation_icon'] . ' ' . $row['donation_name_' . $user_language],
-                'url' => $row['donation_link']
+                'callback_query' => 'donation_' . $row['donation_id']
             ];
         }
-        $donation[] = [
-            'text'  => ($user_language === 'ru' || $user_language === 'kg') ? '✅ Я оплатил' : '✅ I paid',
-            'callback_data' => 'donation_paid'
-        ];
     }
 
     if (!empty($donations)) {
