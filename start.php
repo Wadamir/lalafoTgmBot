@@ -222,6 +222,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     }
                 }
 
+                file_put_contents($start_log_file, ' | ' . $message_text, FILE_APPEND);
+
                 $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "Изменить настройки" : "Change settings";
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
