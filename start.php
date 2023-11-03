@@ -288,12 +288,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             } catch (Exception $e) {
                 $log_error_array[] = $e->getMessage();
             }
-            $donation = getDonation($user_language);
-            if (!empty($donation)) {
-                $message_text = $donation[0];
-                $inline_keyboard = $donation[1];
+            $payment = getPayment($user_language);
+            if (!empty($payment)) {
+                $message_text = $payment[0];
+                $inline_keyboard = $payment[1];
             } else {
-                $log_error_array[] = 'Donation not found';
+                $log_error_array[] = 'Payment not found';
             }
             try {
                 $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
@@ -1547,43 +1547,43 @@ function getPropertyById($property_id)
     return $property;
 }
 
-function getDonation($user_language)
+function getPayment($user_language)
 {
 
     global $start_error_log_file;
 
     $message = null;
 
-    $donations = [];
+    $payments = [];
 
     $dbhost = MYSQL_HOST;
     $dbuser = MYSQL_USER;
     $dbpass = MYSQL_PASSWORD;
     $dbname = MYSQL_DB;
-    $table_donation = MYSQL_TABLE_DONATION;
+    $table_payment = MYSQL_TABLE_PAYMENT;
 
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($start_error_log_file, ' | getDonation - connection failed', FILE_APPEND);
+        file_put_contents($start_error_log_file, ' | getPayment - connection failed', FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
-    $sql = "SELECT * FROM $table_donation WHERE is_active = 1 ORDER BY donation_id ASC";
+    $sql = "SELECT * FROM $table_payment WHERE is_active = 1 ORDER BY payment_id ASC";
     $result = mysqli_query($conn, $sql);
     if ($result && mysqli_num_rows($result) > 0) {
         $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
         foreach ($rows as $row) {
-            $donations[] = [
-                'text' => $row['donation_icon'] . ' ' . $row['donation_name_' . $user_language],
-                'callback_data' => 'donation_' . $row['donation_id']
+            $payments[] = [
+                'text' => $row['payment_icon'] . ' ' . $row['payment_name_' . $user_language],
+                'callback_data' => 'payment_' . $row['payment_id']
             ];
         }
     }
 
-    if (!empty($donations)) {
+    if (!empty($payments)) {
         $inline_keyboard_array = [];
-        foreach ($donations as $key => $value) {
+        foreach ($payments as $key => $value) {
             if ($key % 2 === 0) {
                 $inline_keyboard_array[] = [$value];
             } else {

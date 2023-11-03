@@ -11,7 +11,7 @@ Create database for Lalafo tgm bot
 7. Create table amenity
 8. Create table property
 9. Create table owner
-10. Create table donation
+10. Create table payment
 11. Close connection
 */
 
@@ -37,7 +37,7 @@ $table_rate = MYSQL_TABLE_RATE;
 $table_amenity = MYSQL_TABLE_AMENITY;
 $table_property = MYSQL_TABLE_PROPERTY;
 $table_owner = MYSQL_TABLE_OWNER;
-$table_donation = MYSQL_TABLE_DONATION;
+$table_payment = MYSQL_TABLE_PAYMENT;
 
 // Create connection
 $conn = mysqli_connect($dbhost, $dbuser, $dbpass);
@@ -582,17 +582,21 @@ if (mysqli_query($conn, $sql)) {
     file_put_contents($log_dir . '/install.log', "Error inserting data into table $table_owner: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
-// 10. Create table donation
-file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 10. Create table ' . $table_donation . PHP_EOL, FILE_APPEND);
-$sql = "CREATE TABLE IF NOT EXISTS $table_donation (
-        `donation_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
+// 10. Create table payment
+file_put_contents($log_dir . '/install.log', '[' . date('Y-m-d H:i:s') . '] 10. Create table ' . $table_payment . PHP_EOL, FILE_APPEND);
+$sql = "CREATE TABLE IF NOT EXISTS $table_payment (
+        `payment_id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
         `is_active` tinyint(1) DEFAULT '1',
-        `donation_name_en` varchar(255) NOT NULL,
-        `donation_name_ru` varchar(255) NOT NULL,
-        `donation_name_kg` varchar(255) NOT NULL,
-        `donation_icon` varchar(255) NOT NULL,
-        `donation_slug` varchar(255) NOT NULL,
-        `donation_link` text NOT NULL
+        `payment_name_en` varchar(255) NOT NULL,
+        `payment_name_ru` varchar(255) NOT NULL,
+        `payment_name_kg` varchar(255) NOT NULL,
+        `payment_description_en` text DEFAULT NULL,
+        `payment_description_ru` text DEFAULT NULL,
+        `payment_description_kg` text DEFAULT NULL,
+        `payment_icon` varchar(255) DEFAULT NULL,
+        `payment_slug` varchar(255) NOT NULL,
+        `payment_account` varchar(255) DEFAULT NULL,
+        `payment_link` text DEFAULT NULL
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
 if (!mysqli_select_db($conn, $dbname)) {
@@ -601,9 +605,9 @@ if (!mysqli_select_db($conn, $dbname)) {
 }
 
 if (mysqli_query($conn, $sql)) {
-    file_put_contents($log_dir . '/install.log', "Table $table_donation created successfully" . PHP_EOL, FILE_APPEND);
+    file_put_contents($log_dir . '/install.log', "Table $table_payment created successfully" . PHP_EOL, FILE_APPEND);
 } else {
-    file_put_contents($log_dir . '/install.log', "Error creating table $table_donation: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+    file_put_contents($log_dir . '/install.log', "Error creating table $table_payment: " . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
 }
 
 // 10. Close connection
