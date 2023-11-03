@@ -686,6 +686,31 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             } else {
                 $log_error_array[] = 'Update user error';
             }
+            break;
+        case strpos($command_data, "payment") === 0:
+            $payment_id = str_replace('payment_', '', $command_data);
+            $log_message_array[] = 'Payment - ' . $payment_id;
+            $payment = getPaymentById($payment_id);
+            if (!empty($payment)) {
+                if ($user_language === 'kg' || $user_language === 'ru') {
+                    if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
+                        $message_text = $payment['payment_description_ru'];
+                    }
+                } else {
+                    $message_text = $payment[0]['payment_text_en'];
+                    if ($payment['payment_description_en'] !== '' && $payment['payment_description_en'] !== null) {
+                        $message_text = $payment['payment_description_en'];
+                    }
+                }
+            } else {
+                $log_error_array[] = 'Payment not found';
+            }
+            try {
+                $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
+            } catch (Exception $e) {
+                $log_error_array[] = $e->getMessage();
+            }
+            break;
     }
 } else {
     $log_error_array[] = 'Undefined bot message type or user is bot';
@@ -1639,4 +1664,44 @@ function getPayment($user_language)
     }
 
     return [$message, $inline_keyboard];
+}
+
+function getPaymentById($payment_id)
+{
+
+    global $start_error_log_file;
+
+    $payment = [];
+
+    if ($payment_id === '') {
+        file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getPaymentById - id is empty', FILE_APPEND);
+    } else {
+        $dbhost = MYSQL_HOST;
+        $dbuser = MYSQL_USER;
+        $dbpass = MYSQL_PASSWORD;
+        $dbname = MYSQL_DB;
+        $table_payment = MYSQL_TABLE_PAYMENT;
+
+        // Create connection
+        $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+        if (!$conn) {
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getPaymentById - connection failed', FILE_APPEND);
+            throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+        }
+
+        $sql = "SELECT * FROM $table_payment WHERE payment_id = '$payment_id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $payment = $row;
+            }
+        } else {
+            file_put_contents($start_error_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] getPaymentById with id ' . $payment_id . ' - no payments found', FILE_APPEND);
+        }
+
+        // Close connection
+        mysqli_close($conn);
+    }
+
+    return $payment;
 }
