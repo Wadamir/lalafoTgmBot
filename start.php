@@ -704,7 +704,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     }
                 }
                 if ($payment['payment_account'] !== '' && $payment['payment_account'] !== null) {
-                    $message_text .= "\n\n" . '```' . $payment['payment_account'] . '```';
+                    $message_text .= "\n\n" . '`' . $payment['payment_account'] . '`';
                 }
                 if ($payment['payment_link'] !== '' && $payment['payment_link'] !== null) {
                     $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
