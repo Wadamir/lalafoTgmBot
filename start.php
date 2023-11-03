@@ -173,12 +173,12 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                             $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                         } else {
                             $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Ваша премиум подписка истекла</b>\nЧтобы продлить премиум подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Your premium subscription has expired</b>\nTo renew the premium subscription, use the /premium command \n\n";
-                        }
 
-                        $donation_array = getDonation($user_language);
-                        $inline_keyboard = $donation_array[1];
-                        if (!empty($donation_array[0])) {
-                            $message_text .= $donation_array[0];
+                            $donation_array = getDonation($user_language);
+                            $inline_keyboard = $donation_array[1];
+                            if (!empty($donation_array[0])) {
+                                $message_text .= $donation_array[0];
+                            }
                         }
 
                         try {
@@ -215,6 +215,11 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment_text . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                 } else {
                     $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Ваша премиум подписка истекла</b>\nЧтобы продлить премиум подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Your premium subscription has expired</b>\nTo renew the premium subscription, use the /premium command \n\n";
+                    $donation_array = getDonation($user_language);
+                    $inline_keyboard = $donation_array[1];
+                    if (!empty($donation_array[0])) {
+                        $message_text .= $donation_array[0];
+                    }
                 }
 
                 $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "Изменить настройки" : "Change settings";
