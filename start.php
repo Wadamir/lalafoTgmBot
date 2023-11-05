@@ -693,12 +693,18 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $payment = getPaymentById($payment_id);
             if (!empty($payment)) {
                 // $bot->deleteMessage($chat_id, $messageId);
+
                 if ($user_language === 'kg' || $user_language === 'ru') {
+                    if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
+                        $message_text = 'Способ оплаты: *' . $payment['payment_name_ru'] . '* \n';
+                    }
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
                         $message_text = $payment['payment_description_ru'];
                     }
                 } else {
-                    $message_text = $payment[0]['payment_text_en'];
+                    if ($payment['payment_name_en'] !== '' && $payment['payment_name_en'] !== null) {
+                        $message_text = 'Payment method: *' . $payment['payment_name_en'] . '* \n';
+                    }
                     if ($payment['payment_description_en'] !== '' && $payment['payment_description_en'] !== null) {
                         $message_text = $payment['payment_description_en'];
                     }
