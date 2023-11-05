@@ -695,7 +695,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $bot->deleteMessage($chat_id, $messageId);
                 $message_text = getPremiumSubscriptionBenefit($user_language);
                 $message_text .= "\n\n";
-                $message_text .= "▫▪▫▪▫▪▫▪▫▪▫";
+                $message_text .= "▫➖▫➖▫➖▫➖▫➖▫";
                 $message_text .= "\n\n";
                 if ($payment['payment_icon'] !== '' && $payment['payment_icon'] !== null) {
                     $message_text .= $payment['payment_icon'] . ' ';
@@ -710,7 +710,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     }
                 } else {
                     if ($payment['payment_name_en'] !== '' && $payment['payment_name_en'] !== null) {
-                        $message_text .= 'Payment method: *' . $payment['payment_name_en'] . '*';
+                        $message_text .= 'Payment method: <b>' . $payment['payment_name_en'] . '</b>';
                         $message_text .= "\n";
                     }
                     if ($payment['payment_description_en'] !== '' && $payment['payment_description_en'] !== null) {
@@ -727,7 +727,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $message_text .= "\n\n" . 'Payment link: <a href="' . $payment['payment_link'] . '" target="_blank">pay</a>';
                     }
                 }
-                $payment_done = ($user_language === 'ru' || $user_language === 'kg') ? "Я оплатил" : "I paid";
+                $payment_done = ($user_language === 'ru' || $user_language === 'kg') ? "Оплата завершена" : "Payment done";
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
                         [
@@ -744,6 +744,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $log_error_array[] = 'Payment not found';
             }
             break;
+        default:
+            $log_error_array[] = 'Undefined bot command';
     }
 } else {
     $log_error_array[] = 'Undefined bot message type or user is bot';
