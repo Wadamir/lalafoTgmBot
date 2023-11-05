@@ -1741,5 +1741,6 @@ function getPremiumSubscriptionBenefit($user_language)
 
 function brToNl($string)
 {
-    return mb_ereg_replace('/<br\\s*?\/??>/i', "\n", $string);
+    $breaks = array("<br />", "<br>", "<br/>");
+    return str_replace($breaks, "\n", $string);
 }
