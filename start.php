@@ -737,8 +737,9 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         ],
                     ]
                 );
+                $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
                 try {
-                    $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $inline_keyboard);
+                    $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $force_reply);
                 } catch (Exception $e) {
                     $log_error_array[] = $e->getMessage();
                 }
