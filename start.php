@@ -721,14 +721,20 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $message_text .= "\n\n" . '<code>' . $payment['payment_account'] . '</code>';
                 }
                 if ($payment['payment_link'] !== '' && $payment['payment_link'] !== null) {
-                    $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
-                        [
-                            [
-                                ['text' => 'Оплатить', 'url' => $payment['payment_link']],
-                            ],
-                        ]
-                    );
+                    if ($user_language === 'kg' || $user_language === 'ru') {
+                        $message_text .= "\n\n" . 'Ссылка для оплаты: <a href="' . $payment['payment_link'] . '" target="_blank">оплатить</a>';
+                    } else {
+                        $message_text .= "\n\n" . 'Payment link: <a href="' . $payment['payment_link'] . '" target="_blank">pay</a>';
+                    }
                 }
+                $payment_done = ($user_language === 'ru' || $user_language === 'kg') ? "Я оплатил" : "I paid";
+                $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
+                    [
+                        [
+                            ['text' => $payment_done, 'callback_data' => 'success_payment_' . $payment['payment_id']],
+                        ],
+                    ]
+                );
                 try {
                     $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                 } catch (Exception $e) {
