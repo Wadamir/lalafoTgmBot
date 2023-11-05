@@ -698,7 +698,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
                         $message_text .= 'Способ оплаты: <bankcard>' . $payment['payment_name_ru'] . '</bankcard>';
-                        $message_text .= 'Способ оплаты: <cashtag>' . $payment['payment_name_ru'] . '</cashtag>';
                         $message_text .= 'Способ оплаты: <underline>' . $payment['payment_name_ru'] . '</underline>';
                         $message_text .= 'Способ оплаты: <spoiler>' . $payment['payment_name_ru'] . '</spoiler>';
 
