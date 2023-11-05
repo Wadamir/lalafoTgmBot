@@ -173,7 +173,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                             $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                         } else {
                             $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "🙀 <b>Ваша премиум подписка истекла.</b>\n\n" : "🙀 <b>Your premium subscription has expired.</b>\n\n";
-                            $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)";
+                            $message_text .= getPremiumSubscriptionBenefit($user_language);
                             $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "⚙ Изменить настройки" : "⚙ Change settings";
                             $update_premium_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 Продлить премиум подписку" : "👑 Renew premium subscription";
                             $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
@@ -230,7 +230,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     );
                 } else {
                     $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "🙀 <b>Ваша премиум подписка истекла.</b>\n\n" : "🙀 <b>Your premium subscription has expired.</b>\n\n";
-                    $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)";
+                    $message_text .= getPremiumSubscriptionBenefit($user_language);
                     $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "⚙ Изменить настройки" : "⚙ Change settings";
                     $update_premium_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 Продлить премиум подписку" : "👑 Renew premium subscription";
                     $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
@@ -276,7 +276,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "🙀 <b>Ваша премиум подписка истекла.</b>\n\n" : "🙀 <b>Your premium subscription has expired.</b>\n\n";
                 }
 
-                $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)";
+                $message_text .= getPremiumSubscriptionBenefit($user_language);
                 $update_premium_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 Продлить премиум подписку" : "👑 Renew premium subscription";
                 $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
                     [
@@ -658,7 +658,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "👑 <b>Премиум подписка:</b> " . $user_date_payment_text . "\nКогда ваша премиум-подписка закончится, вы <b><u>продолжите</u></b> получать уведомления, но реже и в сжатом формате. Чтобы проверить состояние подписки или продлить подписку - воспользуйтесь командой /premium \n\n" : "👑 <b>Premium subscription:</b> " . $user_date_payment_text . "\nWhen your premium subscription ends, you will <b><u>continue</u></b> receive notifications, but less frequently and in a compressed format. To check the status of the subscription or renew the subscription, use the /premium command \n\n";
                     } else {
                         $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "🙀 <b>Ваша премиум подписка истекла.</b>\n\n" : "🙀 <b>Your premium subscription has expired.</b>\n\n";
-                        $message_text .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)";
+                        $message_text .= getPremiumSubscriptionBenefit($user_language);
                         $update_settings_text = ($user_language === 'ru' || $user_language === 'kg') ? "⚙ Изменить настройки" : "⚙ Change settings";
                         $update_premium_text = ($user_language === 'ru' || $user_language === 'kg') ? "👑 Продлить премиум подписку" : "👑 Renew premium subscription";
                         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
@@ -692,7 +692,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $log_message_array[] = 'Payment - ' . $payment_id;
             $payment = getPaymentById($payment_id);
             if (!empty($payment)) {
-                $bot->deleteMessage($chat_id, $messageId);
+                // $bot->deleteMessage($chat_id, $messageId);
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
                         $message_text = $payment['payment_description_ru'];
@@ -1671,7 +1671,8 @@ function getPayment($user_language)
         $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup($inline_keyboard_array);
 
         $message = "\n";
-        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб)\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles)\n\n💰 To pay, use the buttons below ⬇";
+        $message .= getPremiumSubscriptionBenefit($user_language);
+        $message .= ($user_language === 'ru' || $user_language === 'kg') ? "\n\n💰 Для оплаты воспользуйтесь кнопками внизу ⬇" : "\n\n💰 To pay, use the buttons below ⬇";
     } else {
         $inline_keyboard = null;
     }
@@ -1717,4 +1718,9 @@ function getPaymentById($payment_id)
     }
 
     return $payment;
+}
+
+function getPremiumSubscriptionBenefit($user_language)
+{
+    return ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Стоимость премиум подписки на 3 дня - 200 сом (220 руб | 1 TonCoin)\n👑 Стоимость премиум подписки на 7 дней - 300 сом (330 руб | 1.5 TonCoin)\n👑 Стоимость премиум подписки на 14 дней - 500 сом (550 руб | 2.5 TonCoin)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles | 1 TonCoin)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles | 1.5 TonCoin)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles | 2.5 TonCoin)";
 }
