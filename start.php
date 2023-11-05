@@ -694,7 +694,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             if (!empty($payment)) {
                 // $bot->deleteMessage($chat_id, $messageId);
                 $message_text = getPremiumSubscriptionBenefit($user_language);
-                $message_text .= "\n\n";
+                $message_text .= "\n---\n";
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
                         $message_text .= 'Способ оплаты: *' . $payment['payment_name_ru'] . '*';
