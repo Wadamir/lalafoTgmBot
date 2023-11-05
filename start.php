@@ -694,13 +694,15 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             if (!empty($payment)) {
                 // $bot->deleteMessage($chat_id, $messageId);
                 $message_text = getPremiumSubscriptionBenefit($user_language);
-                $message_text .= "\n";
+                $message_text .= "\n\n";
                 $message_text .= "▪▫▪▫▪▫▪▫▪▫▪▫▪▫▪▫▪▫▪▫";
-                $message_text .= "\n";
+                $message_text .= "\n\n";
+                if ($payment['payment_icon'] !== '' && $payment['payment_icon'] !== null) {
+                    $message_text .= '<a href="' . $payment['payment_icon'] . '">' . $payment['payment_name_ru'] . '</a>';
+                }
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
                         $message_text .= 'Способ оплаты: <b>' . $payment['payment_name_ru'] . '</b>';
-
                         $message_text .= "\n";
                     }
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
