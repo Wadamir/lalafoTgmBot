@@ -706,7 +706,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $message_text .= "\n";
                     }
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
-                        $message_text .= nl2br($payment['payment_description_ru']);
+                        $message_text .= brToNl($payment['payment_description_ru']);
                     }
                 } else {
                     if ($payment['payment_name_en'] !== '' && $payment['payment_name_en'] !== null) {
@@ -1737,4 +1737,9 @@ function getPaymentById($payment_id)
 function getPremiumSubscriptionBenefit($user_language)
 {
     return ($user_language === 'ru' || $user_language === 'kg') ? "💪 Преимущества премиум подписки:\n1. Ускоренное уведомление о новых объявлениях.\n2. Полный набор фотографий.\n3. Расширенное описание.\n\n👑 Премиум подписка на 3 дня - 200 сом (220 руб | 1 TonCoin)\n👑 Премиум подписка на 7 дней - 300 сом (330 руб | 1.5 TonCoin)\n👑 Премиум подписка на 14 дней - 500 сом (550 руб | 2.5 TonCoin)" : "💪 Benefits of premium subscription:\n1. Expedited notification of new announcements.\n2. Full set of photos.\n3. Extended description.\n\n👑 The cost of premium subscription for 3 days is 200 soms (220 rubles | 1 TonCoin)\n👑 The cost of premium subscription for 7 days is 300 soms (330 rubles | 1.5 TonCoin)\n👑 The cost of premium subscription for 14 days is 500 soms (550 rubles | 2.5 TonCoin)";
+}
+
+function brToNl($string)
+{
+    return mb_ereg_replace('/<br\\s*?\/??>/i', "\n", $string);
 }
