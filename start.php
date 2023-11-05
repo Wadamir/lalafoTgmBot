@@ -697,7 +697,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 $message_text .= "\n---\n";
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
-                        $message_text .= 'Способ оплаты: <underline>' . $payment['payment_name_ru'] . '</underline>';
+                        $message_text .= 'Способ оплаты: <b>' . $payment['payment_name_ru'] . '</b>';
 
                         $message_text .= "\n";
                     }
