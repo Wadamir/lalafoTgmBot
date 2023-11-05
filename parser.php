@@ -356,7 +356,7 @@ if (count($cities) > 0) {
                         $renovation_array = [];
 
                         foreach ($details as $detail) {
-                            $childs = NULL;
+                            $child_elements = NULL;
                             if (mb_strpos($detail->textContent, 'Район') !== false) {
                                 $district = trim(str_replace('Район:', '', $detail->textContent));
                                 $district_result = getDistrictId($city_id, $district);
@@ -457,8 +457,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Дополнительно') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $additional_array[] = $child->textContent;
                                     }
@@ -466,8 +466,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Отопление') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $heating_array[] = $child->textContent;
                                     }
@@ -475,8 +475,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Удобства в квартире') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $improvement_in_array[] = $child->textContent;
                                     }
@@ -484,8 +484,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Благоустройство дома') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $improvement_out_array[] = $child->textContent;
                                     }
@@ -493,8 +493,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'В шаговой доступности') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $nearby_array[] = $child->textContent;
                                     }
@@ -502,8 +502,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Мебель') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $furniture_array[] = $child->textContent;
                                     }
@@ -511,8 +511,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Бытовая техника') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $appliances_array[] = $child->textContent;
                                     }
@@ -520,8 +520,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Коммуникации') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $utility_array[] = $child->textContent;
                                     }
@@ -529,8 +529,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Состояние') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $condition_array[] = $child->textContent;
                                     }
@@ -538,8 +538,8 @@ if (count($cities) > 0) {
                                 continue;
                             }
                             if (mb_strpos($detail->textContent, 'Ремонт') !== false) {
-                                $childs = $detail->childNodes;
-                                foreach ($childs as $child) {
+                                $child_elements = $detail->childNodes;
+                                foreach ($child_elements as $child) {
                                     if ($child->nodeName === 'a') {
                                         $renovation_array[] = $child->textContent;
                                     }

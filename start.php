@@ -17,7 +17,7 @@ if (!$token) {
     die('Token not found');
 }
 
-$adminChatId = ADMIN_CHAT_ID;
+$admin_chat_id = ADMIN_CHAT_ID;
 
 $dbhost = MYSQL_HOST;
 $dbuser = MYSQL_USER;
@@ -57,11 +57,13 @@ if (isset($update['message'])) {
     $chat_id = $update["message"]["chat"]["id"];
     $message = $update["message"]["text"];
     $message_type = $update["message"]["entities"][0]["type"];
+    $message_reply_to_message = ($update["message"]["reply_to_message"]) ? $update["message"]["reply_to_message"] : NULL;
+    $message_reply_to_message_text = ($update["message"]["reply_to_message"]["text"]) ? $update["message"]["reply_to_message"]["text"] : NULL;
 } elseif (isset($update['callback_query'])) {
     file_put_contents($start_log_file, ' Callback: ' . $update['callback_query']['data'], FILE_APPEND);
     $user_data = [
         'tgm_user_id' => $update['callback_query']['from']['id'],
-        'is_bot' => (isset($update['callback_query']['from']['is_bot']) && $update['messacallback_querye']['from']['is_bot'] !== 'false' && $update['callback_query']['from']['is_bot'] !== false) ? 1 : 0,
+        'is_bot' => (isset($update['callback_query']['from']['is_bot']) && $update['callback_query']['from']['is_bot'] !== false) ? 1 : 0,
         'first_name' => (isset($update['callback_query']['from']['first_name']) && $update['callback_query']['from']['first_name'] !== '') ? $update['callback_query']['from']['first_name'] : null,
         'last_name' => (isset($update['callback_query']['from']['last_name']) && $update['callback_query']['from']['last_name'] !== '') ? $update['callback_query']['from']['last_name'] : null,
         'username' => $update['callback_query']['from']['username'],
@@ -302,13 +304,36 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
         default:
             $log_error_array[] = 'Undefined bot command';
     }
+} elseif ($chat_type === 'message' && $message_reply_to_message !== NULL && $message_reply_to_message_text !== NULL && (strpos($message_reply_to_message_text, "Спасибо за оплату!") !== false || strpos($message_reply_to_message_text, "Thank you for payment!") !== false)) {
+    $log_message_array[] = 'Reply to message - ' . $message;
+
+    $get_user_data = getUserData($user_data['tgm_user_id']);
+    $message_text = "👑 <b>Премиум подписка:</b> " . $message . "\n\n";
+    $message_text .= "User: " . $get_user_data['username'] . "\n";
+    $message_text .= "Message: " . $message . "\n";
+
+    // Send message to admin
+    try {
+        $bot->sendMessage($admin_chat_id, $message_text);
+    } catch (Exception $e) {
+        $log_error_array[] = $e->getMessage();
+    }
+
+    // Send message to user
+    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо! Ваша премиум подписка продлена после проверки.\n\nЕсли Вы хотите уточнить какие-либо данные об оплате, напишите боту сообщение с хештегом #feedback" : "Thank you! Your premium subscription has been extended after verification.\n\nIf you want to clarify any payment details, write a message to the bot with the hashtag #feedback";
+
+    try {
+        $bot->sendMessage($chat_id, $message_text);
+    } catch (Exception $e) {
+        $log_error_array[] = $e->getMessage();
+    }
 } elseif ($chat_type === 'message' && strpos($message, "#feedback") !== false) {
     $log_message_array[] = 'Feedback - ' . $message;
 
     // Send message to admin
     $message_text = "Feedback: " . $user_data['first_name'] . "\n\n" . $message;
     try {
-        $bot->sendMessage($adminChatId, $message_text);
+        $bot->sendMessage($admin_chat_id, $message_text);
     } catch (Exception $e) {
         $log_error_array[] = $e->getMessage();
     }
@@ -1178,7 +1203,7 @@ function sendLastAds($tgm_user_id, $chat_id)
             } else {
                 $parameters = "";
             }
-            $sql = "SELECT * FROM $table_data WHERE owner != 'Риэлтор'" . $parameters . " ORDER BY date_added DESC LIMIT 3";
+            $sql = "SELECT * FROM $table_data WHERE owner != '1'" . $parameters . " ORDER BY date_added DESC LIMIT 3";
             file_put_contents($start_log_file, PHP_EOL . '[' . date('Y-m-d H:i:s') . '] sendLastAds() - ' . $sql, FILE_APPEND);
             $result = mysqli_query($conn, $sql);
             $result = mysqli_query($conn, $sql);
