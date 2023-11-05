@@ -9,6 +9,7 @@ require_once __DIR__ . '/config.php';
 $log_dir = __DIR__ . '/logs';
 $start_log_file = $log_dir . '/start.log';
 $start_error_log_file = $log_dir . '/start_error.log';
+$start_test = $log_dir . '/start_test.log';
 
 $token = TOKEN;
 if (!$token) {
@@ -34,6 +35,7 @@ if (!$get_content) {
     die('Get content failed');
 }
 $update = json_decode($get_content, TRUE);
+file_put_contents($start_test, print_r($update, true), FILE_APPEND);
 file_put_contents($start_log_file, '[' . date('Y-m-d H:i:s') . '] Received:', FILE_APPEND);
 
 $command_data = '';
