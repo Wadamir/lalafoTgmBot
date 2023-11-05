@@ -706,7 +706,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         $message_text .= "\n";
                     }
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
-                        $message_text .= $payment['payment_description_ru'];
+                        $message_text .= nl2br($payment['payment_description_ru']);
                     }
                 } else {
                     if ($payment['payment_name_en'] !== '' && $payment['payment_name_en'] !== null) {
