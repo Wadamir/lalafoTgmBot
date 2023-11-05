@@ -35,7 +35,7 @@ if (!$get_content) {
     die('Get content failed');
 }
 $update = json_decode($get_content, TRUE);
-file_put_contents($start_test, print_r($update, true), FILE_APPEND);
+file_put_contents($start_test, print_r($update, true));
 file_put_contents($start_log_file, '[' . date('Y-m-d H:i:s') . '] Received:', FILE_APPEND);
 
 $command_data = '';
@@ -737,14 +737,24 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                         ],
                     ]
                 );
-                $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
+                // $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
                 try {
-                    $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $force_reply);
+                    $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $inline_keyboard);
                 } catch (Exception $e) {
                     $log_error_array[] = $e->getMessage();
                 }
             } else {
                 $log_error_array[] = 'Payment not found';
+            }
+            break;
+        case strpos($command_data, "success_payment") === 0:
+            $payment_id = str_replace('success_payment_', '', $command_data);
+            $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо за оплату! Укажите реквизиты оплаты (ФИО, сумму оплаты, дату и примерное время оплаты и иные данные, которые помогут нам быстрее найти Вашу оплату). После проверки оплаты мы активируем Вашу премиум подписку." : "Thank you for your payment! Specify the payment details (full name, payment amount, date and approximate time of payment and other data that will help us find your payment faster). After checking the payment, we will activate your premium subscription.";
+            $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
+            try {
+                $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $force_reply);
+            } catch (Exception $e) {
+                $log_error_array[] = $e->getMessage();
             }
             break;
         default:
