@@ -695,10 +695,10 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 // $bot->deleteMessage($chat_id, $messageId);
                 $message_text = getPremiumSubscriptionBenefit($user_language);
                 $message_text .= "\n\n";
-                $message_text .= "▪▫▪▫▪▫▪▫▪▫▪▫▪▫▪▫▪▫▪▫";
+                $message_text .= "▫▪▫▪▫▪▫▪▫▪▫";
                 $message_text .= "\n\n";
                 if ($payment['payment_icon'] !== '' && $payment['payment_icon'] !== null) {
-                    $message_text .= '<a href="' . $payment['payment_icon'] . '">' . $payment['payment_name_ru'] . '</a>';
+                    $message_text .= $payment['payment_icon'] . ' ';
                 }
                 if ($user_language === 'kg' || $user_language === 'ru') {
                     if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
