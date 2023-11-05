@@ -692,7 +692,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $log_message_array[] = 'Payment - ' . $payment_id;
             $payment = getPaymentById($payment_id);
             if (!empty($payment)) {
-                // $bot->deleteMessage($chat_id, $messageId);
+                $bot->deleteMessage($chat_id, $messageId);
                 $message_text = getPremiumSubscriptionBenefit($user_language);
                 $message_text .= "\n\n";
                 $message_text .= "▫▪▫▪▫▪▫▪▫▪▫";
@@ -704,7 +704,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     if ($payment['payment_name_ru'] !== '' && $payment['payment_name_ru'] !== null) {
                         $message_text .= 'Способ оплаты: <b>' . $payment['payment_name_ru'] . '</b>';
                         $message_text .= "\n";
-                        $message_text .= "<hr>";
                     }
                     if ($payment['payment_description_ru'] !== '' && $payment['payment_description_ru'] !== null) {
                         $message_text .= $payment['payment_description_ru'];
