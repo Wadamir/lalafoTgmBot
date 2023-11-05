@@ -713,7 +713,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     }
                 }
                 if ($payment['payment_account'] !== '' && $payment['payment_account'] !== null) {
-                    $message_text .= "\n\n" . '`' . $payment['payment_account'] . '`';
+                    $message_text .= "\n\n" . '<pre>' . $payment['payment_account'] . '</pre>';
                 }
                 if ($payment['payment_link'] !== '' && $payment['payment_link'] !== null) {
                     $inline_keyboard = new \TelegramBot\Api\Types\Inline\InlineKeyboardMarkup(
@@ -725,7 +725,7 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                     );
                 }
                 try {
-                    $bot->sendMessage($chat_id, $message_text, 'Markdown', false, null, $inline_keyboard);
+                    $bot->sendMessage($chat_id, $message_text, 'HTML', false, null, $inline_keyboard);
                 } catch (Exception $e) {
                     $log_error_array[] = $e->getMessage();
                 }
