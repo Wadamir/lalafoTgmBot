@@ -345,7 +345,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                             file_put_contents($sender_error_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
                         }
                     }
-                    break;
+                    if (strpos($error, 'Wrong file identifier') !== false) {
+                        removeGalleryFirstImage($row['id']);
+                    }
                 }
                 // set timeout
                 $rnd_sec = rand(1, 3);
@@ -535,4 +537,63 @@ function remoteFileExists($url)
     }
     curl_close($curl);
     return $ret;
+}
+
+
+function removeGalleryFirstImage($id)
+{
+    global $sender_log_file;
+    global $sender_error_log_file;
+
+    $dbhost = MYSQL_HOST;
+    $dbuser = MYSQL_USER;
+    $dbpass = MYSQL_PASSWORD;
+    $dbname = MYSQL_DB;
+    $table_data = MYSQL_TABLE_DATA;
+
+    // Create connection
+    $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
+    if (!$conn) {
+        file_put_contents($sender_error_log_file, ' | removeGalleryFirstImage - connection failed' . PHP_EOL, FILE_APPEND);
+        throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
+    }
+
+    $sql = "SELECT * FROM $table_data WHERE id = '$id'";
+    $result = mysqli_query($conn, $sql);
+    if ($result !== false && mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $gallery = ($row['gallery']) ? json_decode($row['gallery']) : NULL;
+        $new_gallery = [];
+        if (!empty($gallery)) {
+            $gallery = array_map('strval', $gallery);
+            $gallery = array_unique($gallery);
+            $gallery = array_values($gallery);
+            sort($gallery);
+            $counter = 0;
+            foreach ($gallery as $image) {
+                if ($counter === 0) {
+                    continue;
+                }
+                if (remoteFileExists($image)) {
+                    $new_gallery[] = $image;
+                }
+                $counter++;
+            }
+        }
+        if (empty($new_gallery)) {
+            $new_gallery[] = "https://wadamir.ru/no_photo.png";
+        }
+        $new_gallery = json_encode($new_gallery);
+        $sql = "UPDATE $table_data SET gallery = '$new_gallery' WHERE id = " . $row['id'];
+        if (mysqli_query($conn, $sql)) {
+            file_put_contents($sender_log_file, ' | Gallery first image removed', FILE_APPEND);
+        }
+    } else {
+        return false;
+    }
+
+    // Close connection
+    mysqli_close($conn);
+
+    return true;
 }
