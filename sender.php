@@ -268,7 +268,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                     $gallery = array_unique($gallery);
                     $gallery = array_values($gallery);
                     sort($gallery);
-                    foreach($gallery as $image) {
+                    foreach ($gallery as $image) {
                         if (remoteFileExists($image)) {
                             $new_gallery[] = $image;
                         }
@@ -512,6 +512,7 @@ function slug($string, $transliterate = false)
 
 function cutString($string, $max_length = 1000)
 {
+    if (strlen($string) <= $max_length) return $string;
     $string = substr($string, 0, $max_length);
     $string = rtrim($string, "!,.-");
     $string = substr($string, 0, strrpos($string, ' '));

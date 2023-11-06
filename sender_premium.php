@@ -204,7 +204,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($furniture !== 'n/d' && $furniture !== NULL) {
                     $furniture_array = json_decode($furniture);
                     $furniture_array_name = [];
+                    $counter = 0;
                     foreach ($furniture_array as $furniture_item) {
+                        if ($counter === 3) break;
                         $furniture_data = getAmenityById($furniture_item);
                         $furniture_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $furniture_data['amenity_name_ru'] : $furniture_data['amenity_name_en'];
                     }
@@ -214,7 +216,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($condition !== 'n/d' && $condition !== NULL) {
                     $condition_array = json_decode($condition);
                     $condition_array_name = [];
+                    $counter = 0;
                     foreach ($condition_array as $condition_item) {
+                        if ($counter === 3) break;
                         $condition_data = getAmenityById($condition_item);
                         $condition_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $condition_data['amenity_name_ru'] : $condition_data['amenity_name_en'];
                     }
@@ -224,7 +228,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($appliances !== 'n/d' && $appliances !== NULL) {
                     $appliances_array = json_decode($appliances);
                     $appliances_array_name = [];
+                    $counter = 0;
                     foreach ($appliances_array as $appliances_item) {
+                        if ($counter === 3) break;
                         $appliances_data = getAmenityById($appliances_item);
                         $appliances_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $appliances_data['amenity_name_ru'] : $appliances_data['amenity_name_en'];
                     }
@@ -234,7 +240,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($improvement_in !== 'n/d' && $improvement_in !== NULL) {
                     $improvement_in_array = json_decode($improvement_in);
                     $improvement_in_array_name = [];
+                    $counter = 0;
                     foreach ($improvement_in_array as $improvement_in_item) {
+                        if ($counter === 3) break;
                         $improvement_in_data = getAmenityById($improvement_in_item);
                         $improvement_in_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_in_data['amenity_name_ru'] : $improvement_in_data['amenity_name_en'];
                     }
@@ -244,7 +252,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 if ($improvement_out !== 'n/d' && $improvement_out !== NULL) {
                     $improvement_out_array = json_decode($improvement_out);
                     $improvement_out_array_name = [];
+                    $counter = 0;
                     foreach ($improvement_out_array as $improvement_out_item) {
+                        if ($counter === 3) break;
                         $improvement_out_data = getAmenityById($improvement_out_item);
                         $improvement_out_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_out_data['amenity_name_ru'] : $improvement_out_data['amenity_name_en'];
                     }
@@ -255,7 +265,9 @@ if ($users_result && mysqli_num_rows($users_result)) {
                     if ($utility !== 'n/d' && $utility !== NULL) {
                         $utility_array = json_decode($utility);
                         $utility_array_name = [];
+                        $counter = 0;
                         foreach ($utility_array as $utility_item) {
+                            if ($counter === 3) break;
                             $utility_data = getAmenityById($utility_item);
                             $utility_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $utility_data['amenity_name_ru'] : $utility_data['amenity_name_en'];
                         }
@@ -263,10 +275,14 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $message .= ($user_language === 'ru' || $user_language === 'kg') ? "👉 <b>Коммуникации:</b> $utility\n" : "👉 <b>Utility:</b> $utility\n";
                     }
                 }
-                if ($description !== NULL) {
+                if (strlen($message) < 1000) {
                     $message .= "\n";
-                    $message .= "<i>$description</i>\n";
+                    if ($description !== NULL) {
+                        $message .= "\n";
+                        $message .= "<i>$description</i>\n";
+                    }
                 }
+                $message = cutString($message);
                 /*
                 if ($created_at !== $updated_at) {
                     if ($created_at !== 'n/d' && $created_at !== NULL) {
@@ -284,16 +300,27 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 // $message .= "$link\n";
 
                 $gallery = ($row['gallery']) ? json_decode($row['gallery']) : NULL;
+                $new_gallery = [];
+                if (!empty($gallery)) {
+                    $gallery = array_map('strval', $gallery);
+                    $gallery = array_unique($gallery);
+                    $gallery = array_values($gallery);
+                    sort($gallery);
+                    foreach ($gallery as $image) {
+                        if (remoteFileExists($image)) {
+                            $new_gallery[] = $image;
+                        }
+                    }
+                }
+                if (empty($new_gallery)) {
+                    $new_gallery[] = "https://wadamir.ru/no_photo.png";
+                }
                 try {
-                    if (!empty($gallery)) {
+                    if (!empty($new_gallery)) {
                         $bot = new \TelegramBot\Api\BotApi($token);
-                        $gallery = array_map('strval', $gallery);
-                        $gallery = array_unique($gallery);
-                        $gallery = array_values($gallery);
-                        sort($gallery);
                         $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
                         $image_counter = 0;
-                        foreach ($gallery as $image) {
+                        foreach ($new_gallery as $image) {
                             if ($image_counter === 9) break;
                             if ($image_counter === 0) {
                                 $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message, 'HTML');
@@ -519,4 +546,31 @@ function slug($string, $transliterate = false)
         $slug = $string;
     }
     return $slug;
+}
+
+function cutString($string, $max_length = 1000)
+{
+    if (strlen($string) <= $max_length) return $string;
+    $string = substr($string, 0, $max_length);
+    $string = rtrim($string, "!,.-");
+    $string = substr($string, 0, strrpos($string, ' '));
+    $string .= "...";
+
+    return $string;
+}
+
+function remoteFileExists($url)
+{
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_NOBODY, true);
+    $result = curl_exec($curl);
+    $ret = false;
+    if ($result !== false) {
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($statusCode === 200) {
+            $ret = true;
+        }
+    }
+    curl_close($curl);
+    return $ret;
 }
