@@ -308,24 +308,45 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $log_message_array[] = 'Reply to message - ' . $message;
 
     $get_user_data = getUserData($user_data['tgm_user_id']);
-    $message_text = "👑 <b>Премиум подписка:</b>\n\n";
-    $message_text .= "User: " . $get_user_data['username'] . "\n";
-    $message_text .= "Message: " . $message . "\n";
+    if (!empty($get_user_data)) {
+        $message_text = "<b>Оплата премиум подписки:</b>\n";
+        $message_text .= "User_id: " . $get_user_data['user_id'] . "\n";
+        $message_text .= "Tgm_user_id: " . $get_user_data['tgm_user_id'] . "\n";
+        $message_text .= "First name: " . $get_user_data['first_name'] . "\n";
+        $message_text .= "Last name: " . $get_user_data['last_name'] . "\n";
+        $message_text .= "Username: " . $get_user_data['username'] . "\n";
+        $message_text .= "Message: " . $message . "\n";
+        $message_text .= "Date: " . date('Y-m-d H:i:s') . "\n";
+        $message_text .= "Language: " . $user_language . "\n";
+        $message_text .= "\n";
+        $message_text .= "Message to reply: " . $message_reply_to_message_text . "\n";
 
-    // Send message to admin
-    try {
-        $bot->sendMessage($admin_chat_id, $message_text, 'HTML');
-    } catch (Exception $e) {
-        $log_error_array[] = $e->getMessage();
-    }
+        // Send message to admin
+        try {
+            $bot->sendMessage($admin_chat_id, $message_text, 'HTML');
+        } catch (Exception $e) {
+            $log_error_array[] = $e->getMessage();
+        }
 
-    // Send message to user
-    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо! Ваша премиум подписка продлена после проверки.\n\nЕсли Вы хотите уточнить какие-либо данные об оплате, напишите боту сообщение с хештегом #feedback" : "Thank you! Your premium subscription has been extended after verification.\n\nIf you want to clarify any payment details, write a message to the bot with the hashtag #feedback";
+        // Send message to user
+        $user_full_name = [];
+        if ($get_user_data['first_name'] !== NULL) {
+            $user_full_name[] = $get_user_data['first_name'];
+        }
+        if ($get_user_data['last_name'] !== NULL) {
+            $user_full_name[] = $get_user_data['last_name'];
+        }
+        $username = implode(' ', $user_full_name);
 
-    try {
-        $bot->sendMessage($chat_id, $message_text);
-    } catch (Exception $e) {
-        $log_error_array[] = $e->getMessage();
+        $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "🎉 Спасибо, " . $username . "! Ваша премиум подписка будет продлена после проверки. Такая проверка, как правило, занимает 1 час. В редких случаях, время проверки может быть увеличено до 1 рабочего дня. Если нам потребуется дополнительная информация о Вашем платеже, мы свяжемся с Вами.\n\n📯 Если Вы хотите уточнить какие-либо данные об оплате, напишите боту сообщение с хештегом #feedback" : "🎉 Thank you, " . $username . "! Your premium subscription will be renewed upon verification. This check usually takes 1 hour. In rare cases, the verification period may be extended to 1 business day. If we need additional information about your payment, we will contact you.\n\n📯 If you want to clarify any information about the payment, write a message to the bot with the hashtag #feedback";
+
+        try {
+            $bot->sendMessage($chat_id, $message_text);
+        } catch (Exception $e) {
+            $log_error_array[] = $e->getMessage();
+        }
+    } else {
+        $log_error_array[] = 'Get user data error';
     }
 } elseif ($chat_type === 'message' && strpos($message, "#feedback") !== false) {
     $log_message_array[] = 'Feedback - ' . $message;
