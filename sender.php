@@ -259,17 +259,30 @@ if ($users_result && mysqli_num_rows($users_result)) {
                 */
                 // $message .= "$link\n";
 
+                $message = cutString($message);
+
                 $gallery = ($row['gallery']) ? json_decode($row['gallery']) : NULL;
+                $new_gallery = [];
+                if (!empty($gallery)) {
+                    $gallery = array_map('strval', $gallery);
+                    $gallery = array_unique($gallery);
+                    $gallery = array_values($gallery);
+                    sort($gallery);
+                    foreach($gallery as $image) {
+                        if (remoteFileExists($image)) {
+                            $new_gallery[] = $image;
+                        }
+                    }
+                }
+                if (empty($new_gallery)) {
+                    $new_gallery[] = "https://wadamir.ru/no_photo.png";
+                }
                 try {
-                    if (!empty($gallery)) {
+                    if (!empty($new_gallery)) {
                         $bot = new \TelegramBot\Api\BotApi($token);
-                        $gallery = array_map('strval', $gallery);
-                        $gallery = array_unique($gallery);
-                        $gallery = array_values($gallery);
-                        sort($gallery);
                         $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
                         $image_counter = 0;
-                        foreach ($gallery as $image) {
+                        foreach ($new_gallery as $image) {
                             if ($image_counter === 1) break;
                             if ($image_counter === 0) {
                                 $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message, 'HTML');
@@ -495,4 +508,30 @@ function slug($string, $transliterate = false)
         $slug = $string;
     }
     return $slug;
+}
+
+function cutString($string, $max_length = 1000)
+{
+    $string = substr($string, 0, $max_length);
+    $string = rtrim($string, "!,.-");
+    $string = substr($string, 0, strrpos($string, ' '));
+    $string .= "...";
+
+    return $string;
+}
+
+function remoteFileExists($url)
+{
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_NOBODY, true);
+    $result = curl_exec($curl);
+    $ret = false;
+    if ($result !== false) {
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($statusCode === 200) {
+            $ret = true;
+        }
+    }
+    curl_close($curl);
+    return $ret;
 }
