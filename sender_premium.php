@@ -209,6 +209,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         if ($counter === 3) break;
                         $furniture_data = getAmenityById($furniture_item);
                         $furniture_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $furniture_data['amenity_name_ru'] : $furniture_data['amenity_name_en'];
+                        $counter++;
                     }
                     $furniture = implode(', ', $furniture_array_name);
                     $message .= "👉 $furniture\n";
@@ -221,6 +222,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         if ($counter === 3) break;
                         $condition_data = getAmenityById($condition_item);
                         $condition_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $condition_data['amenity_name_ru'] : $condition_data['amenity_name_en'];
+                        $counter++;
                     }
                     $condition = implode(', ', $condition_array_name);
                     $message .= "👉 $condition\n";
@@ -233,6 +235,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         if ($counter === 3) break;
                         $appliances_data = getAmenityById($appliances_item);
                         $appliances_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $appliances_data['amenity_name_ru'] : $appliances_data['amenity_name_en'];
+                        $counter++;
                     }
                     $appliances = implode(', ', $appliances_array_name);
                     $message .= "👉 $appliances\n";
@@ -245,6 +248,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         if ($counter === 3) break;
                         $improvement_in_data = getAmenityById($improvement_in_item);
                         $improvement_in_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_in_data['amenity_name_ru'] : $improvement_in_data['amenity_name_en'];
+                        $counter++;
                     }
                     $improvement_in = implode(', ', $improvement_in_array_name);
                     $message .= "👉 $improvement_in\n";
@@ -257,6 +261,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         if ($counter === 3) break;
                         $improvement_out_data = getAmenityById($improvement_out_item);
                         $improvement_out_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $improvement_out_data['amenity_name_ru'] : $improvement_out_data['amenity_name_en'];
+                        $counter++;
                     }
                     $improvement_out = implode(', ', $improvement_out_array_name);
                     $message .= "👉 $improvement_out\n";
@@ -270,6 +275,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                             if ($counter === 3) break;
                             $utility_data = getAmenityById($utility_item);
                             $utility_array_name[] = ($user_language === 'ru' || $user_language === 'kg') ? $utility_data['amenity_name_ru'] : $utility_data['amenity_name_en'];
+                            $counter++;
                         }
                         $utility = implode(', ', $utility_array_name);
                         $message .= "👉 $utility\n";
