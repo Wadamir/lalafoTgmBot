@@ -63,7 +63,7 @@ if (mysqli_num_rows($users_result)) {
         $username = $user['username'];
         $user_language = $user['language_code'];
 
-        $get_user_data = getUserData($user_data['tgm_user_id']);
+        $get_user_data = getUserData($user['tgm_user_id']);
         if (!empty($get_user_data)) {
             $user_preference_city = $get_user_data['preference_city_text'];
             $user_preference_district = $get_user_data['preference_district_text'];
