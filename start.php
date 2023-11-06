@@ -1147,6 +1147,7 @@ function getUserData($tgm_user_id)
 
 
             $user_data = [
+                'user_id'                   => $row['user_id'],
                 'tgm_user_id'               => $row['tgm_user_id'],
                 'is_bot'                    => $row['is_bot'],
                 'is_deleted'                => $row['is_deleted'],
