@@ -281,14 +281,17 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         $message .= "👉 $utility\n";
                     }
                 }
-                if (strlen($message) < 1000) {
-                    $message .= "\n";
-                    if ($description !== NULL) {
-                        $message .= "\n";
-                        $message .= "<i>$description</i>\n";
+                $message .= "\n";
+                if (strlen($message) < 1010) {
+                    $message_cur_length = strlen($message);
+                    $required_length = 1010 - $message_cur_length;
+                    if ($required_length > 20) {
+                        if ($description !== NULL) {
+                            $description = cutString($description, $required_length);
+                            $message .= "<i>$description</i>\n";
+                        }
                     }
                 }
-                $message = cutString($message);
                 /*
                 if ($created_at !== $updated_at) {
                     if ($created_at !== 'n/d' && $created_at !== NULL) {
