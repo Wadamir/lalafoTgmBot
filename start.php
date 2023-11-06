@@ -308,13 +308,13 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
     $log_message_array[] = 'Reply to message - ' . $message;
 
     $get_user_data = getUserData($user_data['tgm_user_id']);
-    $message_text = "👑 <b>Премиум подписка:</b> " . $message . "\n\n";
+    $message_text = "👑 <b>Премиум подписка:</b>\n\n";
     $message_text .= "User: " . $get_user_data['username'] . "\n";
     $message_text .= "Message: " . $message . "\n";
 
     // Send message to admin
     try {
-        $bot->sendMessage($admin_chat_id, $message_text);
+        $bot->sendMessage($admin_chat_id, $message_text, 'HTML');
     } catch (Exception $e) {
         $log_error_array[] = $e->getMessage();
     }
@@ -720,10 +720,24 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $payment = getPaymentById($payment_id);
             if (!empty($payment)) {
                 $bot->deleteMessage($chat_id, $messageId);
-                $message_text = getPremiumSubscriptionBenefit($user_language);
-                $message_text .= "\n\n";
-                $message_text .= "▫➖▫➖▫➖▫➖▫➖▫";
-                $message_text .= "\n\n";
+                // $message_text = getPremiumSubscriptionBenefit($user_language);
+                // $message_text .= "\n\n";
+                // $message_text .= "▫➖▫➖▫➖▫➖▫➖▫";
+                // $message_text .= "\n\n";
+
+                $bot = new \TelegramBot\Api\BotApi($token);
+                $media = new \TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia();
+                $image = "https://wadamir.ru/bank_default.png";
+
+                if ($payment['payment_img'] !== '' && $payment['payment_img'] !== null) {
+                    $payment_image_exists = remoteFileExists($payment['payment_img']);
+                    if ($payment_image_exists) {
+                        $image = $payment['payment_img'];
+                    }
+                }
+
+                $message_text = '';
+
                 if ($payment['payment_icon'] !== '' && $payment['payment_icon'] !== null) {
                     $message_text .= $payment['payment_icon'] . ' ';
                 }
@@ -764,6 +778,10 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 );
                 // $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
                 try {
+                    $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message_text, 'HTML');
+                    $media->addItem($photo);
+                    $bot->sendMediaGroup($chat_id, $media);
+                    $message_text = ($user_language === 'ru' || $user_language === 'kg') ? 'После завершения оплаты, нажмите кнопку "Оплата завершена"' : 'After completing the payment, click the "Payment done" button';
                     $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $inline_keyboard);
                 } catch (Exception $e) {
                     $log_error_array[] = $e->getMessage();
@@ -774,7 +792,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             break;
         case strpos($command_data, "success_payment") === 0:
             $payment_id = str_replace('success_payment_', '', $command_data);
-            $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо за оплату! Укажите реквизиты оплаты (ФИО, сумму оплаты, дату и примерное время оплаты и иные данные, которые помогут нам быстрее найти Вашу оплату). После проверки оплаты мы активируем Вашу премиум подписку." : "Thank you for your payment! Specify the payment details (full name, payment amount, date and approximate time of payment and other data that will help us find your payment faster). After checking the payment, we will activate your premium subscription.";
+            $payment_data = getPaymentById($payment_id);
+            $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "" : "Thank you for your payment! Specify the payment details (full name, payment amount, date and approximate time of payment and other data that will help us find your payment faster). After checking the payment, we will activate your premium subscription.";
             $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
             try {
                 $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $force_reply);
@@ -1789,4 +1808,20 @@ function brToNl($string)
 {
     $breaks = array("<br />", "<br>", "<br/>");
     return str_replace($breaks, "\n", $string);
+}
+
+function remoteFileExists($url)
+{
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_NOBODY, true);
+    $result = curl_exec($curl);
+    $ret = false;
+    if ($result !== false) {
+        $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        if ($statusCode === 200) {
+            $ret = true;
+        }
+    }
+    curl_close($curl);
+    return $ret;
 }
