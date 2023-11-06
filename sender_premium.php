@@ -363,7 +363,7 @@ if ($users_result && mysqli_num_rows($users_result)) {
                     if (mysqli_query($conn, $sql)) {
                         $msg_sent++;
                     } else {
-                        file_put_contents($sender_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
                         $msg_error++;
                     }
                     $chat_ids_to_send = $row['chat_ids_to_send'];
@@ -378,18 +378,18 @@ if ($users_result && mysqli_num_rows($users_result)) {
                         if (mysqli_query($conn, $sql)) {
                             $msg_sent++;
                         } else {
-                            file_put_contents($sender_log_file, ' | User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                            file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] User: ' . $username . ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
                             $msg_error++;
                         }
                     }
                 } catch (\TelegramBot\Api\Exception $e) {
                     $error = $e->getMessage();
-                    file_put_contents($sender_error_log_file, ' | User: ' . $username . ' Error: ' . $e->getMessage(), FILE_APPEND);
+                    file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] User: ' . $username . ' Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
                     if ($error === 'Forbidden: bot was blocked by the user') {
                         try {
                             deactivateUser($tgm_user_id, $chat_id);
                         } catch (Exception $e) {
-                            file_put_contents($sender_error_log_file, ' | Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+                            file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] Error: ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
                         }
                     }
                     if (strpos($error, 'Wrong file identifier') !== false) {
@@ -428,13 +428,13 @@ function deactivateUser($tgm_user_id, $chat_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($sender_error_log_file, ' | deactivateUser - connection failed', FILE_APPEND);
+        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] deactivateUser - connection failed' . PHP_EOL, FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
     $sql = "UPDATE $table_user SET is_deleted = 1 WHERE tgm_user_id = " . $tgm_user_id;
     $result = mysqli_query($conn, $sql);
     if ($result === false) {
-        file_put_contents($sender_error_log_file, " | deactivateUser - error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] deactivateUser - error: ' . $sql . ' | ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
         return false;
     }
@@ -443,7 +443,7 @@ function deactivateUser($tgm_user_id, $chat_id)
     $sql = "SELECT * FROM $table_data WHERE JSON_CONTAINS(chat_ids_to_send, '\"$chat_id\"') AND done IS NULL";
     $result = mysqli_query($conn, $sql);
     if ($result === false) {
-        file_put_contents($sender_error_log_file, " | deactivateUser - error: " . $sql . ' | ' . mysqli_error($conn), FILE_APPEND);
+        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] deactivateUser - error: ' . $sql . ' | ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
         throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
         return false;
     } else {
@@ -465,7 +465,7 @@ function deactivateUser($tgm_user_id, $chat_id)
                 if (mysqli_query($conn, $sql)) {
                     file_put_contents($sender_log_file, ' | Chat id: ' . $chat_id . ' removed', FILE_APPEND);
                 } else {
-                    file_put_contents($sender_error_log_file, ' | Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
+                    file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] Error: ' . mysqli_error($conn) . PHP_EOL, FILE_APPEND);
                     throw new Exception("Error: " . $sql . ' | ' . mysqli_error($conn));
                     return false;
                 }
@@ -492,7 +492,7 @@ function getAmenityById($amenity_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($sender_error_log_file, ' | getAmenityById - connection failed' . PHP_EOL, FILE_APPEND);
+        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] getAmenityById - connection failed' . PHP_EOL, FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -523,7 +523,7 @@ function getDistrictById($district_id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($sender_error_log_file, ' | getDistrictById - connection failed' . PHP_EOL, FILE_APPEND);
+        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] getDistrictById - connection failed' . PHP_EOL, FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
@@ -600,7 +600,7 @@ function removeGalleryFirstImage($id)
     // Create connection
     $conn = mysqli_connect($dbhost, $dbuser, $dbpass, $dbname);
     if (!$conn) {
-        file_put_contents($sender_error_log_file, ' | removeGalleryFirstImage - connection failed' . PHP_EOL, FILE_APPEND);
+        file_put_contents($sender_error_log_file, '[' . date('Y-m-d H:i:s') . '] removeGalleryFirstImage - connection failed' . PHP_EOL, FILE_APPEND);
         throw new Exception("Connection failed: " . mysqli_connect_error()) . PHP_EOL;
     }
 
