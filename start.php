@@ -794,6 +794,15 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $payment_id = str_replace('success_payment_', '', $command_data);
             $payment_data = getPaymentById($payment_id);
             $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо вам за ваш платеж! Укажите реквизиты платежа (ФИО, сумму платежа, дату и примерное время платежа и другие данные, которые помогут нам быстрее найти ваш платеж). После проверки оплаты мы активируем вашу премиум-подписку." : "Thank you for your payment! Specify the payment details (full name, payment amount, date and approximate time of payment and other data that will help us find your payment faster). After checking the payment, we will activate your premium subscription.";
+            if ($user_language === 'ru' || $user_language === 'kg') {
+                if ($payment['payment_response_ru'] !== '' && $payment['payment_response_ru'] !== null) {
+                    $message_text = $payment['payment_response_ru'];
+                }
+            } else {
+                if ($payment['payment_response_en'] !== '' && $payment['payment_response_en'] !== null) {
+                    $message_text = $payment['payment_response_en'];
+                }
+            }
             $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
             try {
                 $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $force_reply);
