@@ -719,7 +719,6 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $log_message_array[] = 'Payment - ' . $payment_id;
             $payment = getPaymentById($payment_id);
             if (!empty($payment)) {
-                $bot->deleteMessage($chat_id, $messageId);
                 // $message_text = getPremiumSubscriptionBenefit($user_language);
                 // $message_text .= "\n\n";
                 // $message_text .= "▫➖▫➖▫➖▫➖▫➖▫";
@@ -778,6 +777,8 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
                 );
                 // $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
                 try {
+                    $bot->deleteMessage($chat_id, $messageId);
+
                     $photo = new TelegramBot\Api\Types\InputMedia\InputMediaPhoto($image, $message_text, 'HTML');
                     $media->addItem($photo);
                     $bot->sendMediaGroup($chat_id, $media);
@@ -795,16 +796,18 @@ if ($chat_type === 'message' && $user_data['is_bot'] === 0 && $message_type === 
             $payment_data = getPaymentById($payment_id);
             $message_text = ($user_language === 'ru' || $user_language === 'kg') ? "Спасибо вам за ваш платеж! Укажите реквизиты платежа (ФИО, сумму платежа, дату и примерное время платежа и другие данные, которые помогут нам быстрее найти ваш платеж). После проверки оплаты мы активируем вашу премиум-подписку." : "Thank you for your payment! Specify the payment details (full name, payment amount, date and approximate time of payment and other data that will help us find your payment faster). After checking the payment, we will activate your premium subscription.";
             if ($user_language === 'ru' || $user_language === 'kg') {
-                if ($payment['payment_response_ru'] !== '' && $payment['payment_response_ru'] !== null) {
-                    $message_text = $payment['payment_response_ru'];
+                if ($payment_data['payment_response_ru'] !== '' && $payment_data['payment_response_ru'] !== null) {
+                    $message_text = brToNl($payment_data['payment_response_ru']);
                 }
             } else {
-                if ($payment['payment_response_en'] !== '' && $payment['payment_response_en'] !== null) {
-                    $message_text = $payment['payment_response_en'];
+                if ($payment_data['payment_response_en'] !== '' && $payment_data['payment_response_en'] !== null) {
+                    $message_text = brToNl($payment_data['payment_response_en']);
                 }
             }
             $force_reply = new \TelegramBot\Api\Types\ForceReply(true);
             try {
+                $bot->deleteMessage($chat_id, $messageId);
+
                 $bot->sendMessage($chat_id, $message_text, 'HTML', true, null, $force_reply);
             } catch (Exception $e) {
                 $log_error_array[] = $e->getMessage();
